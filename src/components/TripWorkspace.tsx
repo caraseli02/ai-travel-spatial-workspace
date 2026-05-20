@@ -3,7 +3,7 @@ import {
   Compass, ChevronLeft, MapPin, Calendar,
   ZoomIn, ZoomOut, Maximize2, Grid3X3, Share2, Download,
   Sparkles, PanelLeftClose, PanelLeftOpen, Plus,
-  Clock
+  Clock, X
 } from 'lucide-react';
 import { CanvasCardRenderer } from './CanvasCards';
 import InboxPanel from './InboxPanel';
@@ -21,6 +21,16 @@ const DAY_LABEL_CONFIG = [
   { day: 2, x: 38, y: 285, color: '#f97316', bg: '#ffedd5', border: '#fed7aa' },
   { day: 3, x: 38, y: 555, color: '#10b981', bg: '#d1fae5', border: '#a7f3d0' },
   { day: 4, x: 775, y: 255, color: '#f43f5e', bg: '#ffe4e6', border: '#fecdd3' },
+];
+
+const DAY_COLOR_PRESETS = [
+  '#8b5cf6', // Violet
+  '#06b6d4', // Cyan
+  '#ec4899', // Pink
+  '#10b981', // Emerald
+  '#f59e0b', // Amber
+  '#3b82f6', // Blue
+  '#14b8a6', // Teal
 ];
 
 // CARD DIMENSIONS for dynamic connection center points
@@ -55,11 +65,17 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
   const [cards, setCards] = useState<CanvasCard[]>(canvasCards);
   const [selectedCard, setSelectedCard] = useState<CanvasCard | null>(null);
 
-  // Promoting configurations to local state for Option B
+  // Promoting configurations to local state for Option B & C
   const [days, setDays] = useState(dayGroups);
   const [dayLabels, setDayLabels] = useState(DAY_LABEL_CONFIG);
   const [activeConnections, setActiveConnections] = useState(connections);
   const [isAiThinking, setIsAiThinking] = useState(false);
+
+  // Option C: interactive active states
+  const [linkingFromId, setLinkingFromId] = useState<string | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createModalCoords, setCreateModalCoords] = useState<{ x: number; y: number } | null>(null);
+  const [showAddDayModal, setShowAddDayModal] = useState(false);
 
   // Card dragging states
   const [draggingCardId, setDraggingCardId] = useState<string | null>(null);
@@ -355,6 +371,75 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
     }, 1200);
   }, [activeDay, cards, days, dayLabels]);
 
+  // Option C: Card Modifying Callbacks
+  const handleUpdateCard = useCallback((updated: CanvasCard) => {
+    setCards(prev => prev.map(c => c.id === updated.id ? updated : c));
+    setSelectedCard(updated);
+  }, []);
+
+  const handleDeleteCard = useCallback((cardId: string) => {
+    setCards(prev => prev.filter(c => c.id !== cardId));
+    setActiveConnections(prev => prev.filter(conn => conn.from !== cardId && conn.to !== cardId));
+    if (selectedCard?.id === cardId) {
+      setSelectedCard(null);
+    }
+  }, [selectedCard]);
+
+  const handleStartLinking = useCallback((cardId: string) => {
+    setLinkingFromId(cardId);
+  }, []);
+
+  const handleOpenCreateModal = useCallback((x?: number, y?: number) => {
+    if (x !== undefined && y !== undefined) {
+      setCreateModalCoords({ x, y });
+    } else {
+      setCreateModalCoords({ x: 450, y: 250 });
+    }
+    setShowCreateModal(true);
+  }, []);
+
+  const handleCreateManualCard = useCallback((newCardData: Omit<CanvasCard, 'id' | 'x' | 'y' | 'rotation'>) => {
+    const newCardId = `c_manual_${Date.now()}`;
+    const coords = createModalCoords || { x: 450, y: 250 };
+    const newCard: CanvasCard = {
+      id: newCardId,
+      x: coords.x,
+      y: coords.y,
+      rotation: (Math.random() * 4) - 2,
+      ...newCardData,
+    };
+    setCards(prev => [...prev, newCard]);
+    setShowCreateModal(false);
+    setCreateModalCoords(null);
+  }, [createModalCoords]);
+
+  const handleAddCustomDay = useCallback((dayNum: number, labelText: string) => {
+    if (days.some(d => d.day === dayNum)) {
+      alert(`Day ${dayNum} already exists!`);
+      return;
+    }
+    const color = DAY_COLOR_PRESETS[dayNum % DAY_COLOR_PRESETS.length];
+    const newDay = { day: dayNum, label: `Day ${dayNum} — ${labelText}`, color };
+    
+    // Stagger layout coordinates sequentially based on days length
+    const isRight = days.length % 2 === 1;
+    const newX = isRight ? 775 : 38;
+    const newY = 46 + Math.floor(days.length / 2) * 260;
+
+    const newLabel = {
+      day: dayNum,
+      x: newX,
+      y: newY,
+      color,
+      bg: color + '12',
+      border: color + '30',
+    };
+
+    setDays(prev => [...prev, newDay]);
+    setDayLabels(prev => [...prev, newLabel]);
+    setShowAddDayModal(false);
+  }, [days]);
+
   const handleCardMouseDown = useCallback((cardId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     const card = cards.find(c => c.id === cardId);
@@ -373,9 +458,13 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('.canvas-item')) return;
+    if (linkingFromId) {
+      setLinkingFromId(null);
+      return;
+    }
     setIsDraggingCanvas(true);
     setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
-  }, [pan]);
+  }, [pan, linkingFromId]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (draggingCardId) {
@@ -424,7 +513,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
         {/* Left: Back + Trip name */}
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 text-stone-500 hover:text-stone-800 transition-colors text-sm mr-1"
+          className="flex items-center gap-1.5 text-stone-500 hover:text-stone-800 transition-colors text-sm mr-1 cursor-pointer"
         >
           <ChevronLeft size={15} />
           <Compass size={15} color="#92400e" />
@@ -449,7 +538,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
         <div className="flex-1 flex items-center justify-center gap-1.5 overflow-x-auto">
           <button
             onClick={() => setActiveDay(null)}
-            className="flex-shrink-0 text-xs px-2.5 py-1 rounded-full font-medium transition-all"
+            className="flex-shrink-0 text-xs px-2.5 py-1 rounded-full font-medium transition-all cursor-pointer"
             style={{
               backgroundColor: activeDay === null ? '#1c1917' : '#f5f3ef',
               color: activeDay === null ? 'white' : '#78716c',
@@ -461,7 +550,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
             <button
               key={d.day}
               onClick={() => setActiveDay(activeDay === d.day ? null : d.day)}
-              className="flex-shrink-0 text-xs px-2.5 py-1 rounded-full font-medium transition-all"
+              className="flex-shrink-0 text-xs px-2.5 py-1 rounded-full font-medium transition-all cursor-pointer"
               style={{
                 backgroundColor: activeDay === d.day ? d.color : '#f5f3ef',
                 color: activeDay === d.day ? 'white' : '#78716c',
@@ -470,6 +559,14 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
               Day {d.day}
             </button>
           ))}
+          <button
+            onClick={() => setShowAddDayModal(true)}
+            className="flex-shrink-0 w-7 h-7 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 transition-all flex items-center justify-center cursor-pointer ml-1 text-xs font-semibold"
+            style={{ border: '1px solid #e7e3dc' }}
+            title="Add Custom Day"
+          >
+            <Plus size={13} />
+          </button>
         </div>
 
         {/* Right: Actions */}
@@ -477,28 +574,28 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
           <div className="hidden sm:flex items-center">
             <div className="flex items-center -space-x-2">
               {['🧑', '👩', '🧔'].map((a, i) => (
-                <div key={i} className="w-6 h-6 rounded-full flex items-center justify-center text-xs ring-2 ring-white"
+                <div key={i} className="w-6 h-6 rounded-full flex items-center justify-center text-xs ring-2 ring-white select-none"
                   style={{ backgroundColor: '#e7e3dc', fontSize: '13px' }}>
                   {a}
                 </div>
               ))}
             </div>
-            <span className="text-xs text-stone-400 ml-2 hidden lg:block">3 travelers</span>
+            <span className="text-xs text-stone-400 ml-2 hidden lg:block select-none">3 travelers</span>
           </div>
 
-          <button className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all hover:bg-stone-100"
+          <button className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all hover:bg-stone-100 cursor-pointer"
             style={{ color: '#78716c' }}>
             <Share2 size={13} />
             <span className="hidden sm:block">Share</span>
           </button>
-          <button className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all hover:bg-stone-100"
+          <button className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all hover:bg-stone-100 cursor-pointer"
             style={{ color: '#78716c' }}>
             <Download size={13} />
             <span className="hidden sm:block">Export</span>
           </button>
           <button
             onClick={() => setInboxOpen(o => !o)}
-            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all font-medium"
+            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all font-medium cursor-pointer"
             style={{
               backgroundColor: inboxOpen ? '#fef3c7' : '#f5f3ef',
               color: inboxOpen ? '#92400e' : '#78716c',
@@ -521,7 +618,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
 
         {/* INBOX SIDEBAR */}
         <aside
-          className="flex-shrink-0 overflow-hidden transition-all duration-300 z-30"
+          className="flex-shrink-0 overflow-hidden transition-all duration-300 z-30 animate-in fade-in"
           style={{
             width: inboxOpen ? '280px' : '0px',
             borderRight: inboxOpen ? '1px solid #e7e3dc' : 'none',
@@ -529,7 +626,12 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
         >
           {inboxOpen && (
             <div className="h-full" style={{ width: '280px' }}>
-              <InboxPanel items={items} onProcessItem={handleProcessItem} onAddItem={handleAddItem} />
+              <InboxPanel
+                items={items}
+                onProcessItem={handleProcessItem}
+                onAddItem={handleAddItem}
+                onOpenAddManual={() => handleOpenCreateModal()}
+              />
             </div>
           )}
         </aside>
@@ -554,7 +656,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
           </div>
 
           {/* Trip stats pill */}
-          <div className="absolute top-3 right-3 z-20 flex items-center gap-2.5 rounded-xl px-3 py-2"
+          <div className="absolute top-3 right-3 z-20 flex items-center gap-2.5 rounded-xl px-3 py-2 select-none"
             style={{ backgroundColor: '#fefcf8', border: '1px solid #e7e3dc', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
             <StatItem icon={<Calendar size={11} />} label="Dec 14–21" />
             <div className="w-px h-3 bg-stone-200" />
@@ -566,6 +668,20 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
             <div className="w-px h-3 bg-stone-200" />
             <span className="text-xs">🌤️ 8°C</span>
           </div>
+
+          {/* Linking Mode Active Banner */}
+          {linkingFromId && (
+            <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2.5 px-4 py-2 rounded-full border shadow-xl bg-amber-50 border-amber-300 text-amber-900 animate-pulse text-xs font-semibold select-none">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+              <span>Link Mode: Click another card on the canvas to connect them</span>
+              <button
+                onClick={() => setLinkingFromId(null)}
+                className="hover:bg-amber-100 rounded-full p-0.5 text-amber-700 transition-colors cursor-pointer ml-1"
+              >
+                <X size={12} />
+              </button>
+            </div>
+          )}
 
           {/* AI prompt bar */}
           <AiPromptBar onSendQuery={handleSendQuery} isThinking={isAiThinking} />
@@ -613,7 +729,9 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
                       <line
                         x1={fromCenter.x} y1={fromCenter.y}
                         x2={toCenter.x} y2={toCenter.y}
-                        className="ink-line"
+                        className="ink-line text-stone-300"
+                        strokeWidth="1.5"
+                        strokeDasharray={conn.label === 'custom-link' ? '4,4' : '0'}
                       />
                       <circle cx={fromCenter.x} cy={fromCenter.y} r="3" fill="#d6cfc3" />
                       <circle cx={toCenter.x} cy={toCenter.y} r="3" fill="#d6cfc3" />
@@ -640,7 +758,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
                     }}
                   >
                     <div
-                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer transition-all"
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer transition-all hover:scale-105 active:scale-95"
                       style={{
                         backgroundColor: cfg.bg,
                         color: cfg.color,
@@ -651,25 +769,43 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
                       <span className="w-2 h-2 rounded-full" style={{ backgroundColor: cfg.color }} />
                       {group.label}
                     </div>
-                    {/* Soft dashed bounding box */}
-                    <div className="absolute inset-0 pointer-events-none" />
                   </div>
                 );
               })}
 
               {/* CARDS */}
               {filteredCards.map(card => {
-                const isNewlySpawned = card.id.startsWith('c_spawn_') || card.id.startsWith('c_ai_') || card.id === 'c15' || card.id === 'c16' || card.id === 'c17';
+                const isNewlySpawned = card.id.startsWith('c_spawn_') || card.id.startsWith('c_ai_') || card.id.startsWith('c_manual_') || card.id === 'c15' || card.id === 'c16' || card.id === 'c17';
+                const isTargetOfLinking = linkingFromId !== null && linkingFromId !== card.id;
+
                 return (
                   <div
                     key={card.id}
-                    className={`transition-opacity duration-200 ${isNewlySpawned ? 'card-drop-in' : ''}`}
+                    className={`transition-all duration-200 ${isNewlySpawned ? 'card-drop-in' : ''} ${
+                      isTargetOfLinking ? 'hover:ring-4 hover:ring-amber-500/40 hover:scale-[1.02] cursor-pointer' : ''
+                    }`}
                     style={{
                       opacity: activeDay !== null && card.day !== activeDay && card.day !== 0 ? 0.2 : 1,
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedCard(c => c?.id === card.id ? null : card);
+                      if (linkingFromId) {
+                        if (linkingFromId === card.id) {
+                          setLinkingFromId(null);
+                          return;
+                        }
+                        // Connect them!
+                        setActiveConnections(prev => {
+                          // Prevent duplicate connections
+                          if (prev.some(conn => (conn.from === linkingFromId && conn.to === card.id) || (conn.from === card.id && conn.to === linkingFromId))) {
+                            return prev;
+                          }
+                          return [...prev, { from: linkingFromId, to: card.id, label: 'custom-link' }];
+                        });
+                        setLinkingFromId(null);
+                      } else {
+                        setSelectedCard(c => c?.id === card.id ? null : card);
+                      }
                     }}
                   >
                     <CanvasCardRenderer
@@ -683,7 +819,8 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
 
               {/* Add card button */}
               <div
-                className="absolute flex items-center gap-1.5 cursor-pointer group"
+                onClick={() => handleOpenCreateModal(900, 680)}
+                className="absolute flex items-center gap-1.5 cursor-pointer group hover:scale-105 active:scale-95 transition-all select-none"
                 style={{ left: 880, top: 640 }}
               >
                 <div className="w-9 h-9 rounded-xl border-2 border-dashed flex items-center justify-center transition-all group-hover:border-stone-400"
@@ -699,20 +836,30 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
           <OnboardingToast />
 
           {/* Card detail panel */}
-          <CardDetailPanel card={selectedCard} onClose={() => setSelectedCard(null)} />
+          <CardDetailPanel
+            card={selectedCard}
+            onClose={() => setSelectedCard(null)}
+            onUpdateCard={handleUpdateCard}
+            onDeleteCard={handleDeleteCard}
+            onStartLinking={handleStartLinking}
+            isLinkingActive={linkingFromId === selectedCard?.id}
+          />
 
           {/* Bottom mini-map legend */}
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3 py-2 rounded-xl"
             style={{ backgroundColor: 'rgba(254,252,248,0.95)', border: '1px solid #e7e3dc', boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}>
-            <span className="text-xs text-stone-400 font-medium mr-1">Jump to:</span>
+            <span className="text-xs text-stone-400 font-medium mr-1 select-none">Jump to:</span>
             {days.map(d => (
               <button
                 key={d.day}
                 onClick={() => {
-                  setActiveDay(null);
-                  setPan({ x: 0, y: 0 });
+                  setActiveDay(d.day);
+                  const labelCfg = dayLabels.find(l => l.day === d.day);
+                  if (labelCfg) {
+                    setPan({ x: -labelCfg.x + 250, y: -labelCfg.y + 150 });
+                  }
                 }}
-                className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg transition-all hover:opacity-80"
+                className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg transition-all hover:opacity-80 cursor-pointer"
                 style={{ backgroundColor: d.color + '20', color: d.color }}
               >
                 <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: d.color }} />
@@ -720,10 +867,28 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
               </button>
             ))}
             <div className="w-px h-3 bg-stone-200 mx-1" />
-            <span className="text-xs text-stone-400">{cards.length} cards</span>
+            <span className="text-xs text-stone-400 select-none">{cards.length} cards</span>
           </div>
         </main>
       </div>
+
+      {/* DYNAMIC DIALOGS / OVERLAYS */}
+      <CreateCardModal
+        isOpen={showCreateModal}
+        onClose={() => {
+          setShowCreateModal(false);
+          setCreateModalCoords(null);
+        }}
+        onSubmit={handleCreateManualCard}
+        days={days}
+      />
+
+      <AddDayModal
+        isOpen={showAddDayModal}
+        onClose={() => setShowAddDayModal(false)}
+        onSubmit={handleAddCustomDay}
+        nextDayNum={days.length + 1}
+      />
     </div>
   );
 }
@@ -740,7 +905,7 @@ function ToolBtn({
     <button
       onClick={onClick}
       title={title}
-      className="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
+      className="w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer"
       style={{
         backgroundColor: active ? '#fef3c7' : 'transparent',
         color: active ? '#92400e' : '#78716c',
@@ -792,7 +957,7 @@ function AiPromptBar({ onSendQuery, isThinking }: AiPromptBarProps) {
   };
 
   return (
-    <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-20 w-full max-w-lg px-4">
+    <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-20 w-full max-w-lg px-4 select-none">
       <form onSubmit={handleSubmit} className={`rounded-xl transition-all duration-200 ${focused ? 'shadow-lg' : 'shadow-sm'}`}
         style={{ backgroundColor: '#fefcf8', border: `1.5px solid ${focused ? '#fde68a' : '#e7e3dc'}` }}>
         <div className="flex items-center gap-2 px-3 py-2.5">
@@ -819,7 +984,7 @@ function AiPromptBar({ onSendQuery, isThinking }: AiPromptBarProps) {
             </div>
           ) : (
             value && (
-              <button type="submit" className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 hover:opacity-90 active:scale-95 transition-all"
+              <button type="submit" className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 hover:opacity-90 active:scale-95 transition-all cursor-pointer"
                 style={{ backgroundColor: '#92400e' }}>
                 <Plus size={12} color="white" style={{ transform: 'rotate(45deg)' }} />
               </button>
@@ -828,7 +993,7 @@ function AiPromptBar({ onSendQuery, isThinking }: AiPromptBarProps) {
         </div>
 
         {focused && !value && !isThinking && (
-          <div className="px-3 pb-2.5 flex flex-wrap gap-1.5">
+          <div className="px-3 pb-2.5 flex flex-wrap gap-1.5 animate-in fade-in slide-in-from-bottom-1">
             {suggestions.map((s, i) => (
               <button
                 key={i}
@@ -842,6 +1007,281 @@ function AiPromptBar({ onSendQuery, isThinking }: AiPromptBarProps) {
             ))}
           </div>
         )}
+      </form>
+    </div>
+  );
+}
+
+// --- SUB-COMPONENTS FOR CREATING CARDS AND CUSTOM DAYS ---
+
+function CreateCardModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  days,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (cardData: Omit<CanvasCard, 'id' | 'x' | 'y' | 'rotation'>) => void;
+  days: { day: number; label: string }[];
+}) {
+  if (!isOpen) return null;
+
+  const [type, setType] = useState<'polaroid' | 'sticky' | 'article' | 'flight' | 'hotel' | 'note'>('sticky');
+  const [title, setTitle] = useState('');
+  const [subtitle, setSubtitle] = useState('');
+  const [day, setDay] = useState(0);
+  const [tag, setTag] = useState('');
+  const [tagColor, setTagColor] = useState('slate');
+  const [detailsString, setDetailsString] = useState('');
+  const [price, setPrice] = useState('');
+  const [rating, setRating] = useState('4.5');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim()) return;
+
+    const details = detailsString
+      ? detailsString.split('\n').map(s => s.trim()).filter(Boolean)
+      : [];
+
+    let image = undefined;
+    let color = undefined;
+
+    if (type === 'polaroid') {
+      image = '/images/gion.jpg';
+    } else if (type === 'hotel') {
+      image = '/images/ryokan.jpg';
+    } else if (type === 'sticky') {
+      color = '#fef3c7';
+    }
+
+    onSubmit({
+      type,
+      title,
+      subtitle: subtitle || undefined,
+      day: Number(day),
+      tag: tag || undefined,
+      tagColor: tagColor || undefined,
+      details: details.length > 0 ? details : undefined,
+      price: price || undefined,
+      rating: (type === 'hotel' || type === 'polaroid') ? Number(rating) : undefined,
+      image,
+      color,
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm bg-stone-900/40 p-4">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-md bg-stone-50 border border-stone-200 shadow-2xl rounded-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200"
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-stone-200 bg-white">
+          <h3 className="font-bold text-stone-800 text-sm">Create Spatial Card</h3>
+          <button type="button" onClick={onClose} className="text-stone-300 hover:text-stone-600 transition-colors cursor-pointer p-1 rounded hover:bg-stone-50">
+            <X size={15} />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-4 overflow-y-auto flex-1 scrollbar-thin">
+          {/* Card Type Selector */}
+          <div>
+            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Card Type</label>
+            <select
+              value={type}
+              onChange={e => setType(e.target.value as any)}
+              className="w-full text-xs border rounded-xl px-3 py-2 bg-white border-stone-200 outline-none focus:border-amber-500 text-stone-700 h-[36px]"
+            >
+              <option value="sticky">📌 Sticky Note</option>
+              <option value="polaroid">🖼️ Polaroid Location</option>
+              <option value="hotel">🏨 Hotel Accommodation</option>
+              <option value="flight">✈️ Flight Ticket</option>
+              <option value="article">📄 Saved Article</option>
+              <option value="note">📝 Quick Note</option>
+            </select>
+          </div>
+
+          {/* Title */}
+          <div>
+            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Title</label>
+            <input
+              type="text"
+              required
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              className="w-full text-xs border rounded-xl px-3 py-2 bg-white border-stone-200 outline-none focus:border-amber-500 text-stone-700"
+              placeholder="e.g. Kyoto Tower visit"
+            />
+          </div>
+
+          {/* Subtitle */}
+          <div>
+            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Subtitle / Description</label>
+            <input
+              type="text"
+              value={subtitle}
+              onChange={e => setSubtitle(e.target.value)}
+              className="w-full text-xs border rounded-xl px-3 py-2 bg-white border-stone-200 outline-none focus:border-amber-500 text-stone-700"
+              placeholder="e.g. Evening panorama of the city lights"
+            />
+          </div>
+
+          {/* Target Day */}
+          <div>
+            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Associate Day</label>
+            <select
+              value={day}
+              onChange={e => setDay(Number(e.target.value))}
+              className="w-full text-xs border rounded-xl px-3 py-2 bg-white border-stone-200 outline-none focus:border-amber-500 text-stone-700 h-[36px]"
+            >
+              <option value={0}>Unassigned (Logistics)</option>
+              {days.map(d => (
+                <option key={d.day} value={d.day}>Day {d.day}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Details */}
+          <div>
+            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Details (one bullet per line)</label>
+            <textarea
+              value={detailsString}
+              onChange={e => setDetailsString(e.target.value)}
+              className="w-full text-xs border rounded-xl px-3 py-2 bg-white border-stone-200 outline-none focus:border-amber-500 text-stone-700 resize-none h-16"
+              placeholder="Detail line 1&#10;Detail line 2"
+            />
+          </div>
+
+          {/* Type specific inputs */}
+          <div className="grid grid-cols-2 gap-3">
+            {(type === 'hotel' || type === 'flight') && (
+              <div>
+                <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Price</label>
+                <input
+                  type="text"
+                  value={price}
+                  onChange={e => setPrice(e.target.value)}
+                  className="w-full text-xs border rounded-xl px-3 py-2 bg-white border-stone-200 outline-none focus:border-amber-500 text-stone-700"
+                  placeholder="e.g. $140 total"
+                />
+              </div>
+            )}
+            {(type === 'hotel' || type === 'polaroid') && (
+              <div>
+                <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Rating</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="5"
+                  step="0.1"
+                  value={rating}
+                  onChange={e => setRating(e.target.value)}
+                  className="w-full text-xs border rounded-xl px-3 py-2 bg-white border-stone-200 outline-none focus:border-amber-500 text-stone-700"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="px-5 py-4 border-t border-stone-200 bg-white flex items-center justify-end gap-2 flex-shrink-0">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 border border-stone-200 text-xs font-semibold rounded-xl text-stone-600 hover:bg-stone-50 transition-colors cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 text-xs font-semibold rounded-xl text-white hover:opacity-90 transition-opacity cursor-pointer animate-pulse"
+            style={{ backgroundColor: '#92400e' }}
+          >
+            Create Card
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function AddDayModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  nextDayNum,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (dayNum: number, label: string) => void;
+  nextDayNum: number;
+}) {
+  if (!isOpen) return null;
+
+  const [dayNum, setDayNum] = useState(nextDayNum);
+  const [label, setLabel] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!label.trim()) return;
+    onSubmit(dayNum, label);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm bg-stone-900/40 p-4">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-sm bg-stone-50 border border-stone-200 shadow-2xl rounded-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200"
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-stone-200 bg-white">
+          <h3 className="font-bold text-stone-800 text-sm">Add Custom Day</h3>
+          <button type="button" onClick={onClose} className="text-stone-300 hover:text-stone-600 transition-colors cursor-pointer p-1 rounded hover:bg-stone-50">
+            <X size={15} />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-4">
+          <div>
+            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1 text-xs">Day Index</label>
+            <input
+              type="number"
+              min="1"
+              required
+              value={dayNum}
+              onChange={e => setDayNum(Number(e.target.value))}
+              className="w-full text-xs border rounded-xl px-3 py-2 bg-white border-stone-200 outline-none focus:border-amber-500 text-stone-700"
+            />
+          </div>
+
+          <div>
+            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1 text-xs">Day Label / Activity</label>
+            <input
+              type="text"
+              required
+              value={label}
+              onChange={e => setLabel(e.target.value)}
+              className="w-full text-xs border rounded-xl px-3 py-2 bg-white border-stone-200 outline-none focus:border-amber-500 text-stone-700"
+              placeholder="e.g. Nanzenji Temple & Tofu dinner"
+            />
+          </div>
+        </div>
+
+        <div className="px-5 py-4 border-t border-stone-200 bg-white flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 border border-stone-200 text-xs font-semibold rounded-xl text-stone-600 hover:bg-stone-50 transition-colors cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 text-xs font-semibold rounded-xl text-white hover:opacity-90 transition-opacity cursor-pointer"
+            style={{ backgroundColor: '#92400e' }}
+          >
+            Add Day
+          </button>
+        </div>
       </form>
     </div>
   );

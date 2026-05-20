@@ -10,6 +10,7 @@ interface InboxPanelProps {
   items: InboxItem[];
   onProcessItem: (id: string) => void;
   onAddItem: (content: string) => void;
+  onOpenAddManual?: () => void;
 }
 
 const sourceIcons: Record<string, React.ReactElement> = {
@@ -34,7 +35,7 @@ const sampleInputs = [
   'Hiiragiya Ryokan availability?',
 ];
 
-export default function InboxPanel({ items, onProcessItem, onAddItem }: InboxPanelProps) {
+export default function InboxPanel({ items, onProcessItem, onAddItem, onOpenAddManual }: InboxPanelProps) {
   const [inputVal, setInputVal] = useState('');
   const [placeholder, setPlaceholder] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -161,8 +162,11 @@ export default function InboxPanel({ items, onProcessItem, onAddItem }: InboxPan
       <div className="px-4 py-3 flex items-center justify-between"
         style={{ borderTop: '1px solid #e7e3dc', backgroundColor: '#faf9f7' }}>
         <span className="text-xs text-stone-400">{items.length} items total</span>
-        <button className="flex items-center gap-1 text-xs font-medium transition-colors hover:text-stone-700"
-          style={{ color: '#92400e' }}>
+        <button
+          onClick={onOpenAddManual}
+          className="flex items-center gap-1 text-xs font-medium transition-colors hover:text-stone-700 cursor-pointer"
+          style={{ color: '#92400e' }}
+        >
           <Plus size={12} />
           Add manually
         </button>
