@@ -3,7 +3,7 @@ import {
   Compass, ChevronLeft, MapPin, Calendar,
   ZoomIn, ZoomOut, Maximize2, Grid3X3, Share2, Download,
   Sparkles, PanelLeftClose, PanelLeftOpen, Plus,
-  Clock, X
+  Clock, X, MoreHorizontal
 } from 'lucide-react';
 import { CanvasCardRenderer } from './CanvasCards';
 import InboxPanel from './InboxPanel';
@@ -90,6 +90,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createModalCoords, setCreateModalCoords] = useState<{ x: number; y: number } | null>(null);
   const [showAddDayModal, setShowAddDayModal] = useState(false);
+  const [showOverflow, setShowOverflow] = useState(false);
 
   // Card dragging states
   const [draggingCardId, setDraggingCardId] = useState<string | null>(null);
@@ -578,72 +579,79 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
     <div className="flex flex-col h-screen overflow-hidden" style={{ backgroundColor: '#faf9f7' }}>
 
       {/* TOP NAV */}
-      <header className="flex items-center gap-3 px-4 py-2.5 flex-shrink-0 z-40"
-        style={{ backgroundColor: '#fefcf8', borderBottom: '1px solid #e7e3dc', height: '52px' }}>
+      <header className="flex-shrink-0 z-40"
+        style={{ backgroundColor: '#fefcf8', borderBottom: '1px solid #e7e3dc' }}>
 
-        {/* Left: Back + Trip name */}
-        <button
-          onClick={onBack}
-          className="flex items-center gap-1.5 text-stone-500 hover:text-stone-800 transition-colors text-sm mr-1 cursor-pointer"
-        >
-          <ChevronLeft size={15} />
-          <Compass size={15} color="#92400e" />
-          <span className="font-semibold text-stone-700 hidden sm:block" style={{ fontSize: '13px' }}>Wayfarer</span>
-        </button>
+        {/* ── Single Row (desktop) / Top Row (mobile) ── */}
+        <div className="flex items-center gap-2 px-4" style={{ height: '52px' }}>
 
-        <div className="w-px h-5 bg-stone-200" />
-
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded flex items-center justify-center text-sm">🇯🇵</div>
-          <div>
-            <h1 className="font-semibold text-stone-800 leading-tight" style={{ fontSize: '14px' }}>7 Days in Kyoto</h1>
-          </div>
-          <span className="hidden sm:flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: '#d1fae5', color: '#065f46' }}>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            Planning
-          </span>
-        </div>
-
-        {/* Center: Day filters */}
-        <div className="flex-1 flex items-center justify-center gap-1.5 overflow-x-auto">
+          {/* Back + brand */}
           <button
-            onClick={() => setActiveDay(null)}
-            className="flex-shrink-0 text-xs px-2.5 py-1 rounded-full font-medium transition-all cursor-pointer"
-            style={{
-              backgroundColor: activeDay === null ? '#1c1917' : '#f5f3ef',
-              color: activeDay === null ? 'white' : '#78716c',
-            }}
+            onClick={onBack}
+            aria-label="Back to home"
+            className="flex items-center gap-1.5 text-stone-500 hover:text-stone-800 transition-colors text-sm flex-shrink-0 cursor-pointer"
           >
-            All days
+            <ChevronLeft size={15} />
+            <Compass size={15} color="#92400e" />
+            <span className="font-semibold text-stone-700 hidden sm:block" style={{ fontSize: '13px' }}>Wayfarer</span>
           </button>
-          {days.map(d => (
+
+          <div className="w-px h-5 bg-stone-200 flex-shrink-0" />
+
+          {/* Trip identity */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="w-6 h-6 rounded flex items-center justify-center text-sm">🇯🇵</div>
+            <h1 className="font-semibold text-stone-800" style={{ fontSize: '14px' }}>7 Days in Kyoto</h1>
+            <span className="hidden md:flex items-center gap-1 text-xs px-2 py-0.5 rounded-full flex-shrink-0"
+              style={{ backgroundColor: '#d1fae5', color: '#065f46' }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              Planning
+            </span>
+          </div>
+
+          {/* Desktop center: Day filter pills (hidden on mobile — shown in row 2 below) */}
+          <div className="hidden md:flex flex-1 items-center justify-center gap-1.5 overflow-x-auto scrollbar-none px-2">
             <button
-              key={d.day}
-              onClick={() => setActiveDay(activeDay === d.day ? null : d.day)}
+              onClick={() => setActiveDay(null)}
               className="flex-shrink-0 text-xs px-2.5 py-1 rounded-full font-medium transition-all cursor-pointer"
               style={{
-                backgroundColor: activeDay === d.day ? d.color : '#f5f3ef',
-                color: activeDay === d.day ? 'white' : '#78716c',
+                backgroundColor: activeDay === null ? '#1c1917' : '#f5f3ef',
+                color: activeDay === null ? 'white' : '#78716c',
               }}
             >
-              Day {d.day}
+              All days
             </button>
-          ))}
-          <button
-            onClick={() => setShowAddDayModal(true)}
-            className="flex-shrink-0 w-7 h-7 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 transition-all flex items-center justify-center cursor-pointer ml-1 text-xs font-semibold"
-            style={{ border: '1px solid #e7e3dc' }}
-            title="Add Custom Day"
-          >
-            <Plus size={13} />
-          </button>
-        </div>
+            {days.map(d => (
+              <button
+                key={d.day}
+                onClick={() => setActiveDay(activeDay === d.day ? null : d.day)}
+                className="flex-shrink-0 flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium transition-all cursor-pointer"
+                style={{
+                  backgroundColor: activeDay === d.day ? d.color : '#f5f3ef',
+                  color: activeDay === d.day ? 'white' : '#78716c',
+                }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: activeDay === d.day ? 'rgba(255,255,255,0.7)' : d.color }} />
+                Day&nbsp;{d.day}
+              </button>
+            ))}
+            <button
+              onClick={() => setShowAddDayModal(true)}
+              className="flex-shrink-0 w-6 h-6 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 transition-all flex items-center justify-center cursor-pointer ml-1"
+              style={{ border: '1px solid #e7e3dc' }}
+              title="Add Custom Day"
+            >
+              <Plus size={12} />
+            </button>
+          </div>
 
-        {/* Right: Actions */}
-        <div className="flex items-center gap-1.5">
-          <div className="hidden sm:flex items-center">
-            <div className="flex items-center -space-x-2">
+          {/* Mobile: push actions to the right */}
+          <div className="flex-1 md:hidden" />
+
+          {/* Desktop-only secondary actions */}
+          <div className="hidden md:flex items-center gap-1 flex-shrink-0">
+            <div className="flex items-center -space-x-2 mr-1">
               {['🧑', '👩', '🧔'].map((a, i) => (
                 <div key={i} className="w-6 h-6 rounded-full flex items-center justify-center text-xs ring-2 ring-white select-none"
                   style={{ backgroundColor: '#e7e3dc', fontSize: '13px' }}>
@@ -651,22 +659,66 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
                 </div>
               ))}
             </div>
-            <span className="text-xs text-stone-400 ml-2 hidden lg:block select-none">3 travelers</span>
+            <span className="text-xs text-stone-400 mr-2 hidden lg:block select-none">3 travelers</span>
+            <button className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all hover:bg-stone-100 cursor-pointer"
+              style={{ color: '#78716c' }}>
+              <Share2 size={13} />
+              <span>Share</span>
+            </button>
+            <button className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all hover:bg-stone-100 cursor-pointer"
+              style={{ color: '#78716c' }}>
+              <Download size={13} />
+              <span>Export</span>
+            </button>
           </div>
 
-          <button className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all hover:bg-stone-100 cursor-pointer"
-            style={{ color: '#78716c' }}>
-            <Share2 size={13} />
-            <span className="hidden sm:block">Share</span>
-          </button>
-          <button className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all hover:bg-stone-100 cursor-pointer"
-            style={{ color: '#78716c' }}>
-            <Download size={13} />
-            <span className="hidden sm:block">Export</span>
-          </button>
+          {/* Mobile overflow ··· */}
+          <div className="relative md:hidden">
+            <button
+              onClick={() => setShowOverflow(o => !o)}
+              aria-label="More workspace actions"
+              aria-expanded={showOverflow}
+              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all hover:bg-stone-100 cursor-pointer"
+              style={{ color: '#78716c' }}
+            >
+              <MoreHorizontal size={16} />
+            </button>
+            {showOverflow && (
+              <>
+                {/* backdrop */}
+                <div className="fixed inset-0 z-40" onClick={() => setShowOverflow(false)} />
+                {/* popover */}
+                <div className="absolute right-0 top-full mt-1 z-50 rounded-xl shadow-xl py-1.5 min-w-[160px]"
+                  style={{ backgroundColor: '#fefcf8', border: '1px solid #e7e3dc' }}>
+                  <div className="flex items-center gap-2 px-3 py-2 border-b" style={{ borderColor: '#e7e3dc' }}>
+                    <div className="flex items-center -space-x-1.5">
+                      {['🧑', '👩', '🧔'].map((a, i) => (
+                        <div key={i} className="w-5 h-5 rounded-full flex items-center justify-center ring-2 ring-white select-none"
+                          style={{ backgroundColor: '#e7e3dc', fontSize: '11px' }}>{a}</div>
+                      ))}
+                    </div>
+                    <span className="text-xs text-stone-500">3 travelers</span>
+                  </div>
+                  <button className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-stone-50 transition-colors cursor-pointer"
+                    style={{ color: '#78716c' }} onClick={() => setShowOverflow(false)}>
+                    <Share2 size={14} />
+                    <span className="text-sm">Share</span>
+                  </button>
+                  <button className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-stone-50 transition-colors cursor-pointer"
+                    style={{ color: '#78716c' }} onClick={() => setShowOverflow(false)}>
+                    <Download size={14} />
+                    <span className="text-sm">Export</span>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Inbox toggle — always visible */}
           <button
             onClick={() => setInboxOpen(o => !o)}
-            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all font-medium cursor-pointer"
+            aria-label={`${inboxOpen ? 'Close' : 'Open'} inbox`}
+            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all font-medium cursor-pointer flex-shrink-0"
             style={{
               backgroundColor: inboxOpen ? '#fef3c7' : '#f5f3ef',
               color: inboxOpen ? '#92400e' : '#78716c',
@@ -680,6 +732,43 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
                 {items.filter(i => !i.processed).length}
               </span>
             )}
+          </button>
+        </div>
+
+        {/* ── Row 2: Day filter strip — mobile only ── */}
+        <div className="md:hidden flex items-center gap-1.5 px-4 pb-2.5 overflow-x-auto scrollbar-none flex-nowrap">
+          <button
+            onClick={() => setActiveDay(null)}
+            className="flex-shrink-0 text-xs px-3 py-1.5 rounded-full font-medium transition-all cursor-pointer"
+            style={{
+              backgroundColor: activeDay === null ? '#1c1917' : '#f5f3ef',
+              color: activeDay === null ? 'white' : '#78716c',
+            }}
+          >
+            All
+          </button>
+          {days.map(d => (
+            <button
+              key={d.day}
+              onClick={() => setActiveDay(activeDay === d.day ? null : d.day)}
+              className="flex-shrink-0 flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-medium transition-all cursor-pointer"
+              style={{
+                backgroundColor: activeDay === d.day ? d.color : '#f5f3ef',
+                color: activeDay === d.day ? 'white' : '#78716c',
+              }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                style={{ backgroundColor: activeDay === d.day ? 'rgba(255,255,255,0.7)' : d.color }} />
+              Day&nbsp;{d.day}
+            </button>
+          ))}
+          <button
+            onClick={() => setShowAddDayModal(true)}
+            className="flex-shrink-0 w-7 h-7 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 transition-all flex items-center justify-center cursor-pointer"
+            style={{ border: '1px solid #e7e3dc' }}
+            title="Add Day"
+          >
+            <Plus size={12} />
           </button>
         </div>
       </header>
@@ -935,30 +1024,6 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
             isLinkingActive={linkingFromId === selectedCard?.id}
           />
 
-          {/* Bottom mini-map legend */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3 py-2 rounded-xl"
-            style={{ backgroundColor: 'rgba(254,252,248,0.95)', border: '1px solid #e7e3dc', boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}>
-            <span className="text-xs text-stone-400 font-medium mr-1 select-none">Jump to:</span>
-            {days.map(d => (
-              <button
-                key={d.day}
-                onClick={() => {
-                  setActiveDay(d.day);
-                  const labelCfg = dayLabels.find(l => l.day === d.day);
-                  if (labelCfg) {
-                    setPan({ x: -labelCfg.x + 250, y: -labelCfg.y + 150 });
-                  }
-                }}
-                className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg transition-all hover:opacity-80 cursor-pointer"
-                style={{ backgroundColor: d.color + '20', color: d.color }}
-              >
-                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: d.color }} />
-                Day {d.day}
-              </button>
-            ))}
-            <div className="w-px h-3 bg-stone-200 mx-1" />
-            <span className="text-xs text-stone-400 select-none">{cards.length} cards</span>
-          </div>
         </main>
       </div>
 
@@ -1047,7 +1112,7 @@ function AiPromptBar({ onSendQuery, isThinking }: AiPromptBarProps) {
   };
 
   return (
-    <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-20 w-full max-w-lg px-4 select-none">
+    <div className="absolute bottom-6 md:bottom-14 left-1/2 -translate-x-1/2 z-20 w-full max-w-lg px-4 select-none">
       <form onSubmit={handleSubmit} className={`rounded-xl transition-all duration-200 ${focused ? 'shadow-lg' : 'shadow-sm'}`}
         style={{ backgroundColor: '#fefcf8', border: `1.5px solid ${focused ? '#fde68a' : '#e7e3dc'}` }}>
         <div className="flex items-center gap-2 px-3 py-2.5">
