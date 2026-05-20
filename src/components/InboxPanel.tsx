@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Sparkles, MessageSquare, Link2, FileText,
   Plane, Hotel, ChevronRight, Plus, Send,
-  CheckCircle2, Circle
+  CheckCircle2, Circle, X
 } from 'lucide-react';
 import type { InboxItem } from '../data/tripData';
 
@@ -11,6 +11,7 @@ interface InboxPanelProps {
   onProcessItem: (id: string) => void;
   onAddItem: (content: string) => void;
   onOpenAddManual?: () => void;
+  onClose?: () => void;
 }
 
 const sourceIcons: Record<string, React.ReactElement> = {
@@ -35,7 +36,7 @@ const sampleInputs = [
   'Hiiragiya Ryokan availability?',
 ];
 
-export default function InboxPanel({ items, onProcessItem, onAddItem, onOpenAddManual }: InboxPanelProps) {
+export default function InboxPanel({ items, onProcessItem, onAddItem, onOpenAddManual, onClose }: InboxPanelProps) {
   const [inputVal, setInputVal] = useState('');
   const [placeholder, setPlaceholder] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -65,10 +66,21 @@ export default function InboxPanel({ items, onProcessItem, onAddItem, onOpenAddM
       <div className="px-4 pt-4 pb-3" style={{ borderBottom: '1px solid #e7e3dc' }}>
         <div className="flex items-center justify-between mb-1">
           <h2 className="font-semibold text-stone-800 text-sm">Inbox</h2>
-          <div className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: '#fef3c7', color: '#92400e' }}>
-            <Sparkles size={10} />
-            <span>AI active</span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
+              style={{ backgroundColor: '#fef3c7', color: '#92400e' }}>
+              <Sparkles size={10} />
+              <span>AI active</span>
+            </div>
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="md:hidden hover:bg-stone-100 rounded-full p-1 text-stone-400 hover:text-stone-600 transition-colors cursor-pointer"
+                aria-label="Close inbox"
+              >
+                <X size={15} />
+              </button>
+            )}
           </div>
         </div>
         <p className="text-xs text-stone-400 leading-snug">

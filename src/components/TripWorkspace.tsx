@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import {
   Compass, ChevronLeft, MapPin, Calendar,
   ZoomIn, ZoomOut, Maximize2, Grid3X3, Share2, Download,
@@ -54,7 +54,21 @@ function getCardCenter(card: CanvasCard) {
 }
 
 export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
+  const [isMobile, setIsMobile] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(true);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    // On mobile, close inbox by default so the workspace canvas is clean
+    if (window.innerWidth < 768) {
+      setInboxOpen(false);
+    }
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDraggingCanvas, setIsDraggingCanvas] = useState(false);
@@ -456,6 +470,25 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
     });
   }, [cards, pan, zoom]);
 
+  const handleCardTouchStart = useCallback((cardId: string, e: React.TouchEvent) => {
+    e.stopPropagation();
+    const card = cards.find(c => c.id === cardId);
+    if (!card) return;
+
+    const touch = e.touches[0];
+    if (!touch) return;
+
+    // Convert screen coordinates into canvas coordinate space
+    const canvasMouseX = (touch.clientX - pan.x) / zoom;
+    const canvasMouseY = (touch.clientY - pan.y) / zoom;
+
+    setDraggingCardId(cardId);
+    setDragOffset({
+      x: canvasMouseX - card.x,
+      y: canvasMouseY - card.y,
+    });
+  }, [cards, pan, zoom]);
+
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('.canvas-item')) return;
     if (linkingFromId) {
@@ -464,6 +497,18 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
     }
     setIsDraggingCanvas(true);
     setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
+  }, [pan, linkingFromId]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if ((e.target as HTMLElement).closest('.canvas-item')) return;
+    if (linkingFromId) {
+      setLinkingFromId(null);
+      return;
+    }
+    const touch = e.touches[0];
+    if (!touch) return;
+    setIsDraggingCanvas(true);
+    setDragStart({ x: touch.clientX - pan.x, y: touch.clientY - pan.y });
   }, [pan, linkingFromId]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -483,6 +528,32 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
 
     if (!isDraggingCanvas) return;
     setPan({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+  }, [isDraggingCanvas, draggingCardId, dragOffset, pan, zoom, dragStart]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (!touch) return;
+
+    if (draggingCardId) {
+      // Prevent default scrolling on mobile when dragging a card
+      if (e.cancelable) e.preventDefault();
+      // Convert screen coordinates into canvas coordinate space
+      const canvasMouseX = (touch.clientX - pan.x) / zoom;
+      const canvasMouseY = (touch.clientY - pan.y) / zoom;
+
+      const newX = canvasMouseX - dragOffset.x;
+      const newY = canvasMouseY - dragOffset.y;
+
+      setCards(prev => prev.map(c =>
+        c.id === draggingCardId ? { ...c, x: newX, y: newY } : c
+      ));
+      return;
+    }
+
+    if (!isDraggingCanvas) return;
+    // Prevent default scrolling on mobile when panning the canvas
+    if (e.cancelable) e.preventDefault();
+    setPan({ x: touch.clientX - dragStart.x, y: touch.clientY - dragStart.y });
   }, [isDraggingCanvas, draggingCardId, dragOffset, pan, zoom, dragStart]);
 
   const handleMouseUp = useCallback(() => {
@@ -618,19 +689,25 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
 
         {/* INBOX SIDEBAR */}
         <aside
-          className="flex-shrink-0 overflow-hidden transition-all duration-300 z-30 animate-in fade-in"
+          className="flex-shrink-0 overflow-hidden transition-all duration-300 z-30 animate-in fade-in absolute md:relative h-full bg-[#fefcf8] shadow-2xl md:shadow-none"
           style={{
-            width: inboxOpen ? '280px' : '0px',
+            width: inboxOpen ? (isMobile ? '100%' : '280px') : '0px',
             borderRight: inboxOpen ? '1px solid #e7e3dc' : 'none',
           }}
         >
           {inboxOpen && (
-            <div className="h-full" style={{ width: '280px' }}>
+            <div className="h-full w-full md:w-[280px]">
               <InboxPanel
                 items={items}
-                onProcessItem={handleProcessItem}
+                onProcessItem={(id) => {
+                  handleProcessItem(id);
+                  if (isMobile) {
+                    setInboxOpen(false);
+                  }
+                }}
                 onAddItem={handleAddItem}
                 onOpenAddManual={() => handleOpenCreateModal()}
+                onClose={() => setInboxOpen(false)}
               />
             </div>
           )}
@@ -695,6 +772,10 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleMouseUp}
+            onTouchCancel={handleMouseUp}
           >
             <div
               style={{
@@ -807,6 +888,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
                         setSelectedCard(c => c?.id === card.id ? null : card);
                       }
                     }}
+                    onTouchStart={(e) => handleCardTouchStart(card.id, e)}
                   >
                     <CanvasCardRenderer
                       card={card}

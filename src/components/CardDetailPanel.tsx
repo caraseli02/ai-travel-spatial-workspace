@@ -151,9 +151,8 @@ export default function CardDetailPanel({
 
   return (
     <div
-      className="absolute right-0 top-0 bottom-0 z-30 overflow-y-auto scrollbar-thin transition-all duration-300 flex flex-col"
+      className="absolute right-0 top-0 bottom-0 z-30 overflow-y-auto scrollbar-thin transition-all duration-300 flex flex-col w-full sm:w-[280px]"
       style={{
-        width: '280px',
         backgroundColor: '#fefcf8',
         borderLeft: '1px solid #e7e3dc',
         boxShadow: '-4px 0 24px rgba(0,0,0,0.06)',
