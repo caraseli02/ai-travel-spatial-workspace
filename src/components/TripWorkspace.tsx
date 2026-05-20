@@ -16,6 +16,17 @@ interface TripWorkspaceProps {
   onBack: () => void;
 }
 
+type CardType = CanvasCard['type'];
+
+const CARD_TYPE_OPTIONS = [
+  { value: 'sticky', label: '📌 Sticky Note' },
+  { value: 'polaroid', label: '🖼️ Polaroid Location' },
+  { value: 'hotel', label: '🏨 Hotel Accommodation' },
+  { value: 'flight', label: '✈️ Flight Ticket' },
+  { value: 'article', label: '📄 Saved Article' },
+  { value: 'note', label: '📝 Quick Note' },
+] satisfies { value: CardType; label: string }[];
+
 const DAY_LABEL_CONFIG = [
   { day: 1, x: 38, y: 46, color: '#f59e0b', bg: '#fef3c7', border: '#fde68a' },
   { day: 2, x: 38, y: 285, color: '#f97316', bg: '#ffedd5', border: '#fed7aa' },
@@ -51,6 +62,10 @@ function getCardCenter(card: CanvasCard) {
     x: card.x + w / 2,
     y: card.y + h / 2,
   };
+}
+
+function isCardType(value: string): value is CardType {
+  return CARD_TYPE_OPTIONS.some(option => option.value === value);
 }
 
 export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
@@ -1180,9 +1195,7 @@ function CreateCardModal({
   onSubmit: (cardData: Omit<CanvasCard, 'id' | 'x' | 'y' | 'rotation'>) => void;
   days: { day: number; label: string }[];
 }) {
-  if (!isOpen) return null;
-
-  const [type, setType] = useState<'polaroid' | 'sticky' | 'article' | 'flight' | 'hotel' | 'note'>('sticky');
+  const [type, setType] = useState<CardType>('sticky');
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [day, setDay] = useState(0);
@@ -1191,6 +1204,22 @@ function CreateCardModal({
   const [detailsString, setDetailsString] = useState('');
   const [price, setPrice] = useState('');
   const [rating, setRating] = useState('4.5');
+
+  useEffect(() => {
+    if (isOpen) {
+      setType('sticky');
+      setTitle('');
+      setSubtitle('');
+      setDay(0);
+      setTag('');
+      setTagColor('slate');
+      setDetailsString('');
+      setPrice('');
+      setRating('4.5');
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1245,15 +1274,16 @@ function CreateCardModal({
             <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Card Type</label>
             <select
               value={type}
-              onChange={e => setType(e.target.value as any)}
+              onChange={e => {
+                if (isCardType(e.target.value)) {
+                  setType(e.target.value);
+                }
+              }}
               className="w-full text-xs border rounded-xl px-3 py-2 bg-white border-stone-200 outline-none focus:border-amber-500 text-stone-700 h-[36px]"
             >
-              <option value="sticky">📌 Sticky Note</option>
-              <option value="polaroid">🖼️ Polaroid Location</option>
-              <option value="hotel">🏨 Hotel Accommodation</option>
-              <option value="flight">✈️ Flight Ticket</option>
-              <option value="article">📄 Saved Article</option>
-              <option value="note">📝 Quick Note</option>
+              {CARD_TYPE_OPTIONS.map(option => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
             </select>
           </div>
 
@@ -1371,10 +1401,17 @@ function AddDayModal({
   onSubmit: (dayNum: number, label: string) => void;
   nextDayNum: number;
 }) {
-  if (!isOpen) return null;
-
   const [dayNum, setDayNum] = useState(nextDayNum);
   const [label, setLabel] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      setDayNum(nextDayNum);
+      setLabel('');
+    }
+  }, [isOpen, nextDayNum]);
+
+  if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
