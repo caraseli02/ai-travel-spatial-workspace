@@ -733,15 +733,23 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
           </div>
 
           {/* Trip stats pill */}
-          <div className="absolute top-3 right-3 z-20 flex items-center gap-2.5 rounded-xl px-3 py-2 select-none"
+          <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 md:gap-2.5 rounded-xl px-2 py-1.5 md:px-3 md:py-2 select-none"
             style={{ backgroundColor: '#fefcf8', border: '1px solid #e7e3dc', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-            <StatItem icon={<Calendar size={11} />} label="Dec 14–21" />
-            <div className="w-px h-3 bg-stone-200" />
+            {!isMobile && (
+              <>
+                <StatItem icon={<Calendar size={11} />} label="Dec 14–21" />
+                <div className="w-px h-3 bg-stone-200" />
+              </>
+            )}
             <StatItem icon={<MapPin size={11} />} label="Kyoto, JP" />
-            <div className="w-px h-3 bg-stone-200" />
-            <StatItem icon={<Clock size={11} />} label="7 nights" />
-            <div className="w-px h-3 bg-stone-200" />
-            <span className="text-xs text-stone-400">~$2,340 est.</span>
+            {!isMobile && (
+              <>
+                <div className="w-px h-3 bg-stone-200" />
+                <StatItem icon={<Clock size={11} />} label="7 nights" />
+                <div className="w-px h-3 bg-stone-200" />
+                <span className="text-xs text-stone-400">~$2,340 est.</span>
+              </>
+            )}
             <div className="w-px h-3 bg-stone-200" />
             <span className="text-xs">🌤️ 8°C</span>
           </div>

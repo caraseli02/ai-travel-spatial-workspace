@@ -100,7 +100,7 @@ export const canvasCards: CanvasCard[] = [
   {
     id: 'c1',
     type: 'flight',
-    x: 48,
+    x: 30,
     y: 72,
     rotation: -1.5,
     title: 'JAL JL69 · SFO → KIX',
@@ -145,7 +145,7 @@ export const canvasCards: CanvasCard[] = [
   {
     id: 'c4',
     type: 'polaroid',
-    x: 40,
+    x: 20,
     y: 310,
     rotation: -2.5,
     title: 'Fushimi Inari',
@@ -159,7 +159,7 @@ export const canvasCards: CanvasCard[] = [
   {
     id: 'c5',
     type: 'sticky',
-    x: 285,
+    x: 275,
     y: 290,
     rotation: 1.5,
     title: 'Yuki says:',
@@ -188,7 +188,7 @@ export const canvasCards: CanvasCard[] = [
   {
     id: 'c7',
     type: 'polaroid',
-    x: 48,
+    x: 30,
     y: 580,
     rotation: 1.8,
     title: 'Arashiyama Bamboo',
@@ -269,7 +269,7 @@ export const canvasCards: CanvasCard[] = [
   {
     id: 'c13',
     type: 'sticky',
-    x: 305,
+    x: 295,
     y: 740,
     rotation: 1,
     title: '🍵 Matcha kit-kats',
