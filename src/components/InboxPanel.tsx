@@ -9,6 +9,7 @@ import type { InboxItem } from '../data/tripData';
 interface InboxPanelProps {
   items: InboxItem[];
   onProcessItem: (id: string) => void;
+  onAddItem: (content: string) => void;
 }
 
 const sourceIcons: Record<string, React.ReactElement> = {
@@ -33,7 +34,7 @@ const sampleInputs = [
   'Hiiragiya Ryokan availability?',
 ];
 
-export default function InboxPanel({ items, onProcessItem }: InboxPanelProps) {
+export default function InboxPanel({ items, onProcessItem, onAddItem }: InboxPanelProps) {
   const [inputVal, setInputVal] = useState('');
   const [placeholder, setPlaceholder] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -44,10 +45,12 @@ export default function InboxPanel({ items, onProcessItem }: InboxPanelProps) {
   function handleSend() {
     if (!inputVal.trim()) return;
     setIsProcessing(true);
+    // Trigger mock parsing in workspace parent state
+    onAddItem(inputVal);
     setTimeout(() => {
       setIsProcessing(false);
       setInputVal('');
-    }, 1500);
+    }, 1200);
   }
 
   function cyclePlaceholder() {

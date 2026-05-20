@@ -141,3 +141,22 @@
   width: 100%;
   height: 100%;
 }
+
+/* Option B - Card Entrance Drop-in Animation */
+@keyframes drop-in {
+  0% {
+    opacity: 0;
+    transform: scale(1.15) translateY(-30px) rotate(5deg);
+  }
+  70% {
+    transform: scale(0.98) translateY(2px) rotate(-1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0) rotate(var(--rotate-angle, 0deg));
+  }
+}
+
+.card-drop-in {
+  animation: drop-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}

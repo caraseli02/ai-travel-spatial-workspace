@@ -55,17 +55,305 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
   const [cards, setCards] = useState<CanvasCard[]>(canvasCards);
   const [selectedCard, setSelectedCard] = useState<CanvasCard | null>(null);
 
+  // Promoting configurations to local state for Option B
+  const [days, setDays] = useState(dayGroups);
+  const [dayLabels, setDayLabels] = useState(DAY_LABEL_CONFIG);
+  const [activeConnections, setActiveConnections] = useState(connections);
+  const [isAiThinking, setIsAiThinking] = useState(false);
+
   // Card dragging states
   const [draggingCardId, setDraggingCardId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  const handleProcessItem = useCallback((id: string) => {
-    setItems(prev => prev.map(item =>
-      item.id === id ? { ...item, processed: true } : item
-    ));
+  // Custom Inbox Item Classifier/Parser
+  const handleAddItem = useCallback((content: string) => {
+    let type: 'whatsapp' | 'link' | 'note' | 'flight' | 'hotel' = 'note';
+    let source = 'Inbox Clip';
+    let avatar = undefined;
+
+    const lower = content.toLowerCase();
+    if (lower.includes('flight') || lower.includes('jl') || lower.includes('ana') || lower.includes('sfo-') || lower.includes('kix')) {
+      type = 'flight';
+      source = 'Flight Parser';
+    } else if (lower.includes('hotel') || lower.includes('ryokan') || lower.includes('booking') || lower.includes('stay') || lower.includes('airbnb') || lower.includes('hoshinoya') || lower.includes('hostel')) {
+      type = 'hotel';
+      source = 'Hotel Scanner';
+    } else if (lower.includes('http') || lower.includes('.com') || lower.includes('reddit') || lower.includes('eater') || lower.includes('blog')) {
+      type = 'link';
+      source = 'Web Parser';
+    } else if (lower.includes('chat') || lower.includes('says') || lower.includes(':') || lower.includes('mom') || lower.includes('yuki') || lower.includes('friend')) {
+      type = 'whatsapp';
+      source = 'WhatsApp Sync';
+      avatar = '💬';
+    }
+
+    const newItem: InboxItem = {
+      id: `i_spawn_${Date.now()}`,
+      type,
+      source,
+      content,
+      timestamp: 'Just now',
+      processed: false,
+      avatar,
+    };
+
+    setItems(prev => [newItem, ...prev]);
   }, []);
+
+  // Enhanced handleProcessItem that generates and places stylized cards dynamically near clusters
+  const handleProcessItem = useCallback((id: string) => {
+    let processedItem: InboxItem | undefined;
+    setItems(prev => prev.map(item => {
+      if (item.id === id) {
+        processedItem = { ...item, processed: true };
+        return processedItem;
+      }
+      return item;
+    }));
+
+    if (!processedItem) return;
+
+    const item = processedItem as InboxItem;
+    const newCardId = `c_spawn_${Date.now()}`;
+    let newCard: CanvasCard;
+
+    const associatedDay = activeDay || 2;
+    const dayCfg = dayLabels.find(l => l.day === associatedDay) || dayLabels[0];
+    const scatterX = Math.floor(Math.random() * 80) - 40;
+    const scatterY = Math.floor(Math.random() * 80) - 40;
+    
+    const targetX = Math.min(Math.max(dayCfg.x + 180 + scatterX, 50), 1000);
+    const targetY = Math.min(Math.max(dayCfg.y + scatterY, 50), 800);
+
+    const rotation = (Math.random() * 4) - 2;
+
+    if (item.type === 'flight') {
+      newCard = {
+        id: newCardId,
+        type: 'flight',
+        x: targetX,
+        y: targetY,
+        rotation,
+        title: 'New Flight Ticket',
+        subtitle: item.content,
+        tag: `Day ${associatedDay} · Flight`,
+        tagColor: 'slate',
+        day: associatedDay,
+        details: ['Parsed from flight tracker', 'Ready for boarding confirmation'],
+        width: 280,
+      };
+    } else if (item.type === 'hotel') {
+      newCard = {
+        id: newCardId,
+        type: 'hotel',
+        x: targetX,
+        y: targetY,
+        rotation,
+        title: 'Hotel Accommodation',
+        subtitle: item.content,
+        tag: `Day ${associatedDay} · Stay`,
+        tagColor: 'amber',
+        day: associatedDay,
+        details: ['Parsed from reservation', 'Address details verified'],
+        rating: 4.8,
+        width: 260,
+      };
+    } else if (item.id === 'i4') {
+      newCard = {
+        id: newCardId,
+        type: 'polaroid',
+        x: targetX,
+        y: targetY,
+        rotation,
+        title: 'Hidden Temples',
+        subtitle: 'Kurama-dera & Jingo-ji',
+        image: '/images/ryokan.jpg',
+        tag: 'Day 2 · Exploration',
+        tagColor: 'orange',
+        day: 2,
+        width: 220,
+      };
+    } else if (item.id === 'i6') {
+      newCard = {
+        id: newCardId,
+        type: 'polaroid',
+        x: targetX,
+        y: targetY,
+        rotation,
+        title: 'Golden Pavilion (Kinkaku-ji)',
+        subtitle: "Mom's Match Rec 🍵",
+        image: '/images/gion.jpg',
+        tag: 'Day 2 · Sightseeing',
+        tagColor: 'orange',
+        day: 2,
+        width: 220,
+      };
+    } else if (item.id === 'i7') {
+      newCard = {
+        id: newCardId,
+        type: 'article',
+        x: targetX,
+        y: targetY,
+        rotation,
+        title: 'Mizai Restaurant',
+        subtitle: 'Michelin 3★ Kaiseki near Maruyama Park',
+        tag: 'Day 4 · Fine Dining',
+        tagColor: 'rose',
+        day: 4,
+        details: ['Tasting menu only', 'Pre-payment required', 'Rated 4.9 on Eater'],
+        width: 250,
+      };
+    } else {
+      newCard = {
+        id: newCardId,
+        type: 'sticky',
+        x: targetX,
+        y: targetY,
+        rotation,
+        title: item.source || 'AI Parsed Clip',
+        subtitle: item.content,
+        color: item.type === 'whatsapp' ? '#fce7f3' : '#d1fae5',
+        day: associatedDay,
+        width: 200,
+      };
+    }
+
+    setCards(prev => [...prev, newCard]);
+
+    const siblingCard = cards.find(c => c.day === associatedDay && c.id !== newCardId);
+    if (siblingCard) {
+      setActiveConnections(prev => [...prev, { from: siblingCard.id, to: newCardId, label: 'dynamic-link' }]);
+    }
+  }, [activeDay, dayLabels, cards]);
+
+  // AI Prompt Parser Logic
+  const handleSendQuery = useCallback((query: string) => {
+    if (!query.trim()) return;
+    setIsAiThinking(true);
+
+    setTimeout(() => {
+      const lower = query.toLowerCase();
+
+      if (lower.includes('plan day 5') || lower.includes('suggest day 5') || lower.includes('day 5 itinerary')) {
+        setDays(prev => {
+          if (prev.some(d => d.day === 5)) return prev;
+          return [...prev, { day: 5, label: 'Day 5 — Kurama & Kaiseki', color: '#8b5cf6' }];
+        });
+
+        setDayLabels(prev => {
+          if (prev.some(l => l.day === 5)) return prev;
+          return [...prev, { day: 5, x: 775, y: 555, color: '#8b5cf6', bg: '#f5f3ff', border: '#ddd6fe' }];
+        });
+
+        const curamaDera: CanvasCard = {
+          id: 'c15',
+          type: 'polaroid',
+          x: 790,
+          y: 520,
+          rotation: 2.2,
+          title: 'Kurama-dera Temple',
+          subtitle: 'Mountain hike north of Kyoto',
+          image: '/images/fushimi-inari.jpg',
+          tag: 'Day 5 · Morning',
+          tagColor: 'rose',
+          day: 5,
+          width: 220,
+        };
+
+        setCards(prev => {
+          const filtered = prev.filter(c => c.id !== 'c15');
+          return [...filtered, curamaDera];
+        });
+
+        setActiveConnections(prev => {
+          const filtered = prev.filter(conn => !(conn.from === 'c15' && conn.to === 'c14') && !(conn.from === 'c14' && conn.to === 'c15'));
+          return [...filtered, { from: 'c15', to: 'c14', label: 'hiking to dining' }];
+        });
+
+        setActiveDay(5);
+
+      } else if (lower.includes('ryokan') || lower.includes('hoshinoya') || lower.includes('stay in arashiyama')) {
+        const hoshinoya: CanvasCard = {
+          id: 'c16',
+          type: 'hotel',
+          x: 290,
+          y: 690,
+          rotation: -1.2,
+          title: 'Hoshinoya Kyoto',
+          subtitle: 'Arashiyama River Luxury Ryokan',
+          tag: 'Day 3 · Luxury Ryokan',
+          tagColor: 'emerald',
+          day: 3,
+          details: ['Accessible only via wooden boat ride', 'Stunning river views', '¥110,000/night', 'Private pavilion standard'],
+          rating: 5.0,
+          image: '/images/ryokan.jpg',
+          width: 260,
+        };
+
+        setCards(prev => {
+          const filtered = prev.filter(c => c.id !== 'c16');
+          return [...filtered, hoshinoya];
+        });
+
+        setActiveConnections(prev => {
+          const filtered = prev.filter(conn => !(conn.from === 'c7' && conn.to === 'c16') && !(conn.from === 'c16' && conn.to === 'c7'));
+          return [...filtered, { from: 'c7', to: 'c16', label: 'stay option' }];
+        });
+
+        setActiveDay(3);
+
+      } else if (lower.includes('restaurant') || lower.includes('gion food') || lower.includes('gion restaurant') || lower.includes('sasaki')) {
+        const gionSasaki: CanvasCard = {
+          id: 'c17',
+          type: 'article',
+          x: 1040,
+          y: 280,
+          rotation: 1.8,
+          title: 'Gion Sasaki',
+          subtitle: 'Michelin 3★ creative counter dining',
+          tag: 'Day 4 · Splurge dinner',
+          tagColor: 'rose',
+          day: 4,
+          details: ['Pre-book 2 months in advance', 'Counter seating only'],
+          width: 260,
+        };
+
+        setCards(prev => {
+          const filtered = prev.filter(c => c.id !== 'c17');
+          return [...filtered, gionSasaki];
+        });
+
+        setActiveConnections(prev => {
+          const filtered = prev.filter(conn => !(conn.from === 'c10' && conn.to === 'c17') && !(conn.from === 'c17' && conn.to === 'c10'));
+          return [...filtered, { from: 'c10', to: 'c17', label: 'dinner option' }];
+        });
+
+        setActiveDay(4);
+
+      } else {
+        const notesId = `c_ai_sticky_${Date.now()}`;
+        const newSticky: CanvasCard = {
+          id: notesId,
+          type: 'note',
+          x: 480 + (Math.random() * 60 - 30),
+          y: 350 + (Math.random() * 60 - 30),
+          rotation: (Math.random() * 4) - 2,
+          title: 'AI Helper Answer 🤖',
+          subtitle: `Regarding "${query}": Based on local guides, I highly recommend visiting early morning. Make sure to check weather and transit times!`,
+          tag: 'AI Assistant Answer',
+          tagColor: 'slate',
+          day: activeDay || 0,
+          width: 230,
+        };
+
+        setCards(prev => [...prev, newSticky]);
+      }
+
+      setIsAiThinking(false);
+    }, 1200);
+  }, [activeDay, cards, days, dayLabels]);
 
   const handleCardMouseDown = useCallback((cardId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -169,7 +457,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
           >
             All days
           </button>
-          {dayGroups.map(d => (
+          {days.map(d => (
             <button
               key={d.day}
               onClick={() => setActiveDay(activeDay === d.day ? null : d.day)}
@@ -241,7 +529,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
         >
           {inboxOpen && (
             <div className="h-full" style={{ width: '280px' }}>
-              <InboxPanel items={items} onProcessItem={handleProcessItem} />
+              <InboxPanel items={items} onProcessItem={handleProcessItem} onAddItem={handleAddItem} />
             </div>
           )}
         </aside>
@@ -280,7 +568,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
           </div>
 
           {/* AI prompt bar */}
-          <AiPromptBar />
+          <AiPromptBar onSendQuery={handleSendQuery} isThinking={isAiThinking} />
 
           {/* THE CANVAS */}
           <div
@@ -306,7 +594,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
                 className="connection-svg"
                 style={{ width: '1200px', height: '900px', zIndex: 0 }}
               >
-                {connections.map((conn, i) => {
+                {activeConnections.map((conn, i) => {
                   const fromCard = cards.find(c => c.id === conn.from);
                   const toCard = cards.find(c => c.id === conn.to);
 
@@ -335,8 +623,8 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
               </svg>
 
               {/* Day cluster labels */}
-              {showDayLabels && DAY_LABEL_CONFIG.map(cfg => {
-                const group = dayGroups.find(d => d.day === cfg.day);
+              {showDayLabels && dayLabels.map(cfg => {
+                const group = days.find(d => d.day === cfg.day);
                 if (!group) return null;
                 const isActive = activeDay === cfg.day;
                 const isDimmed = activeDay !== null && !isActive;
@@ -370,25 +658,28 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
               })}
 
               {/* CARDS */}
-              {filteredCards.map(card => (
-                <div
-                  key={card.id}
-                  className="transition-opacity duration-200"
-                  style={{
-                    opacity: activeDay !== null && card.day !== activeDay && card.day !== 0 ? 0.2 : 1,
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedCard(c => c?.id === card.id ? null : card);
-                  }}
-                >
-                  <CanvasCardRenderer
-                    card={card}
-                    onMouseDown={(e) => handleCardMouseDown(card.id, e)}
-                    isDragging={draggingCardId === card.id}
-                  />
-                </div>
-              ))}
+              {filteredCards.map(card => {
+                const isNewlySpawned = card.id.startsWith('c_spawn_') || card.id.startsWith('c_ai_') || card.id === 'c15' || card.id === 'c16' || card.id === 'c17';
+                return (
+                  <div
+                    key={card.id}
+                    className={`transition-opacity duration-200 ${isNewlySpawned ? 'card-drop-in' : ''}`}
+                    style={{
+                      opacity: activeDay !== null && card.day !== activeDay && card.day !== 0 ? 0.2 : 1,
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedCard(c => c?.id === card.id ? null : card);
+                    }}
+                  >
+                    <CanvasCardRenderer
+                      card={card}
+                      onMouseDown={(e) => handleCardMouseDown(card.id, e)}
+                      isDragging={draggingCardId === card.id}
+                    />
+                  </div>
+                );
+              })}
 
               {/* Add card button */}
               <div
@@ -414,7 +705,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3 py-2 rounded-xl"
             style={{ backgroundColor: 'rgba(254,252,248,0.95)', border: '1px solid #e7e3dc', boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}>
             <span className="text-xs text-stone-400 font-medium mr-1">Jump to:</span>
-            {dayGroups.map(d => (
+            {days.map(d => (
               <button
                 key={d.day}
                 onClick={() => {
@@ -475,45 +766,75 @@ function StatItem({ icon, label }: { icon: React.ReactNode; label: string }) {
   );
 }
 
-function AiPromptBar() {
+interface AiPromptBarProps {
+  onSendQuery: (query: string) => void;
+  isThinking: boolean;
+}
+
+function AiPromptBar({ onSendQuery, isThinking }: AiPromptBarProps) {
   const [value, setValue] = useState('');
   const [focused, setFocused] = useState(false);
   const suggestions = [
-    'Suggest a Day 5 itinerary',
-    'Find restaurants near Gion',
-    'How long from Arashiyama to Nishiki?',
+    'Plan Day 5',
+    'Suggest a ryokan in Arashiyama',
+    'Find a restaurant near Gion',
   ];
+
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!value.trim() || isThinking) return;
+    onSendQuery(value);
+    setValue('');
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    onSendQuery(suggestion);
+  };
 
   return (
     <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-20 w-full max-w-lg px-4">
-      <div className={`rounded-xl transition-all duration-200 ${focused ? 'shadow-lg' : 'shadow-sm'}`}
+      <form onSubmit={handleSubmit} className={`rounded-xl transition-all duration-200 ${focused ? 'shadow-lg' : 'shadow-sm'}`}
         style={{ backgroundColor: '#fefcf8', border: `1.5px solid ${focused ? '#fde68a' : '#e7e3dc'}` }}>
         <div className="flex items-center gap-2 px-3 py-2.5">
-          <Sparkles size={14} color="#92400e" />
+          {isThinking ? (
+            <Sparkles size={14} className="text-amber-500 animate-spin" />
+          ) : (
+            <Sparkles size={14} color="#92400e" />
+          )}
           <input
-            className="flex-1 text-xs outline-none bg-transparent placeholder-stone-300 text-stone-700"
-            placeholder='Ask AI: "Plan Day 5" or "Find a ryokan near Arashiyama"'
+            className="flex-1 text-xs outline-none bg-transparent placeholder-stone-300 text-stone-700 disabled:opacity-50"
+            placeholder={isThinking ? 'AI is thinking...' : 'Ask AI: "Plan Day 5" or "Suggest a ryokan in Arashiyama"'}
             value={value}
             onChange={e => setValue(e.target.value)}
             onFocus={() => setFocused(true)}
             onBlur={() => setTimeout(() => setFocused(false), 200)}
+            disabled={isThinking}
             style={{ fontFamily: 'inherit' }}
           />
-          {value && (
-            <button className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: '#92400e' }}>
-              <Plus size={12} color="white" style={{ transform: 'rotate(45deg)' }} />
-            </button>
+          {isThinking ? (
+            <div className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            </div>
+          ) : (
+            value && (
+              <button type="submit" className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 hover:opacity-90 active:scale-95 transition-all"
+                style={{ backgroundColor: '#92400e' }}>
+                <Plus size={12} color="white" style={{ transform: 'rotate(45deg)' }} />
+              </button>
+            )
           )}
         </div>
 
-        {focused && !value && (
+        {focused && !value && !isThinking && (
           <div className="px-3 pb-2.5 flex flex-wrap gap-1.5">
             {suggestions.map((s, i) => (
               <button
                 key={i}
-                onClick={() => setValue(s)}
-                className="text-xs px-2.5 py-1 rounded-full transition-all hover:opacity-80"
+                type="button"
+                onClick={() => handleSuggestionClick(s)}
+                className="text-xs px-2.5 py-1 rounded-full transition-all hover:opacity-80 active:scale-95 cursor-pointer"
                 style={{ backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }}
               >
                 {s}
@@ -521,7 +842,7 @@ function AiPromptBar() {
             ))}
           </div>
         )}
-      </div>
+      </form>
     </div>
   );
 }
