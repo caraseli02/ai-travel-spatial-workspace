@@ -158,7 +158,6 @@ describe('Trip Workspace model', () => {
       connections: [],
       items: [],
       selectedCard: null,
-      linkingFromId: null,
       isAiThinking: false,
       showCreateModal: false,
       createModalCoords: null,
@@ -225,7 +224,7 @@ describe('Trip Workspace model', () => {
       expect(newState.selectedCard).toBeNull(); // selection cleared
     });
 
-    it('can handle linking mode and establish manual connections via START/COMPLETE/CANCEL_LINKING', () => {
+    it('can establish manual connections via ADD_CONNECTION', () => {
       const mockCard1 = { id: 'c1', type: 'sticky' as const, x: 100, y: 100, day: 1, title: 'Card 1' };
       const mockCard2 = { id: 'c2', type: 'sticky' as const, x: 200, y: 200, day: 1, title: 'Card 2' };
       const state: TripWorkspaceState = {
@@ -234,19 +233,9 @@ describe('Trip Workspace model', () => {
         connections: [],
       };
 
-      // 1. Start linking
-      let nextState = tripWorkspaceReducer(state, { type: 'START_LINKING', id: 'c1' });
-      expect(nextState.linkingFromId).toBe('c1');
-
-      // 2. Cancel linking
-      let cancelState = tripWorkspaceReducer(nextState, { type: 'CANCEL_LINKING' });
-      expect(cancelState.linkingFromId).toBeNull();
-
-      // 3. Complete linking
-      nextState = tripWorkspaceReducer(nextState, { type: 'COMPLETE_LINKING', id: 'c2' });
+      const nextState = tripWorkspaceReducer(state, { type: 'ADD_CONNECTION', fromId: 'c1', toId: 'c2' });
       expect(nextState.connections).toHaveLength(1);
       expect(nextState.connections[0]).toMatchObject({ from: 'c1', to: 'c2', label: 'custom-link' });
-      expect(nextState.linkingFromId).toBeNull(); // reset linking mode
     });
 
     it('can add a custom day group and position a new day label via ADD_CUSTOM_DAY', () => {

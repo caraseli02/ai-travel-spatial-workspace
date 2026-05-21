@@ -25,16 +25,8 @@ export function useTripWorkspaceState(initialState: TripWorkspaceState) {
     dispatch({ type: 'UPDATE_CARD', card });
   }, []);
 
-  const startLinking = useCallback((id: string) => {
-    dispatch({ type: 'START_LINKING', id });
-  }, []);
-
-  const completeLinking = useCallback((id: string) => {
-    dispatch({ type: 'COMPLETE_LINKING', id });
-  }, []);
-
-  const cancelLinking = useCallback(() => {
-    dispatch({ type: 'CANCEL_LINKING' });
+  const addConnection = useCallback((fromId: string, toId: string) => {
+    dispatch({ type: 'ADD_CONNECTION', fromId, toId });
   }, []);
 
   const addCustomDay = useCallback((dayNum: number, label: string) => {
@@ -91,9 +83,7 @@ export function useTripWorkspaceState(initialState: TripWorkspaceState) {
     processInboxItem,
     deleteCard,
     updateCard,
-    startLinking,
-    completeLinking,
-    cancelLinking,
+    addConnection,
     addCustomDay,
     sendAiQuery,
     setSelectedCard,

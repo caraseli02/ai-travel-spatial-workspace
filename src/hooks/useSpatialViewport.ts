@@ -17,15 +17,15 @@ export function calculateCardPosition(canvasMouse: number, dragOffset: number): 
 interface UseSpatialViewportProps {
   cards: CanvasCard[];
   onUpdateCardPosition: (id: string, x: number, y: number) => void;
-  linkingFromId?: string | null;
-  cancelLinking?: () => void;
+  isLinkingActive?: boolean;
+  onCancelLinking?: () => void;
 }
 
 export function useSpatialViewport({
   cards,
   onUpdateCardPosition,
-  linkingFromId = null,
-  cancelLinking,
+  isLinkingActive = false,
+  onCancelLinking,
 }: UseSpatialViewportProps) {
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -69,25 +69,25 @@ export function useSpatialViewport({
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('.canvas-item')) return;
-    if (linkingFromId) {
-      if (cancelLinking) cancelLinking();
+    if (isLinkingActive) {
+      if (onCancelLinking) onCancelLinking();
       return;
     }
     setIsDraggingCanvas(true);
     setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
-  }, [pan, linkingFromId, cancelLinking]);
+  }, [pan, isLinkingActive, onCancelLinking]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if ((e.target as HTMLElement).closest('.canvas-item')) return;
-    if (linkingFromId) {
-      if (cancelLinking) cancelLinking();
+    if (isLinkingActive) {
+      if (onCancelLinking) onCancelLinking();
       return;
     }
     const touch = e.touches[0];
     if (!touch) return;
     setIsDraggingCanvas(true);
     setDragStart({ x: touch.clientX - pan.x, y: touch.clientY - pan.y });
-  }, [pan, linkingFromId, cancelLinking]);
+  }, [pan, isLinkingActive, onCancelLinking]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (draggingCardId) {
