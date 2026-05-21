@@ -405,3 +405,43 @@ export function buildCustomDay(days: DayGroup[], dayNum: number, labelText: stri
 
   return { newDay, newLabel };
 }
+
+export function canConnectCards(
+  connections: Connection[],
+  fromId: string,
+  toId: string
+): boolean {
+  if (!fromId || !toId) return false;
+  if (fromId === toId) return false;
+
+  // Check if a connection already exists bidirectionally
+  const alreadyConnected = connections.some(
+    conn =>
+      (conn.from === fromId && conn.to === toId) ||
+      (conn.from === toId && conn.to === fromId)
+  );
+
+  return !alreadyConnected;
+}
+
+export function connectCards(
+  state: TripWorkspaceState,
+  fromId: string,
+  toId: string
+): TripWorkspaceState {
+  if (!canConnectCards(state.connections, fromId, toId)) {
+    return state;
+  }
+
+  const newConnection: Connection = {
+    from: fromId,
+    to: toId,
+    label: 'custom-link',
+  };
+
+  return {
+    ...state,
+    connections: [...state.connections, newConnection],
+  };
+}
+

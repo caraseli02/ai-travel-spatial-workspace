@@ -6,6 +6,8 @@ import {
   buildProcessedCanvasCard,
   dayLabelConfig,
   getCardCenter,
+  canConnectCards,
+  connectCards,
 } from './tripWorkspaceModel';
 
 const zeroRandom = () => 0.5;
@@ -90,5 +92,58 @@ describe('Trip Workspace model', () => {
   it('computes connection endpoints from Canvas Card dimensions', () => {
     expect(getCardCenter({ ...canvasCards[0], width: 300 })).toEqual({ x: 180, y: 162 });
     expect(getCardCenter(canvasCards[4])).toEqual({ x: 372.5, y: 350 });
+  });
+
+  describe('Connection validation and creation', () => {
+    const mockConnections = [
+      { from: 'c1', to: 'c2', label: 'custom-link' },
+      { from: 'c2', to: 'c3', label: 'custom-link' },
+    ];
+
+    it('canConnectCards identifies valid connections', () => {
+      // Normal valid link between two unconnected cards
+      expect(canConnectCards(mockConnections, 'c1', 'c3')).toBe(true);
+      expect(canConnectCards(mockConnections, 'c3', 'c4')).toBe(true);
+
+      // Self connection is invalid
+      expect(canConnectCards(mockConnections, 'c1', 'c1')).toBe(false);
+
+      // Duplicate connection is invalid (same direction)
+      expect(canConnectCards(mockConnections, 'c1', 'c2')).toBe(false);
+
+      // Duplicate connection is invalid (reverse direction)
+      expect(canConnectCards(mockConnections, 'c2', 'c1')).toBe(false);
+    });
+
+    it('connectCards adds a valid connection to state', () => {
+      const initialState = {
+        activeDay: null,
+        days: dayGroups,
+        dayLabels: dayLabelConfig,
+        cards: canvasCards,
+        connections: mockConnections,
+      };
+
+      const result = connectCards(initialState, 'c1', 'c3');
+      expect(result.connections).toHaveLength(3);
+      expect(result.connections[2]).toEqual({
+        from: 'c1',
+        to: 'c3',
+        label: 'custom-link',
+      });
+    });
+
+    it('connectCards does not duplicate an existing connection in state', () => {
+      const initialState = {
+        activeDay: null,
+        days: dayGroups,
+        dayLabels: dayLabelConfig,
+        cards: canvasCards,
+        connections: mockConnections,
+      };
+
+      const result = connectCards(initialState, 'c1', 'c2');
+      expect(result.connections).toHaveLength(2); // no additions
+    });
   });
 });
