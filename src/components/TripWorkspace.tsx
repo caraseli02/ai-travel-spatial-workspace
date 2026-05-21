@@ -12,19 +12,13 @@ import CardDetailPanel from './CardDetailPanel';
 import { canvasCards, inboxItems, dayGroups, connections } from '../data/tripData';
 import type { CanvasCard, InboxItem } from '../data/tripData';
 import {
-  applyAiPromptToTripWorkspace,
-  buildCustomDay,
-  buildInboxItem,
-  buildManualCanvasCard,
-  buildProcessedCanvasCard,
   cardTypeOptions,
   dayLabelConfig,
   getCardCenter,
-  isCardType,
-  canConnectCards,
-  connectCards,
 } from '../models/tripWorkspaceModel';
 import type { CardType } from '../models/tripWorkspaceModel';
+import { useTripWorkspaceState } from '../hooks/useTripWorkspaceState';
+import { useSpatialViewport } from '../hooks/useSpatialViewport';
 
 interface TripWorkspaceProps {
   onBack: () => void;
@@ -46,248 +40,119 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
     }
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [isDraggingCanvas, setIsDraggingCanvas] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [activeDay, setActiveDay] = useState<number | null>(null);
   const [showDayLabels, setShowDayLabels] = useState(true);
-  const [items, setItems] = useState<InboxItem[]>(inboxItems);
-  const [cards, setCards] = useState<CanvasCard[]>(canvasCards);
-  const [selectedCard, setSelectedCard] = useState<CanvasCard | null>(null);
 
-  // Promoting configurations to local state for Option B & C
-  const [days, setDays] = useState(dayGroups);
-  const [dayLabels, setDayLabels] = useState(dayLabelConfig);
-  const [activeConnections, setActiveConnections] = useState(connections);
-  const [isAiThinking, setIsAiThinking] = useState(false);
+  // Initialize unified State coordinator hook
+  const {
+    state,
+    addInboxItem,
+    processInboxItem,
+    deleteCard,
+    updateCard,
+    startLinking,
+    completeLinking,
+    cancelLinking,
+    addCustomDay,
+    sendAiQuery,
+    setSelectedCard: hookSetSelectedCard,
+    openCreateModal,
+    closeCreateModal,
+    openAddDayModal,
+    closeAddDayModal,
+    toggleOverflow,
+    updateCardPosition,
+    setActiveDay,
+    createManualCard,
+  } = useTripWorkspaceState({
+    activeDay: null,
+    days: dayGroups,
+    dayLabels: dayLabelConfig,
+    cards: canvasCards,
+    connections: connections,
+    items: inboxItems,
+    selectedCard: null,
+    linkingFromId: null,
+    isAiThinking: false,
+    showCreateModal: false,
+    createModalCoords: null,
+    showAddDayModal: false,
+    showOverflow: false,
+  });
 
-  // Option C: interactive active states
-  const [linkingFromId, setLinkingFromId] = useState<string | null>(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [createModalCoords, setCreateModalCoords] = useState<{ x: number; y: number } | null>(null);
-  const [showAddDayModal, setShowAddDayModal] = useState(false);
-  const [showOverflow, setShowOverflow] = useState(false);
+  // Extract variables for easier mapping back to existing JSX naming
+  const {
+    activeDay,
+    days,
+    dayLabels,
+    cards,
+    connections: activeConnections,
+    selectedCard,
+    linkingFromId,
+    showCreateModal,
+    createModalCoords,
+    showAddDayModal,
+    showOverflow,
+    items,
+    isAiThinking,
+  } = state;
 
-  // Card dragging states
-  const [draggingCardId, setDraggingCardId] = useState<string | null>(null);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-
-  const canvasRef = useRef<HTMLDivElement>(null);
-
-  // Custom Inbox Item Classifier/Parser
-  const handleAddItem = useCallback((content: string) => {
-    setItems(prev => [buildInboxItem(content), ...prev]);
-  }, []);
-
-  // Enhanced handleProcessItem that generates and places stylized cards dynamically near clusters
-  const handleProcessItem = useCallback((id: string) => {
-    const item = items.find(inboxItem => inboxItem.id === id);
-    if (!item) return;
-
-    const result = buildProcessedCanvasCard({
-      item,
-      activeDay,
-      dayLabels,
-      cards,
-    });
-
-    setItems(prev => prev.map(inboxItem => inboxItem.id === id ? result.processedItem : inboxItem));
-    setCards(prev => [...prev, result.newCard]);
-
-    const connection = result.connection;
-    if (connection) {
-      setActiveConnections(prev => [...prev, connection]);
-    }
-  }, [activeDay, cards, dayLabels, items]);
-
-  // AI Prompt Parser Logic
-  const handleSendQuery = useCallback((query: string) => {
-    if (!query.trim()) return;
-    setIsAiThinking(true);
-
-    setTimeout(() => {
-      const result = applyAiPromptToTripWorkspace({
-        query,
-        activeDay,
-        days,
-        dayLabels,
-        cards,
-        connections: activeConnections,
-      });
-
-      setDays(result.days);
-      setDayLabels(result.dayLabels);
-      setCards(result.cards);
-      setActiveConnections(result.connections);
-      setActiveDay(result.activeDay);
-
-      setIsAiThinking(false);
-    }, 1200);
-  }, [activeConnections, activeDay, cards, days, dayLabels]);
-
-  // Option C: Card Modifying Callbacks
-  const handleUpdateCard = useCallback((updated: CanvasCard) => {
-    setCards(prev => prev.map(c => c.id === updated.id ? updated : c));
-    setSelectedCard(updated);
-  }, []);
-
-  const handleDeleteCard = useCallback((cardId: string) => {
-    setCards(prev => prev.filter(c => c.id !== cardId));
-    setActiveConnections(prev => prev.filter(conn => conn.from !== cardId && conn.to !== cardId));
-    if (selectedCard?.id === cardId) {
-      setSelectedCard(null);
-    }
-  }, [selectedCard]);
-
-  const handleStartLinking = useCallback((cardId: string) => {
-    setLinkingFromId(cardId);
-  }, []);
-
+  // Compatibility adapters to map old callback names exactly, avoiding wide-scale JSX modifications
+  const handleAddItem = addInboxItem;
+  const handleProcessItem = processInboxItem;
+  const handleSendQuery = sendAiQuery;
+  const handleUpdateCard = updateCard;
+  const handleDeleteCard = deleteCard;
+  const handleStartLinking = startLinking;
+  
   const handleOpenCreateModal = useCallback((x?: number, y?: number) => {
     if (x !== undefined && y !== undefined) {
-      setCreateModalCoords({ x, y });
+      openCreateModal({ x, y });
     } else {
-      setCreateModalCoords({ x: 450, y: 250 });
+      openCreateModal({ x: 450, y: 250 });
     }
-    setShowCreateModal(true);
-  }, []);
+  }, [openCreateModal]);
 
-  const handleCreateManualCard = useCallback((newCardData: Omit<CanvasCard, 'id' | 'x' | 'y' | 'rotation'>) => {
-    const coords = createModalCoords || { x: 450, y: 250 };
-    const newCard = buildManualCanvasCard({ cardData: newCardData, coords });
-    setCards(prev => [...prev, newCard]);
-    setShowCreateModal(false);
-    setCreateModalCoords(null);
-  }, [createModalCoords]);
+  const handleCreateManualCard = createManualCard;
 
   const handleAddCustomDay = useCallback((dayNum: number, labelText: string) => {
     if (days.some(d => d.day === dayNum)) {
       alert(`Day ${dayNum} already exists!`);
       return;
     }
-    const { newDay, newLabel } = buildCustomDay(days, dayNum, labelText);
+    addCustomDay(dayNum, labelText);
+  }, [days, addCustomDay]);
 
-    setDays(prev => [...prev, newDay]);
-    setDayLabels(prev => [...prev, newLabel]);
-    setShowAddDayModal(false);
-  }, [days]);
-
-  const handleCardMouseDown = useCallback((cardId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const card = cards.find(c => c.id === cardId);
-    if (!card) return;
-
-    // Convert screen coordinates into canvas coordinate space
-    const canvasMouseX = (e.clientX - pan.x) / zoom;
-    const canvasMouseY = (e.clientY - pan.y) / zoom;
-
-    setDraggingCardId(cardId);
-    setDragOffset({
-      x: canvasMouseX - card.x,
-      y: canvasMouseY - card.y,
-    });
-  }, [cards, pan, zoom]);
-
-  const handleCardTouchStart = useCallback((cardId: string, e: React.TouchEvent) => {
-    e.stopPropagation();
-    const card = cards.find(c => c.id === cardId);
-    if (!card) return;
-
-    const touch = e.touches[0];
-    if (!touch) return;
-
-    // Convert screen coordinates into canvas coordinate space
-    const canvasMouseX = (touch.clientX - pan.x) / zoom;
-    const canvasMouseY = (touch.clientY - pan.y) / zoom;
-
-    setDraggingCardId(cardId);
-    setDragOffset({
-      x: canvasMouseX - card.x,
-      y: canvasMouseY - card.y,
-    });
-  }, [cards, pan, zoom]);
-
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('.canvas-item')) return;
-    if (linkingFromId) {
-      setLinkingFromId(null);
-      return;
+  const setSelectedCard = useCallback((cardOrFn: CanvasCard | null | ((prev: CanvasCard | null) => CanvasCard | null)) => {
+    if (typeof cardOrFn === 'function') {
+      hookSetSelectedCard(cardOrFn(selectedCard));
+    } else {
+      hookSetSelectedCard(cardOrFn);
     }
-    setIsDraggingCanvas(true);
-    setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
-  }, [pan, linkingFromId]);
+  }, [selectedCard, hookSetSelectedCard]);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if ((e.target as HTMLElement).closest('.canvas-item')) return;
-    if (linkingFromId) {
-      setLinkingFromId(null);
-      return;
-    }
-    const touch = e.touches[0];
-    if (!touch) return;
-    setIsDraggingCanvas(true);
-    setDragStart({ x: touch.clientX - pan.x, y: touch.clientY - pan.y });
-  }, [pan, linkingFromId]);
+  // Initialize Spatial Viewport Physics hook
+  const {
+    zoom,
+    pan,
+    isDraggingCanvas,
+    draggingCardId,
+    handleZoom,
+    handleReset,
+    handleMouseDown,
+    handleTouchStart,
+    handleMouseMove,
+    handleTouchMove,
+    handleMouseUp,
+    handleCardMouseDown,
+    handleCardTouchStart,
+  } = useSpatialViewport({
+    cards,
+    onUpdateCardPosition: updateCardPosition,
+    linkingFromId,
+    cancelLinking,
+  });
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (draggingCardId) {
-      // Convert screen coordinates into canvas coordinate space
-      const canvasMouseX = (e.clientX - pan.x) / zoom;
-      const canvasMouseY = (e.clientY - pan.y) / zoom;
-
-      const newX = canvasMouseX - dragOffset.x;
-      const newY = canvasMouseY - dragOffset.y;
-
-      setCards(prev => prev.map(c =>
-        c.id === draggingCardId ? { ...c, x: newX, y: newY } : c
-      ));
-      return;
-    }
-
-    if (!isDraggingCanvas) return;
-    setPan({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
-  }, [isDraggingCanvas, draggingCardId, dragOffset, pan, zoom, dragStart]);
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    if (!touch) return;
-
-    if (draggingCardId) {
-      // Prevent default scrolling on mobile when dragging a card
-      if (e.cancelable) e.preventDefault();
-      // Convert screen coordinates into canvas coordinate space
-      const canvasMouseX = (touch.clientX - pan.x) / zoom;
-      const canvasMouseY = (touch.clientY - pan.y) / zoom;
-
-      const newX = canvasMouseX - dragOffset.x;
-      const newY = canvasMouseY - dragOffset.y;
-
-      setCards(prev => prev.map(c =>
-        c.id === draggingCardId ? { ...c, x: newX, y: newY } : c
-      ));
-      return;
-    }
-
-    if (!isDraggingCanvas) return;
-    // Prevent default scrolling on mobile when panning the canvas
-    if (e.cancelable) e.preventDefault();
-    setPan({ x: touch.clientX - dragStart.x, y: touch.clientY - dragStart.y });
-  }, [isDraggingCanvas, draggingCardId, dragOffset, pan, zoom, dragStart]);
-
-  const handleMouseUp = useCallback(() => {
-    setIsDraggingCanvas(false);
-    setDraggingCardId(null);
-  }, []);
-
-  const handleZoom = useCallback((dir: 'in' | 'out') => {
-    setZoom(z => Math.min(Math.max(dir === 'in' ? z + 0.1 : z - 0.1, 0.4), 2));
-  }, []);
-
-  const handleReset = useCallback(() => {
-    setZoom(1);
-    setPan({ x: 0, y: 0 });
-  }, []);
+  const canvasRef = useRef<HTMLDivElement>(null);
 
   const filteredCards = activeDay
     ? cards.filter(c => c.day === activeDay || c.day === 0)
@@ -355,7 +220,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
               </button>
             ))}
             <button
-              onClick={() => setShowAddDayModal(true)}
+              onClick={openAddDayModal}
               className="flex-shrink-0 w-6 h-6 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 transition-all flex items-center justify-center cursor-pointer ml-1"
               style={{ border: '1px solid #e7e3dc' }}
               title="Add Custom Day"
@@ -393,7 +258,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
           {/* Mobile overflow ··· */}
           <div className="relative md:hidden">
             <button
-              onClick={() => setShowOverflow(o => !o)}
+              onClick={() => toggleOverflow()}
               aria-label="More workspace actions"
               aria-expanded={showOverflow}
               className="w-8 h-8 flex items-center justify-center rounded-lg transition-all hover:bg-stone-100 cursor-pointer"
@@ -404,7 +269,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
             {showOverflow && (
               <>
                 {/* backdrop */}
-                <div className="fixed inset-0 z-40" onClick={() => setShowOverflow(false)} />
+                <div className="fixed inset-0 z-40" onClick={() => toggleOverflow(false)} />
                 {/* popover */}
                 <div className="absolute right-0 top-full mt-1 z-50 rounded-xl shadow-xl py-1.5 min-w-[160px]"
                   style={{ backgroundColor: '#fefcf8', border: '1px solid #e7e3dc' }}>
@@ -418,12 +283,12 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
                     <span className="text-xs text-stone-500">3 travelers</span>
                   </div>
                   <button className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-stone-50 transition-colors cursor-pointer"
-                    style={{ color: '#78716c' }} onClick={() => setShowOverflow(false)}>
+                    style={{ color: '#78716c' }} onClick={() => toggleOverflow(false)}>
                     <Share2 size={14} />
                     <span className="text-sm">Share</span>
                   </button>
                   <button className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-stone-50 transition-colors cursor-pointer"
-                    style={{ color: '#78716c' }} onClick={() => setShowOverflow(false)}>
+                    style={{ color: '#78716c' }} onClick={() => toggleOverflow(false)}>
                     <Download size={14} />
                     <span className="text-sm">Export</span>
                   </button>
@@ -481,7 +346,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
             </button>
           ))}
           <button
-            onClick={() => setShowAddDayModal(true)}
+            onClick={openAddDayModal}
             className="flex-shrink-0 w-7 h-7 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 transition-all flex items-center justify-center cursor-pointer"
             style={{ border: '1px solid #e7e3dc' }}
             title="Add Day"
@@ -567,7 +432,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
               <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
               <span>Link Mode: Click another card on the canvas to connect them</span>
               <button
-                onClick={() => setLinkingFromId(null)}
+                onClick={cancelLinking}
                 className="hover:bg-amber-100 rounded-full p-0.5 text-amber-700 transition-colors cursor-pointer ml-1"
               >
                 <X size={12} />
@@ -687,27 +552,10 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
                       e.stopPropagation();
                       if (linkingFromId) {
                         if (linkingFromId === card.id) {
-                          setLinkingFromId(null);
-                          return;
+                          cancelLinking();
+                        } else {
+                          completeLinking(card.id);
                         }
-                        // Connect them! Using our model validation and transition logic
-                        if (canConnectCards(activeConnections, linkingFromId, card.id)) {
-                          setActiveConnections(prev => {
-                            const updatedState = connectCards(
-                              {
-                                activeDay,
-                                days,
-                                dayLabels,
-                                cards,
-                                connections: prev,
-                              },
-                              linkingFromId,
-                              card.id
-                            );
-                            return updatedState.connections;
-                          });
-                        }
-                        setLinkingFromId(null);
                       } else {
                         setSelectedCard(c => c?.id === card.id ? null : card);
                       }
@@ -757,17 +605,14 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
       {/* DYNAMIC DIALOGS / OVERLAYS */}
       <CreateCardModal
         isOpen={showCreateModal}
-        onClose={() => {
-          setShowCreateModal(false);
-          setCreateModalCoords(null);
-        }}
+        onClose={closeCreateModal}
         onSubmit={handleCreateManualCard}
         days={days}
       />
 
       <AddDayModal
         isOpen={showAddDayModal}
-        onClose={() => setShowAddDayModal(false)}
+        onClose={closeAddDayModal}
         onSubmit={handleAddCustomDay}
         nextDayNum={days.length + 1}
       />
