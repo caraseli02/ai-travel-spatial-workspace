@@ -8,22 +8,17 @@ flowchart TD
   app --> landing["LandingPage"]
   app --> workspace["TripWorkspace"]
 
-  workspace --> data["tripData"]
-  workspace --> model["tripWorkspaceModel"]
+  workspace --> hookState["useTripWorkspaceState"]
+  workspace --> hookViewport["useSpatialViewport"]
   workspace --> inbox["InboxPanel"]
   workspace --> cards["CanvasCardRenderer"]
   workspace --> detail["CardDetailPanel"]
   workspace --> toast["OnboardingToast"]
 
-  data --> inboxItems["Inbox Items"]
-  data --> canvasCards["Canvas Cards"]
-  data --> dayGroups["Day Groups"]
-  data --> connections["Connections"]
-
-  model --> inboxItems
-  model --> canvasCards
-  model --> dayGroups
-  model --> connections
+  hookState --> model["tripWorkspaceReducer (tripWorkspaceModel)"]
+  hookState --> data["tripData"]
+  hookViewport --> data
+  model --> data
 
   inbox --> workspace
   detail --> workspace
@@ -50,32 +45,40 @@ flowchart TD
 
 This file is acting as fixture data and as part of the implicit domain schema. New Trip Workspace behavior should prefer the model types in `src/models/tripWorkspaceModel.ts` when describing mutable workspace transitions.
 
-`src/models/tripWorkspaceModel.ts` is the Trip Workspace behavior module. It owns deterministic state transitions that can be tested without rendering React:
+`src/models/tripWorkspaceModel.ts` is the Trip Workspace behavior module. It owns the pure `tripWorkspaceReducer` and deterministic state transitions that can be tested without rendering React:
 
+- `tripWorkspaceReducer`: handles 19 distinct semantic state transitions (adding inbox items, promoting items to canvas cards, card deletions, manual card creation, connection linking sessions, custom days, and mock AI prompts).
 - `buildInboxItem`: classifies pasted Trip Material into an Inbox Item.
 - `buildProcessedCanvasCard`: marks an Inbox Item processed, creates the corresponding Canvas Card, places it near a Day Label, and returns the optional dynamic Connection.
 - `applyAiPromptToTripWorkspace`: applies the mocked AI Prompt effects for Day 5 planning, Arashiyama ryokan suggestions, Gion restaurant suggestions, and fallback AI answer cards.
-- `buildManualCanvasCard` and `buildCustomDay`: create user-authored Canvas Cards and Day Groups.
 - `getCardCenter`: computes Connection endpoints from Canvas Card dimensions.
 
-`src/models/tripWorkspaceModel.test.ts` contains characterization tests for this module. Those tests are intended to preserve current prototype behavior while the implementation is refactored.
+`src/models/tripWorkspaceModel.test.ts` contains characterization tests for this module.
+
+## State Coordinator & Viewport Hooks
+
+To decouple complex viewport physics and deep React state orchestration from rendering layout:
+
+- `src/hooks/useTripWorkspaceState.ts` (`useTripWorkspaceState`): coordinates all application state transitions by wrapping the pure `tripWorkspaceReducer` under React `useReducer`. It exposes neat, typed action handlers (e.g. `addInboxItem`, `processInboxItem`, `deleteCard`, `addCustomDay`, `createManualCard`, `startLinking`).
+- `src/hooks/useSpatialViewport.ts` (`useSpatialViewport`): isolates mouse/touch event listeners and normalizations, panning and zoom scale boundaries, screen-to-canvas mathematical coordinate translations, and card-dragging physics.
+
+Both hooks are covered by comprehensive unit tests (`useSpatialViewport.test.ts` and `tripWorkspaceModel.test.ts`).
 
 ## Main Workspace
 
-`src/components/TripWorkspace.tsx` is the orchestration module. It owns most mutable state:
+`src/components/TripWorkspace.tsx` is the orchestration module. It acts as a thin presentation view that mounts our custom hooks and binds their state and physics APIs to the rendering tree:
 
-- viewport state: zoom, pan, and canvas dragging
-- trip organization state: Inbox Items, Canvas Cards, Day Groups, Day Labels, and Connections
-- interaction state: selected Canvas Card, active Day Group filter, linking mode, create-day/card dialogs
-- mocked AI Prompt state
+- Delegates active viewport dimensions, panning offsets, zoom scaling, and dragging events to `useSpatialViewport`.
+- Delegates Inbox Items, Canvas Cards, Day Groups, and dialog/modal states to `useTripWorkspaceState`.
+- Renders SVGs for connection lines, maps over card arrays to render cards, and loads the `InboxPanel` and dialog panels.
 
 The main flows are:
 
-1. Inbox capture: `handleAddItem` delegates classification to `buildInboxItem`.
-2. Inbox organization: `handleProcessItem` delegates Inbox Item promotion to `buildProcessedCanvasCard`.
-3. AI Prompt handling: `handleSendQuery` delegates mocked prompt effects to `applyAiPromptToTripWorkspace`.
-4. Canvas editing: card selection, drag, update, delete, linking, dialog state, and React event handling remain in `TripWorkspace`.
-5. Manual creation: manual Canvas Card and custom Day Group creation delegate their domain object construction to the model.
+1. Inbox capture: `handleAddItem` dispatches to `addInboxItem`.
+2. Inbox organization: `handleProcessItem` dispatches to `processInboxItem`.
+3. AI Prompt handling: `handleSendQuery` dispatches to `sendAiQuery`.
+4. Canvas editing: card deletion, position updates, and modal/dialog states invoke hook callbacks directly.
+5. Manual creation: manual card creation dispatches to `createManualCard`.
 
 ## Rendering Modules
 
@@ -96,8 +99,9 @@ It is presentation-focused and receives card position and drag state from `TripW
 
 ## Current Shape
 
-The app is currently a Trip Workspace orchestration component plus a small model module and presentation-focused satellites. `TripWorkspace` is still the UI center of gravity: it owns React state, canvas behavior, dialog state, filtering, linking, and event wiring.
+The app is highly decoupled, robust, and unit-tested:
+1. **Domain State Coordinator (`tripWorkspaceReducer`)**: Completely separate from the UI layer. Fully unit-tested and verified.
+2. **Physics Layer (`useSpatialViewport`)**: Math translations and scale limits are purely isolated, eliminating event leakage.
+3. **Orchestrator (`TripWorkspace`)**: Focused purely on styling, rendering layout, CSS animations, and structure.
 
-The Trip Workspace Model now owns the domain transformations that were previously embedded in `TripWorkspace`: Inbox Item classification, Inbox-to-card promotion, mocked AI Prompt effects, Day Group construction, manual card construction, and Connection geometry. Card linking is still implemented inline in `TripWorkspace` because it is tightly coupled to current click interaction state.
-
-Future refactors should keep behavior-preserving tests around `tripWorkspaceModel` before moving more state transitions out of the component.
+This clean candidate architecture makes the codebase extremely testable, performant, and resilient to rapid UI iterations.

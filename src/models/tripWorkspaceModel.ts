@@ -29,6 +29,14 @@ export interface TripWorkspaceState {
   dayLabels: DayLabel[];
   cards: CanvasCard[];
   connections: Connection[];
+  items: InboxItem[];
+  selectedCard: CanvasCard | null;
+  linkingFromId: string | null;
+  isAiThinking: boolean;
+  showCreateModal: boolean;
+  createModalCoords: { x: number; y: number } | null;
+  showAddDayModal: boolean;
+  showOverflow: boolean;
 }
 
 export const cardTypeOptions = [
@@ -443,5 +451,197 @@ export function connectCards(
     ...state,
     connections: [...state.connections, newConnection],
   };
+}
+
+export type TripWorkspaceAction =
+  | { type: 'ADD_INBOX_ITEM'; content: string }
+  | { type: 'PROCESS_INBOX_ITEM'; id: string }
+  | { type: 'DELETE_CARD'; id: string }
+  | { type: 'UPDATE_CARD'; card: CanvasCard }
+  | { type: 'START_LINKING'; id: string }
+  | { type: 'COMPLETE_LINKING'; id: string }
+  | { type: 'CANCEL_LINKING' }
+  | { type: 'ADD_CUSTOM_DAY'; dayNum: number; label: string }
+  | { type: 'AI_PROMPT_START' }
+  | { type: 'AI_PROMPT_SUCCESS'; query: string }
+  | { type: 'SET_SELECTED_CARD'; card: CanvasCard | null }
+  | { type: 'OPEN_CREATE_MODAL'; coords: { x: number; y: number } | null }
+  | { type: 'CLOSE_CREATE_MODAL' }
+  | { type: 'OPEN_ADD_DAY_MODAL' }
+  | { type: 'CLOSE_ADD_DAY_MODAL' }
+  | { type: 'TOGGLE_OVERFLOW'; show?: boolean }
+  | { type: 'UPDATE_CARD_POSITION'; id: string; x: number; y: number }
+  | { type: 'SET_ACTIVE_DAY'; day: number | null | ((prev: number | null) => number | null) }
+  | { type: 'CREATE_MANUAL_CARD'; cardData: Omit<CanvasCard, 'id' | 'x' | 'y' | 'rotation'> };
+
+export function tripWorkspaceReducer(
+  state: TripWorkspaceState,
+  action: TripWorkspaceAction
+): TripWorkspaceState {
+  switch (action.type) {
+    case 'ADD_INBOX_ITEM': {
+      const newItem = buildInboxItem(action.content);
+      return {
+        ...state,
+        items: [newItem, ...state.items],
+      };
+    }
+    case 'PROCESS_INBOX_ITEM': {
+      const item = state.items.find(i => i.id === action.id);
+      if (!item) return state;
+
+      const result = buildProcessedCanvasCard({
+        item,
+        activeDay: state.activeDay,
+        dayLabels: state.dayLabels,
+        cards: state.cards,
+      });
+
+      const nextConnections = result.connection
+        ? [...state.connections, result.connection]
+        : state.connections;
+
+      return {
+        ...state,
+        items: state.items.map(i => i.id === action.id ? result.processedItem : i),
+        cards: [...state.cards, result.newCard],
+        connections: nextConnections,
+      };
+    }
+    case 'DELETE_CARD': {
+      const nextCards = state.cards.filter(c => c.id !== action.id);
+      const nextConnections = state.connections.filter(
+        conn => conn.from !== action.id && conn.to !== action.id
+      );
+      const nextSelectedCard =
+        state.selectedCard?.id === action.id ? null : state.selectedCard;
+
+      return {
+        ...state,
+        cards: nextCards,
+        connections: nextConnections,
+        selectedCard: nextSelectedCard,
+      };
+    }
+    case 'START_LINKING':
+      return {
+        ...state,
+        linkingFromId: action.id,
+      };
+    case 'CANCEL_LINKING':
+      return {
+        ...state,
+        linkingFromId: null,
+      };
+    case 'COMPLETE_LINKING': {
+      if (!state.linkingFromId) return state;
+      const updatedState = connectCards(state, state.linkingFromId, action.id);
+      return {
+        ...updatedState,
+        linkingFromId: null,
+      };
+    }
+    case 'ADD_CUSTOM_DAY': {
+      if (state.days.some(d => d.day === action.dayNum)) {
+        return state;
+      }
+      const { newDay, newLabel } = buildCustomDay(state.days, action.dayNum, action.label);
+      return {
+        ...state,
+        days: [...state.days, newDay],
+        dayLabels: [...state.dayLabels, newLabel],
+        showAddDayModal: false,
+      };
+    }
+    case 'UPDATE_CARD': {
+      const nextSelectedCard =
+        state.selectedCard?.id === action.card.id ? action.card : state.selectedCard;
+      return {
+        ...state,
+        cards: state.cards.map(c => c.id === action.card.id ? action.card : c),
+        selectedCard: nextSelectedCard,
+      };
+    }
+    case 'UPDATE_CARD_POSITION': {
+      const nextCards = state.cards.map(c =>
+        c.id === action.id ? { ...c, x: action.x, y: action.y } : c
+      );
+      const nextSelectedCard =
+        state.selectedCard?.id === action.id
+          ? { ...state.selectedCard, x: action.x, y: action.y }
+          : state.selectedCard;
+      return {
+        ...state,
+        cards: nextCards,
+        selectedCard: nextSelectedCard,
+      };
+    }
+    case 'AI_PROMPT_START':
+      return {
+        ...state,
+        isAiThinking: true,
+      };
+    case 'AI_PROMPT_SUCCESS': {
+      const updatedState = applyAiPromptToTripWorkspace({
+        ...state,
+        query: action.query,
+      });
+      return {
+        ...updatedState,
+        isAiThinking: false,
+      };
+    }
+    case 'SET_SELECTED_CARD':
+      return {
+        ...state,
+        selectedCard: action.card,
+      };
+    case 'OPEN_CREATE_MODAL':
+      return {
+        ...state,
+        showCreateModal: true,
+        createModalCoords: action.coords,
+      };
+    case 'CLOSE_CREATE_MODAL':
+      return {
+        ...state,
+        showCreateModal: false,
+        createModalCoords: null,
+      };
+    case 'OPEN_ADD_DAY_MODAL':
+      return {
+        ...state,
+        showAddDayModal: true,
+      };
+    case 'CLOSE_ADD_DAY_MODAL':
+      return {
+        ...state,
+        showAddDayModal: false,
+      };
+    case 'TOGGLE_OVERFLOW':
+      return {
+        ...state,
+        showOverflow: action.show !== undefined ? action.show : !state.showOverflow,
+      };
+    case 'SET_ACTIVE_DAY': {
+      const nextActiveDay = typeof action.day === 'function' ? action.day(state.activeDay) : action.day;
+      return {
+        ...state,
+        activeDay: nextActiveDay,
+      };
+    }
+    case 'CREATE_MANUAL_CARD': {
+      const coords = state.createModalCoords || { x: 450, y: 250 };
+      const newCard = buildManualCanvasCard({ cardData: action.cardData, coords });
+      return {
+        ...state,
+        cards: [...state.cards, newCard],
+        showCreateModal: false,
+        createModalCoords: null,
+      };
+    }
+    default:
+      return state;
+  }
 }
 
