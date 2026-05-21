@@ -109,6 +109,7 @@ export default function InboxPanel({ items, onProcessItem, onAddItem, onOpenAddM
           <button
             onClick={handleSend}
             disabled={!inputVal.trim() || isProcessing}
+            aria-label="Submit inbox item"
             className="absolute bottom-2.5 right-2.5 w-7 h-7 rounded-lg flex items-center justify-center transition-all"
             style={{
               backgroundColor: inputVal.trim() ? '#92400e' : '#e7e3dc',

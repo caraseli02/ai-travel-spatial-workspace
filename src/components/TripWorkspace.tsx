@@ -819,7 +819,12 @@ function CreateCardModal({
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-stone-200 bg-white">
           <h3 className="font-bold text-stone-800 text-sm">Create Spatial Card</h3>
-          <button type="button" onClick={onClose} className="text-stone-300 hover:text-stone-600 transition-colors cursor-pointer p-1 rounded hover:bg-stone-50">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close dialog"
+            className="text-stone-300 hover:text-stone-600 transition-colors cursor-pointer p-1 rounded hover:bg-stone-50"
+          >
             <X size={15} />
           </button>
         </div>
@@ -983,7 +988,12 @@ function AddDayModal({
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-stone-200 bg-white">
           <h3 className="font-bold text-stone-800 text-sm">Add Custom Day</h3>
-          <button type="button" onClick={onClose} className="text-stone-300 hover:text-stone-600 transition-colors cursor-pointer p-1 rounded hover:bg-stone-50">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close dialog"
+            className="text-stone-300 hover:text-stone-600 transition-colors cursor-pointer p-1 rounded hover:bg-stone-50"
+          >
             <X size={15} />
           </button>
         </div>
