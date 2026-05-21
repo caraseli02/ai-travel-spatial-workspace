@@ -56,6 +56,20 @@ A relationship between two Canvas Cards. Connections are rendered as lines on th
 
 Avoid: edge unless describing graph mechanics only.
 
+### Linking Session
+
+The transient, active state of manual connection creation. A traveler initiates a Linking Session from an origin Canvas Card and completes it by selecting a destination Canvas Card, creating a Connection.
+
+Avoid: link state, connecting mode.
+
+### Optimized Sequence
+
+A sequentially ordered, directed path of Canvas Cards on a specific Day Group. In the current prototype, it is generated using a metadata-aware sorting algorithm (ordering by card type and time-of-day tags). In future versions, this will be powered by real-time agent context (crowdedness, opening hours, local transit data).
+
+Avoid: route, itinerary path.
+
+
+
 ### Card Detail Panel
 
 The editing and inspection surface for the selected Canvas Card. It owns local edit controls but pushes Canvas Card updates back to the Trip Workspace.

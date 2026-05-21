@@ -21,6 +21,8 @@ import {
   dayLabelConfig,
   getCardCenter,
   isCardType,
+  canConnectCards,
+  connectCards,
 } from '../models/tripWorkspaceModel';
 import type { CardType } from '../models/tripWorkspaceModel';
 
@@ -688,14 +690,23 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
                           setLinkingFromId(null);
                           return;
                         }
-                        // Connect them!
-                        setActiveConnections(prev => {
-                          // Prevent duplicate connections
-                          if (prev.some(conn => (conn.from === linkingFromId && conn.to === card.id) || (conn.from === card.id && conn.to === linkingFromId))) {
-                            return prev;
-                          }
-                          return [...prev, { from: linkingFromId, to: card.id, label: 'custom-link' }];
-                        });
+                        // Connect them! Using our model validation and transition logic
+                        if (canConnectCards(activeConnections, linkingFromId, card.id)) {
+                          setActiveConnections(prev => {
+                            const updatedState = connectCards(
+                              {
+                                activeDay,
+                                days,
+                                dayLabels,
+                                cards,
+                                connections: prev,
+                              },
+                              linkingFromId,
+                              card.id
+                            );
+                            return updatedState.connections;
+                          });
+                        }
                         setLinkingFromId(null);
                       } else {
                         setSelectedCard(c => c?.id === card.id ? null : card);
