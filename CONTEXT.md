@@ -8,6 +8,26 @@ This repo is a React/Vite prototype for Wayfarer, an AI-native travel workspace.
 
 The product represented by this app. Wayfarer turns loose travel research into a visual trip workspace.
 
+### Trip
+
+A single travel plan scoped to one destination. A Trip owns a Trip Workspace and all its contents (Inbox Items, Canvas Cards, Connections, Day Groups). A traveler can have many Trips.
+_Avoid_: project, itinerary (when referring to the container).
+
+### Trip List
+
+The intermediate page a traveler sees after the Landing Page. It displays all their Trips and lets them create, open, or manage them.
+_Avoid_: dashboard, home screen.
+
+### Trip Repository
+
+The persistence interface that saves, loads, lists, and deletes Trips. The current implementation uses localStorage. The interface is designed so a backend implementation (e.g., Supabase) can be swapped in without changing domain logic.
+_Avoid_: store, database, API when discussing the abstraction.
+
+### Demo Trip
+
+The pre-loaded "7 Days in Kyoto" Trip that ships with a fresh install. It demonstrates the product's value on first visit and can be deleted by the traveler.
+_Avoid_: seed data, fixture, sample trip.
+
 ### Trip Workspace
 
 The main planning surface for a trip. The Trip Workspace combines the inbox, spatial canvas, day filters, card detail panel, AI prompt bar, and creation dialogs.
@@ -92,9 +112,29 @@ Avoid: data, content, assets when discussing the domain.
 
 ## Current Prototype Assumptions
 
-- The seed trip is "7 Days in Kyoto".
-- Trip data is local fixture state, not persisted.
-- AI behavior is mocked inside the client.
+- A traveler can have multiple Trips, each scoped to one destination.
+- Trip data is persisted to localStorage via the Trip Repository interface.
+- The "7 Days in Kyoto" Demo Trip is pre-loaded on first visit.
+- New Trips start with an empty workspace (blank canvas, empty inbox).
+- AI behavior is mocked inside the client (deterministic string matching).
+- The Trip List has both a "+ New Trip" button and a prompt bar for chat-driven creation.
+- The Trip List prompt bar and the Workspace AI Prompt are separate components with different scopes.
+- Routing uses react-router: `/` (landing), `/trips` (trip list), `/trips/:id` (workspace).
+- Landing Page "Enter Demo" navigates directly to the Demo Trip workspace; Trip List is discovered via back navigation.
 - Canvas coordinates are fixed-size prototype coordinates.
 - Trip Workspace state transitions are characterized by tests in `src/models/tripWorkspaceModel.test.ts`.
 - Share, export, authentication, and collaboration are visual affordances only.
+
+## Example Dialogue
+
+> **Dev:** The user pastes a Booking.com link on the Trip List. What happens?
+>
+> **Domain expert:** The Trip List prompt bar parses it as Trip Material — specifically a hotel reservation. If no Trip exists for that destination, it creates a new Trip and drops the link into the Trip's inbox as an Inbox Item. If a matching Trip exists, it adds it to that Trip's inbox.
+>
+> **Dev:** And if the user opens that Trip, the Inbox Item is just sitting there unprocessed?
+>
+> **Domain expert:** Exactly. The traveler decides when to promote it to a Canvas Card. Wayfarer captures, the traveler organizes.
+>
+> **Dev:** What if the AI can't figure out the destination from the link?
+>
+> **Domain expert:** Then the prompt bar asks a clarifying question — "Which trip does this belong to?" It doesn't guess.
