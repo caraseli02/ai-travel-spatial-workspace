@@ -19,6 +19,7 @@ import {
 import type { CardType } from '../models/tripWorkspaceModel';
 import { useTripWorkspaceState } from '../hooks/useTripWorkspaceState';
 import { useSpatialViewport } from '../hooks/useSpatialViewport';
+import { useLinkingSession } from '../hooks/useLinkingSession';
 
 interface TripWorkspaceProps {
   onBack: () => void;
@@ -49,9 +50,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
     processInboxItem,
     deleteCard,
     updateCard,
-    startLinking,
-    completeLinking,
-    cancelLinking,
+    addConnection,
     addCustomDay,
     sendAiQuery,
     setSelectedCard: hookSetSelectedCard,
@@ -71,7 +70,6 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
     connections: connections,
     items: inboxItems,
     selectedCard: null,
-    linkingFromId: null,
     isAiThinking: false,
     showCreateModal: false,
     createModalCoords: null,
@@ -87,7 +85,6 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
     cards,
     connections: activeConnections,
     selectedCard,
-    linkingFromId,
     showCreateModal,
     createModalCoords,
     showAddDayModal,
@@ -96,13 +93,19 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
     isAiThinking,
   } = state;
 
+  // Initialize stateful Linking Session adapter
+  const linkingSession = useLinkingSession({
+    connections: activeConnections,
+    onAddConnection: addConnection,
+  });
+
   // Compatibility adapters to map old callback names exactly, avoiding wide-scale JSX modifications
   const handleAddItem = addInboxItem;
   const handleProcessItem = processInboxItem;
   const handleSendQuery = sendAiQuery;
   const handleUpdateCard = updateCard;
   const handleDeleteCard = deleteCard;
-  const handleStartLinking = startLinking;
+  const handleStartLinking = linkingSession.start;
   
   const handleOpenCreateModal = useCallback((x?: number, y?: number) => {
     if (x !== undefined && y !== undefined) {
@@ -148,8 +151,8 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
   } = useSpatialViewport({
     cards,
     onUpdateCardPosition: updateCardPosition,
-    linkingFromId,
-    cancelLinking,
+    isLinkingActive: linkingSession.isActive,
+    onCancelLinking: linkingSession.cancel,
   });
 
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -427,12 +430,12 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
           </div>
 
           {/* Linking Mode Active Banner */}
-          {linkingFromId && (
+          {linkingSession.isActive && (
             <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2.5 px-4 py-2 rounded-full border shadow-xl bg-amber-50 border-amber-300 text-amber-900 animate-pulse text-xs font-semibold select-none">
               <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
               <span>Link Mode: Click another card on the canvas to connect them</span>
               <button
-                onClick={cancelLinking}
+                onClick={linkingSession.cancel}
                 className="hover:bg-amber-100 rounded-full p-0.5 text-amber-700 transition-colors cursor-pointer ml-1"
               >
                 <X size={12} />
@@ -537,7 +540,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
               {/* CARDS */}
               {filteredCards.map(card => {
                 const isNewlySpawned = card.id.startsWith('c_spawn_') || card.id.startsWith('c_ai_') || card.id.startsWith('c_manual_') || card.id === 'c15' || card.id === 'c16' || card.id === 'c17';
-                const isTargetOfLinking = linkingFromId !== null && linkingFromId !== card.id;
+                const isTargetOfLinking = linkingSession.isActive && linkingSession.originId !== card.id;
 
                 return (
                   <div
@@ -550,12 +553,8 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (linkingFromId) {
-                        if (linkingFromId === card.id) {
-                          cancelLinking();
-                        } else {
-                          completeLinking(card.id);
-                        }
+                      if (linkingSession.isActive) {
+                        linkingSession.resolveTarget(card.id);
                       } else {
                         setSelectedCard(c => c?.id === card.id ? null : card);
                       }
@@ -596,7 +595,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
             onUpdateCard={handleUpdateCard}
             onDeleteCard={handleDeleteCard}
             onStartLinking={handleStartLinking}
-            isLinkingActive={linkingFromId === selectedCard?.id}
+            isLinkingActive={linkingSession.isActive && linkingSession.originId === selectedCard?.id}
           />
 
         </main>

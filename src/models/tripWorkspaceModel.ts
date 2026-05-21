@@ -31,7 +31,6 @@ export interface TripWorkspaceState {
   connections: Connection[];
   items: InboxItem[];
   selectedCard: CanvasCard | null;
-  linkingFromId: string | null;
   isAiThinking: boolean;
   showCreateModal: boolean;
   createModalCoords: { x: number; y: number } | null;
@@ -458,9 +457,7 @@ export type TripWorkspaceAction =
   | { type: 'PROCESS_INBOX_ITEM'; id: string }
   | { type: 'DELETE_CARD'; id: string }
   | { type: 'UPDATE_CARD'; card: CanvasCard }
-  | { type: 'START_LINKING'; id: string }
-  | { type: 'COMPLETE_LINKING'; id: string }
-  | { type: 'CANCEL_LINKING' }
+  | { type: 'ADD_CONNECTION'; fromId: string; toId: string }
   | { type: 'ADD_CUSTOM_DAY'; dayNum: number; label: string }
   | { type: 'AI_PROMPT_START' }
   | { type: 'AI_PROMPT_SUCCESS'; query: string }
@@ -523,23 +520,8 @@ export function tripWorkspaceReducer(
         selectedCard: nextSelectedCard,
       };
     }
-    case 'START_LINKING':
-      return {
-        ...state,
-        linkingFromId: action.id,
-      };
-    case 'CANCEL_LINKING':
-      return {
-        ...state,
-        linkingFromId: null,
-      };
-    case 'COMPLETE_LINKING': {
-      if (!state.linkingFromId) return state;
-      const updatedState = connectCards(state, state.linkingFromId, action.id);
-      return {
-        ...updatedState,
-        linkingFromId: null,
-      };
+    case 'ADD_CONNECTION': {
+      return connectCards(state, action.fromId, action.toId);
     }
     case 'ADD_CUSTOM_DAY': {
       if (state.days.some(d => d.day === action.dayNum)) {
