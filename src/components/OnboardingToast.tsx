@@ -24,13 +24,21 @@ export default function OnboardingToast() {
   ];
 
   useEffect(() => {
-    const t = setTimeout(() => setVisible(true), 800);
-    return () => clearTimeout(t);
+    const completed = localStorage.getItem('wayfarer_onboarding_completed') === 'true';
+    if (!completed) {
+      const t = setTimeout(() => setVisible(true), 800);
+      return () => clearTimeout(t);
+    }
   }, []);
 
   if (!visible) return null;
 
   const current = steps[step];
+
+  const handleClose = () => {
+    setVisible(false);
+    localStorage.setItem('wayfarer_onboarding_completed', 'true');
+  };
 
   return (
     <div
@@ -48,7 +56,11 @@ export default function OnboardingToast() {
           <Sparkles size={11} />
           Quick tip {step + 1}/{steps.length}
         </div>
-        <button onClick={() => setVisible(false)} className="text-stone-300 hover:text-stone-500 transition-colors">
+        <button
+          onClick={handleClose}
+          className="text-stone-300 hover:text-stone-500 transition-colors"
+          aria-label="Close onboarding tips"
+        >
           <X size={13} />
         </button>
       </div>
@@ -78,14 +90,16 @@ export default function OnboardingToast() {
             onClick={() => setStep(s => s + 1)}
             className="flex items-center gap-1 text-xs font-medium transition-colors hover:opacity-80"
             style={{ color: '#92400e' }}
+            aria-label="Next tip"
           >
             Next <ChevronRight size={11} />
           </button>
         ) : (
           <button
-            onClick={() => setVisible(false)}
+            onClick={handleClose}
             className="text-xs font-medium px-2.5 py-1 rounded-lg transition-all"
             style={{ backgroundColor: '#92400e', color: 'white' }}
+            aria-label="Acknowledge and close onboarding tips"
           >
             Got it!
           </button>

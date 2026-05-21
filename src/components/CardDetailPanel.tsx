@@ -170,10 +170,15 @@ export default function CardDetailPanel({
             onClick={() => setIsEditing(e => !e)}
             className="p-1 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-all cursor-pointer"
             title={isEditing ? "View details" : "Edit details"}
+            aria-label={isEditing ? "View details" : "Edit details"}
           >
             {isEditing ? <Eye size={14} /> : <Edit3 size={14} />}
           </button>
-          <button onClick={onClose} className="p-1 rounded-lg text-stone-300 hover:text-stone-600 hover:bg-stone-100 transition-all cursor-pointer">
+          <button
+            onClick={onClose}
+            className="p-1 rounded-lg text-stone-300 hover:text-stone-600 hover:bg-stone-100 transition-all cursor-pointer"
+            aria-label="Close details panel"
+          >
             <X size={14} />
           </button>
         </div>
@@ -324,6 +329,7 @@ export default function CardDetailPanel({
                       type="button"
                       onClick={() => handleRemoveDetail(idx)}
                       className="text-stone-300 hover:text-rose-500 p-0.5 transition-colors cursor-pointer"
+                      aria-label="Remove detail line"
                     >
                       <Trash size={12} />
                     </button>
