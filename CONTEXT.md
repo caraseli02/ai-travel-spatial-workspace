@@ -114,7 +114,7 @@ Avoid: data, content, assets when discussing the domain.
 
 - A traveler can have multiple Trips, each scoped to one destination.
 - Trip data is persisted to localStorage via the Trip Repository interface.
-- The "7 Days in Kyoto" Demo Trip is pre-loaded on first visit.
+- The "7 Days in Kyoto" Demo Trip is pre-loaded on first visit and seeded only once ever; once deleted, it is never automatically re-seeded.
 - New Trips start with an empty workspace (blank canvas, empty inbox).
 - AI behavior is mocked inside the client (deterministic string matching).
 - The Trip List has both a "+ New Trip" button and a prompt bar for chat-driven creation.

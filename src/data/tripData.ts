@@ -307,3 +307,31 @@ export const connections = [
   { from: 'c1', to: 'c2', label: 'same day' },
   { from: 'c12', to: 'c1', label: 'logistics' },
 ];
+
+// --- Demo Trip factory ---
+
+import type { Trip } from '../models/trip';
+import { DEMO_TRIP_ID } from '../models/trip';
+import { dayLabelConfig } from '../models/tripWorkspaceModel';
+
+/**
+ * Create the pre-loaded "7 Days in Kyoto" Demo Trip.
+ * Wraps existing fixture data into a proper Trip entity.
+ */
+export function createDemoTrip(): Trip {
+  return {
+    id: DEMO_TRIP_ID,
+    name: '7 Days in Kyoto',
+    destination: 'Kyoto, Japan',
+    emoji: '🇯🇵',
+    dates: { start: '2025-12-14', end: '2025-12-21' },
+    createdAt: '2025-01-01T00:00:00.000Z',
+    updatedAt: new Date().toISOString(),
+    cards: [...canvasCards],
+    connections: [...connections],
+    inboxItems: [...inboxItems],
+    days: [...dayGroups],
+    dayLabels: [...dayLabelConfig],
+  };
+}
+
