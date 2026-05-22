@@ -236,17 +236,28 @@ function TripWorkspacePresenter({
   });
 
   const canvasRef = useRef<HTMLDivElement>(null);
-  // Persist domain state to repository on every change
+  // Persist domain state to repository on every change (debounced and skipped during dragging to optimize performance)
   useEffect(() => {
-    localTripRepository.save({
-      ...trip,
-      cards: state.cards,
-      connections: activeConnections,
-      inboxItems: items,
-      days,
-      dayLabels,
-    });
-  }, [state.cards, activeConnections, items, days, dayLabels, trip]);
+    // Skip saving while a card is being dragged to prevent synchronous main-thread stalls
+    if (draggingCardId !== null) {
+      return;
+    }
+
+    const handler = setTimeout(() => {
+      localTripRepository.save({
+        ...trip,
+        cards: state.cards,
+        connections: activeConnections,
+        inboxItems: items,
+        days,
+        dayLabels,
+      });
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [state.cards, activeConnections, items, days, dayLabels, trip, draggingCardId]);
 
   const filteredCards = activeDay
     ? cards.filter(c => c.day === activeDay || c.day === 0)

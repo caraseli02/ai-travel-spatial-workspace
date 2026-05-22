@@ -4,32 +4,43 @@ import { createDemoTrip } from '../data/tripData';
 
 const STORAGE_KEY = 'wayfarer_trips';
 
-/**
- * Persistence interface for Trips.
- * Current implementation: localStorage.
- * Designed so a backend (e.g., Supabase) can be swapped in
- * without changing domain logic. See ADR 0001.
- */
-export interface TripRepository {
-  list(): Trip[];
-  load(id: string): Trip | null;
-  save(trip: Trip): void;
-  delete(id: string): void;
+/** Safe wrapper to get items from localStorage. */
+function safeGetItem(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch (err) {
+    console.warn(`Failed to get item "${key}" from localStorage:`, err);
+    return null;
+  }
+}
+
+/** Safe wrapper to set items in localStorage. */
+function safeSetItem(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch (err) {
+    console.warn(`Failed to set item "${key}" in localStorage:`, err);
+  }
 }
 
 /** Read all trips from localStorage. */
 function readAll(): Trip[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = safeGetItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
-  } catch {
+  } catch (err) {
+    console.warn('Failed to parse trips from localStorage:', err);
     return [];
   }
 }
 
 /** Write all trips to localStorage. */
 function writeAll(trips: Trip[]): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(trips));
+  try {
+    safeSetItem(STORAGE_KEY, JSON.stringify(trips));
+  } catch (err) {
+    console.warn('Failed to serialize trips for localStorage:', err);
+  }
 }
 
 const SEEDED_KEY = 'wayfarer_demo_seeded';
@@ -40,21 +51,21 @@ const SEEDED_KEY = 'wayfarer_demo_seeded';
  * the Kyoto demo trip is pre-loaded.
  */
 function ensureDemoTrip(trips: Trip[]): Trip[] {
-  if (localStorage.getItem(SEEDED_KEY) === 'true') {
+  if (safeGetItem(SEEDED_KEY) === 'true') {
     return trips;
   }
   if (trips.length > 0) {
-    localStorage.setItem(SEEDED_KEY, 'true');
+    safeSetItem(SEEDED_KEY, 'true');
     return trips;
   }
   const demo = createDemoTrip();
   writeAll([demo]);
-  localStorage.setItem(SEEDED_KEY, 'true');
+  safeSetItem(SEEDED_KEY, 'true');
   return [demo];
 }
 
-/** localStorage implementation of TripRepository. */
-export const localTripRepository: TripRepository = {
+/** localStorage implementation of Trip persistence. */
+export const localTripRepository = {
   list(): Trip[] {
     const trips = readAll();
     return ensureDemoTrip(trips);
