@@ -197,7 +197,6 @@ export function generateTripFromMessage(message: string): Trip {
     dates,
     createdAt: today.toISOString(),
     updatedAt: today.toISOString(),
-    status: 'planning',
     image: destData.image,
     country: destData.country,
     travelers,

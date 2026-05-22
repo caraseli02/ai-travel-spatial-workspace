@@ -293,23 +293,36 @@ describe('Trip Workspace model', () => {
     });
 
     it('can transition AI prompt states via AI_PROMPT_START and AI_PROMPT_SUCCESS', () => {
+      const mockItem = {
+        id: 'i7',
+        type: 'article' as const,
+        source: 'Web Parser',
+        content: 'Mizai Restaurant',
+        timestamp: 'Just now',
+        processed: false,
+      };
       const state = {
         ...createInitialState(),
         days: [
           { day: 1, label: 'Day 1', color: 'blue' }
         ],
+        items: [mockItem],
+        showOverflow: true,
         isAiThinking: false,
       };
 
       // 1. Start AI thinking
       const thinkingState = tripWorkspaceReducer(state, { type: 'AI_PROMPT_START' });
       expect(thinkingState.isAiThinking).toBe(true);
+      expect(thinkingState.items).toEqual([mockItem]);
 
       // 2. Complete AI thinking and apply the prompt
       const successState = tripWorkspaceReducer(thinkingState, { type: 'AI_PROMPT_SUCCESS', query: 'Plan Day 5' });
       expect(successState.isAiThinking).toBe(false);
       expect(successState.activeDay).toBe(5);
       expect(successState.days).toHaveLength(2); // Day 5 is added
+      expect(successState.items).toEqual([mockItem]); // Items are preserved
+      expect(successState.showOverflow).toBe(true); // Other fields are preserved
     });
 
     it('can transition UI overlay states', () => {

@@ -92,7 +92,7 @@ describe('tripListHelpers - generateTripFromMessage', () => {
     expect(trip.country).toBe('France');
     expect(trip.travelers).toBe(2);
     expect(trip.budget).toContain('$');
-    expect(trip.status).toBe('planning');
+    expect(trip.status).toBeUndefined();
     expect(trip.emoji).toBe('🗼');
     expect(trip.cards.length).toBeGreaterThan(0); // Itinerary cards pre-populated!
     expect(trip.dates).toBeDefined();

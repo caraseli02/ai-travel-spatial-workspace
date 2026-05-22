@@ -244,18 +244,24 @@ export default function TripListPage() {
                           ? 'bg-white/[0.06] text-slate-200'
                           : 'bg-[#1a1a1f] border border-white/[0.06] text-slate-300'
                       }`}>
-                        {msg.content.split('\n').map((line, i) => (
-                          <span key={i}>
-                            {line.includes('**') ? (
-                              <span dangerouslySetInnerHTML={{
-                                __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
-                              }} />
-                            ) : (
-                              line
-                            )}
-                            {i < msg.content.split('\n').length - 1 && <br />}
-                          </span>
-                        ))}
+                        {msg.content.split('\n').map((line, i) => {
+                          const parts = line.split(/\*\*(.*?)\*\*/g);
+                          return (
+                            <span key={i}>
+                              {parts.map((part, index) => {
+                                if (index % 2 === 1) {
+                                  return (
+                                    <strong key={index} className="text-white font-semibold">
+                                      {part}
+                                    </strong>
+                                  );
+                                }
+                                return part;
+                              })}
+                              {i < msg.content.split('\n').length - 1 && <br />}
+                            </span>
+                          );
+                        })}
                       </div>
                     </motion.div>
                   ))

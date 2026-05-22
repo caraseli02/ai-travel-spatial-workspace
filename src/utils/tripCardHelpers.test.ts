@@ -7,6 +7,7 @@ import {
   deriveTripTravelers,
   deriveTripBudget,
   deriveTripActivities,
+  formatTripDates,
 } from './tripCardHelpers';
 
 // A mock function to help build a minimal trip for tests
@@ -151,7 +152,7 @@ describe('Trip Card Helpers', () => {
       expect(deriveTripActivities(trip)).toEqual(['Surfing', 'Hiking']);
     });
 
-    it('extracts top 3 card titles if activities not defined', () => {
+    it('extracts all card titles if activities not defined', () => {
       const trip = makeMockTrip({
         cards: [
           { id: 'c1', type: 'sticky', x: 0, y: 0, rotation: 0, title: 'Visit Temple' },
@@ -160,12 +161,39 @@ describe('Trip Card Helpers', () => {
           { id: 'c4', type: 'flight', x: 0, y: 0, rotation: 0, title: 'Flight Back' },
         ]
       });
-      expect(deriveTripActivities(trip)).toEqual(['Visit Temple', 'Sushi Dinner', 'Bamboo Forest']);
+      expect(deriveTripActivities(trip)).toEqual(['Visit Temple', 'Sushi Dinner', 'Bamboo Forest', 'Flight Back']);
     });
 
     it('returns empty array if no activities and no cards', () => {
       const trip = makeMockTrip({ cards: [] });
       expect(deriveTripActivities(trip)).toEqual([]);
+    });
+  });
+
+  describe('formatTripDates', () => {
+    it('returns Flexible when no dates or partial dates are provided', () => {
+      expect(formatTripDates()).toBe('Flexible');
+      expect(formatTripDates({ start: '', end: '2026-05-30' })).toBe('Flexible');
+    });
+
+    it('formats cross-year date ranges with full years', () => {
+      expect(formatTripDates({ start: '2025-12-30', end: '2026-01-05' }))
+        .toBe('Dec 30, 2025 – Jan 5, 2026');
+    });
+
+    it('formats cross-month date ranges in the same year beautifully', () => {
+      expect(formatTripDates({ start: '2026-05-30', end: '2026-06-05' }))
+        .toBe('May 30 – Jun 5, 2026');
+    });
+
+    it('formats multi-day date ranges in the same month elegantly', () => {
+      expect(formatTripDates({ start: '2026-05-14', end: '2026-05-21' }))
+        .toBe('May 14 – 21, 2026');
+    });
+
+    it('formats single-day dates simple and clean', () => {
+      expect(formatTripDates({ start: '2026-05-14', end: '2026-05-14' }))
+        .toBe('May 14, 2026');
     });
   });
 });

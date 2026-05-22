@@ -58,6 +58,36 @@ export function deriveTripActivities(trip: Trip): string[] {
   }
   return trip.cards
     .map(c => c.title)
-    .filter(title => !!title && !!title.trim())
-    .slice(0, 3);
+    .filter(title => !!title && !!title.trim());
+}
+
+export function formatTripDates(dates?: { start: string; end: string }): string {
+  if (!dates || !dates.start || !dates.end) {
+    return 'Flexible';
+  }
+  try {
+    const start = new Date(dates.start);
+    const end = new Date(dates.end);
+    
+    // Check if dates are valid
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return 'Flexible';
+    }
+
+    const startMonth = start.toLocaleDateString('en-US', { month: 'short' });
+    const endMonth = end.toLocaleDateString('en-US', { month: 'short' });
+
+    if (start.getFullYear() !== end.getFullYear()) {
+      return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} – ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+    }
+    if (startMonth !== endMonth) {
+      return `${startMonth} ${start.getDate()} – ${endMonth} ${end.getDate()}, ${start.getFullYear()}`;
+    }
+    if (start.getDate() !== end.getDate()) {
+      return `${startMonth} ${start.getDate()} – ${end.getDate()}, ${start.getFullYear()}`;
+    }
+    return start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch {
+    return 'Flexible';
+  }
 }
