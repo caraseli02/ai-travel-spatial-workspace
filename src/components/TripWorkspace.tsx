@@ -57,11 +57,69 @@ export default function TripWorkspace() {
     }
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Handle not found or loading states
+  if (notFound) {
+    return (
+      <div className="flex items-center justify-center h-screen" style={{ backgroundColor: '#faf9f7' }}>
+        <div className="text-center">
+          <p className="text-stone-500 text-lg mb-4">Trip not found</p>
+          <button
+            onClick={() => navigate('/trips')}
+            className="text-sm font-medium px-4 py-2 rounded-lg transition-all hover:opacity-90"
+            style={{ backgroundColor: '#92400e', color: 'white' }}
+          >
+            Back to trips
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!trip) {
+    return (
+      <div className="flex items-center justify-center h-screen" style={{ backgroundColor: '#faf9f7' }}>
+        <div className="flex items-center gap-2 text-stone-400">
+          <Compass size={16} className="animate-spin" />
+          <span className="text-sm">Loading workspace...</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <TripWorkspacePresenter
+      trip={trip}
+      tripId={tripId}
+      isMobile={isMobile}
+      inboxOpen={inboxOpen}
+      setInboxOpen={setInboxOpen}
+      navigate={navigate}
+    />
+  );
+}
+
+interface PresenterProps {
+  trip: Trip;
+  tripId: string;
+  isMobile: boolean;
+  inboxOpen: boolean;
+  setInboxOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  navigate: ReturnType<typeof useNavigate>;
+}
+
+function TripWorkspacePresenter({
+  trip,
+  tripId,
+  isMobile,
+  inboxOpen,
+  setInboxOpen,
+  navigate,
+}: PresenterProps) {
   const [showDayLabels, setShowDayLabels] = useState(true);
 
   // Build initial state from loaded trip
-  const initialState = useMemo<TripWorkspaceState | null>(() => {
-    if (!trip) return null;
+  const initialState = useMemo<TripWorkspaceState>(() => {
     return {
       activeDay: null,
       days: trip.days,
@@ -97,20 +155,7 @@ export default function TripWorkspace() {
     updateCardPosition,
     setActiveDay,
     createManualCard,
-  } = useTripWorkspaceState(initialState ?? {
-    activeDay: null,
-    days: [],
-    dayLabels: [],
-    cards: [],
-    connections: [],
-    items: [],
-    selectedCard: null,
-    isAiThinking: false,
-    showCreateModal: false,
-    createModalCoords: null,
-    showAddDayModal: false,
-    showOverflow: false,
-  });
+  } = useTripWorkspaceState(initialState);
 
   // Extract variables for easier mapping back to existing JSX naming
   const {
@@ -193,7 +238,6 @@ export default function TripWorkspace() {
   const canvasRef = useRef<HTMLDivElement>(null);
   // Persist domain state to repository on every change
   useEffect(() => {
-    if (!trip || !tripId) return;
     localTripRepository.save({
       ...trip,
       cards: state.cards,
@@ -202,36 +246,7 @@ export default function TripWorkspace() {
       days,
       dayLabels,
     });
-  }, [state.cards, activeConnections, items, days, dayLabels, trip, tripId]);
-
-  // Handle not found or loading states
-  if (notFound) {
-    return (
-      <div className="flex items-center justify-center h-screen" style={{ backgroundColor: '#faf9f7' }}>
-        <div className="text-center">
-          <p className="text-stone-500 text-lg mb-4">Trip not found</p>
-          <button
-            onClick={() => navigate('/trips')}
-            className="text-sm font-medium px-4 py-2 rounded-lg transition-all hover:opacity-90"
-            style={{ backgroundColor: '#92400e', color: 'white' }}
-          >
-            Back to trips
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!trip || !initialState) {
-    return (
-      <div className="flex items-center justify-center h-screen" style={{ backgroundColor: '#faf9f7' }}>
-        <div className="flex items-center gap-2 text-stone-400">
-          <Compass size={16} className="animate-spin" />
-          <span className="text-sm">Loading workspace...</span>
-        </div>
-      </div>
-    );
-  }
+  }, [state.cards, activeConnections, items, days, dayLabels, trip]);
 
   const filteredCards = activeDay
     ? cards.filter(c => c.day === activeDay || c.day === 0)
