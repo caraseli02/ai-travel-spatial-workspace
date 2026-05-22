@@ -254,6 +254,7 @@ export function applyAiPromptToTripWorkspace({
   connections,
   now = Date.now,
   random = Math.random,
+  ...rest
 }: TripWorkspaceState & {
   query: string;
   now?: () => number;
@@ -278,6 +279,7 @@ export function applyAiPromptToTripWorkspace({
     };
 
     return {
+      ...rest,
       activeDay: 5,
       days: days.some(day => day.day === 5)
         ? days
@@ -312,6 +314,7 @@ export function applyAiPromptToTripWorkspace({
     };
 
     return {
+      ...rest,
       activeDay: 3,
       days,
       dayLabels,
@@ -340,6 +343,7 @@ export function applyAiPromptToTripWorkspace({
     };
 
     return {
+      ...rest,
       activeDay: 4,
       days,
       dayLabels,
@@ -367,6 +371,7 @@ export function applyAiPromptToTripWorkspace({
   };
 
   return {
+    ...rest,
     activeDay,
     days,
     dayLabels,
@@ -569,6 +574,7 @@ export function tripWorkspaceReducer(
         query: action.query,
       });
       return {
+        ...state,
         ...updatedState,
         isAiThinking: false,
       };

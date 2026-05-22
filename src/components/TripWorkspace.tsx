@@ -22,6 +22,51 @@ import { useSpatialViewport } from '../hooks/useSpatialViewport';
 import { useLinkingSession } from '../hooks/useLinkingSession';
 import { localTripRepository } from '../models/tripRepository';
 import type { Trip } from '../models/trip';
+import {
+  deriveTripStatus,
+  deriveTripTravelers,
+  deriveTripBudget,
+} from '../utils/tripCardHelpers';
+
+const workspaceStatusConfig = {
+  upcoming: { bg: '#d1fae5', text: '#065f46', dot: '#10b981', label: 'Upcoming' },
+  ongoing: { bg: '#fef3c7', text: '#92400e', dot: '#f59e0b', label: 'Ongoing' },
+  completed: { bg: '#f3f4f6', text: '#374151', dot: '#6b7280', label: 'Completed' },
+  planning: { bg: '#e0f2fe', text: '#0369a1', dot: '#0ea5e9', label: 'Planning' },
+};
+
+const formatRange = (startStr?: string, endStr?: string) => {
+  if (!startStr || !endStr) return 'Flexible';
+  try {
+    const s = new Date(startStr);
+    const e = new Date(endStr);
+    const startOpt: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+    const endOpt: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+    if (s.getFullYear() !== new Date().getFullYear()) {
+      startOpt.year = '2-digit';
+    }
+    if (e.getFullYear() !== s.getFullYear()) {
+      endOpt.year = '2-digit';
+    }
+    return `${s.toLocaleDateString('en-US', startOpt)} – ${e.toLocaleDateString('en-US', endOpt)}`;
+  } catch {
+    return 'Flexible';
+  }
+};
+
+const getDurationNights = (startStr?: string, endStr?: string) => {
+  if (!startStr || !endStr) return 'Flexible';
+  try {
+    const s = new Date(startStr);
+    const e = new Date(endStr);
+    const diffTime = Math.abs(e.getTime() - s.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return `${diffDays} ${diffDays === 1 ? 'night' : 'nights'}`;
+  } catch {
+    return 'Flexible';
+  }
+};
+
 
 export default function TripWorkspace() {
   const { tripId } = useParams<{ tripId: string }>();
@@ -290,11 +335,17 @@ function TripWorkspacePresenter({
           <div className="flex items-center gap-2 flex-shrink-0">
             <div className="w-6 h-6 rounded flex items-center justify-center text-sm">{trip.emoji}</div>
             <h1 className="font-semibold text-stone-800" style={{ fontSize: '14px' }}>{trip.name}</h1>
-            <span className="hidden md:flex items-center gap-1 text-xs px-2 py-0.5 rounded-full flex-shrink-0"
-              style={{ backgroundColor: '#d1fae5', color: '#065f46' }}>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              Planning
-            </span>
+            {(() => {
+              const tripStatus = deriveTripStatus(trip);
+              const statusCfg = workspaceStatusConfig[tripStatus];
+              return (
+                <span className="hidden md:flex items-center gap-1 text-xs px-2 py-0.5 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: statusCfg.bg, color: statusCfg.text }}>
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusCfg.dot }} />
+                  {statusCfg.label}
+                </span>
+              );
+            })()}
           </div>
 
           {/* Desktop center: Day filter pills (hidden on mobile — shown in row 2 below) */}
@@ -340,14 +391,19 @@ function TripWorkspacePresenter({
           {/* Desktop-only secondary actions */}
           <div className="hidden md:flex items-center gap-1 flex-shrink-0">
             <div className="flex items-center -space-x-2 mr-1">
-              {['🧑', '👩', '🧔'].map((a, i) => (
-                <div key={i} className="w-6 h-6 rounded-full flex items-center justify-center text-xs ring-2 ring-white select-none"
-                  style={{ backgroundColor: '#e7e3dc', fontSize: '13px' }}>
-                  {a}
-                </div>
-              ))}
+              {Array.from({ length: Math.min(deriveTripTravelers(trip), 3) }).map((_, i) => {
+                const avatars = ['🧑', '👩', '🧔'];
+                return (
+                  <div key={i} className="w-6 h-6 rounded-full flex items-center justify-center text-xs ring-2 ring-white select-none"
+                    style={{ backgroundColor: '#e7e3dc', fontSize: '13px' }}>
+                    {avatars[i % avatars.length]}
+                  </div>
+                );
+              })}
             </div>
-            <span className="text-xs text-stone-400 mr-2 hidden lg:block select-none">3 travelers</span>
+            <span className="text-xs text-stone-400 mr-2 hidden lg:block select-none">
+              {deriveTripTravelers(trip)} {deriveTripTravelers(trip) === 1 ? 'traveler' : 'travelers'}
+            </span>
             <button className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all hover:bg-stone-100 cursor-pointer"
               style={{ color: '#78716c' }}>
               <Share2 size={13} />
@@ -380,12 +436,17 @@ function TripWorkspacePresenter({
                   style={{ backgroundColor: '#fefcf8', border: '1px solid #e7e3dc' }}>
                   <div className="flex items-center gap-2 px-3 py-2 border-b" style={{ borderColor: '#e7e3dc' }}>
                     <div className="flex items-center -space-x-1.5">
-                      {['🧑', '👩', '🧔'].map((a, i) => (
-                        <div key={i} className="w-5 h-5 rounded-full flex items-center justify-center ring-2 ring-white select-none"
-                          style={{ backgroundColor: '#e7e3dc', fontSize: '11px' }}>{a}</div>
-                      ))}
+                      {Array.from({ length: Math.min(deriveTripTravelers(trip), 3) }).map((_, i) => {
+                        const avatars = ['🧑', '👩', '🧔'];
+                        return (
+                          <div key={i} className="w-5 h-5 rounded-full flex items-center justify-center ring-2 ring-white select-none"
+                            style={{ backgroundColor: '#e7e3dc', fontSize: '11px' }}>{avatars[i % avatars.length]}</div>
+                        );
+                      })}
                     </div>
-                    <span className="text-xs text-stone-500">3 travelers</span>
+                    <span className="text-xs text-stone-500">
+                      {deriveTripTravelers(trip)} {deriveTripTravelers(trip) === 1 ? 'traveler' : 'travelers'}
+                    </span>
                   </div>
                   <button className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-stone-50 transition-colors cursor-pointer"
                     style={{ color: '#78716c' }} onClick={() => toggleOverflow(false)}>
@@ -514,17 +575,23 @@ function TripWorkspacePresenter({
             style={{ backgroundColor: '#fefcf8', border: '1px solid #e7e3dc', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
             {!isMobile && (
               <>
-                <StatItem icon={<Calendar size={11} />} label="Dec 14–21" />
+                <StatItem icon={<Calendar size={11} />} label={formatRange(trip.dates?.start, trip.dates?.end)} />
                 <div className="w-px h-3 bg-stone-200" />
               </>
             )}
             <StatItem icon={<MapPin size={11} />} label={trip.destination} />
             {!isMobile && (
               <>
+                {trip.dates && (
+                  <>
+                    <div className="w-px h-3 bg-stone-200" />
+                    <StatItem icon={<Clock size={11} />} label={getDurationNights(trip.dates?.start, trip.dates?.end)} />
+                  </>
+                )}
                 <div className="w-px h-3 bg-stone-200" />
-                <StatItem icon={<Clock size={11} />} label="7 nights" />
-                <div className="w-px h-3 bg-stone-200" />
-                <span className="text-xs text-stone-400">~$2,340 est.</span>
+                <span className="text-xs text-stone-400">
+                  Budget: <span className="font-semibold text-stone-600">{deriveTripBudget(trip)}</span>
+                </span>
               </>
             )}
             <div className="w-px h-3 bg-stone-200" />

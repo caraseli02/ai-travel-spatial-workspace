@@ -19,6 +19,13 @@ export interface Trip {
   inboxItems: InboxItem[];
   days: DayGroup[];
   dayLabels: DayLabel[];
+  // Optional metadata to support rich cards:
+  status?: 'upcoming' | 'ongoing' | 'completed' | 'planning';
+  image?: string;
+  country?: string;
+  travelers?: number;
+  budget?: string;
+  activities?: string[];
 }
 
 /** Well-known ID for the pre-loaded Kyoto demo trip. */

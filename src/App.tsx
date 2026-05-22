@@ -6,7 +6,7 @@ import TripListPage from './components/TripListPage';
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen" style={{ backgroundColor: '#faf9f7' }}>
+      <div className="min-h-screen bg-[#09090b]">
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/trips" element={<TripListPage />} />

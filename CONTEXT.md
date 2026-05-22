@@ -102,6 +102,19 @@ A natural-language request entered by the traveler to add or reshape trip struct
 
 Avoid: chat message unless specifically discussing the input UI.
 
+### AI Chat Sidebar
+
+The side panel on the Trip List that preserves and displays the conversational history of AI-assisted trip creation and general planning inquiries. In the UI, it is positioned on the left side of the screen for familiar sidebar navigation.
+
+Avoid: chat panel, dashboard sidebar.
+
+### Procedural Trip Generator
+
+The background parser and generator that translates raw, conversational prompts into a structured Trip model, complete with appropriate dates, travelers, budgets, and pre-populated Canvas Cards.
+
+Avoid: AI compiler, trip factory.
+
+
 ### Trip Material
 
 The loose travel research and planning inputs a traveler collects before Wayfarer organizes them.
@@ -124,6 +137,8 @@ Avoid: data, content, assets when discussing the domain.
 - Canvas coordinates are fixed-size prototype coordinates.
 - Trip Workspace state transitions are characterized by tests in `src/models/tripWorkspaceModel.test.ts`.
 - Share, export, authentication, and collaboration are visual affordances only.
+- The coexistence of a dark-themed Trip List and light-themed Trip Workspace serves as a theme exploration, with full light/dark theme toggle support planned for a future release.
+
 
 ## Example Dialogue
 
