@@ -7,6 +7,7 @@ import {
 import { localTripRepository } from '../models/tripRepository';
 import { createEmptyTrip } from '../models/trip';
 import type { Trip } from '../models/trip';
+import { buildInboxItem } from '../models/tripWorkspaceModel';
 
 const EMOJI_PRESETS = ['🏖️', '🏔️', '🌆', '🏯', '⛷️', '🌴', '🎭', '✈️', '🚢', '🏕️', '🗺️', '🌸',
   '🇯🇵', '🇪🇸', '🇮🇹', '🇫🇷', '🇬🇷', '🇹🇭', '🇧🇷', '🇬🇧', '🇩🇪', '🇵🇹', '🇲🇽', '🇺🇸'];
@@ -23,8 +24,18 @@ export default function TripListPage() {
     setTrips(localTripRepository.list());
   }, []);
 
-  const handleCreateTrip = (name: string, destination: string, emoji: string, dates?: { start: string; end: string }) => {
+  const handleCreateTrip = (
+    name: string,
+    destination: string,
+    emoji: string,
+    dates?: { start: string; end: string },
+    initialInboxItemContent?: string
+  ) => {
     const newTrip = createEmptyTrip(name, destination, emoji, dates);
+    if (initialInboxItemContent) {
+      const newItem = buildInboxItem(initialInboxItemContent);
+      newTrip.inboxItems = [newItem];
+    }
     localTripRepository.save(newTrip);
     setTrips(localTripRepository.list());
     setShowNewTripModal(false);
@@ -42,26 +53,27 @@ export default function TripListPage() {
     if (!promptValue.trim()) return;
 
     const lower = promptValue.toLowerCase();
+    const originalPrompt = promptValue;
 
     // Basic mocked intent detection for trip creation
     const cityMatch = lower.match(/(?:plan|trip|go|visit|travel)\s+(?:a\s+trip\s+)?(?:to|in)\s+(.+)/);
     if (cityMatch) {
       const destination = cityMatch[1].trim().replace(/[.!?]+$/, '');
       const capitalized = destination.charAt(0).toUpperCase() + destination.slice(1);
-      handleCreateTrip(`Trip to ${capitalized}`, capitalized, '✈️');
+      handleCreateTrip(`Trip to ${capitalized}`, capitalized, '✈️', undefined, originalPrompt);
       setPromptValue('');
       return;
     }
 
     // Detect pasted links with hotel/flight keywords
     if (lower.includes('booking.com') || lower.includes('hotel') || lower.includes('airbnb')) {
-      handleCreateTrip('New Hotel Trip', 'TBD', '🏨');
+      handleCreateTrip('New Hotel Trip', 'TBD', '🏨', undefined, originalPrompt);
       setPromptValue('');
       return;
     }
 
     if (lower.includes('flight') || lower.includes('google.com/flights')) {
-      handleCreateTrip('New Flight Trip', 'TBD', '✈️');
+      handleCreateTrip('New Flight Trip', 'TBD', '✈️', undefined, originalPrompt);
       setPromptValue('');
       return;
     }

@@ -126,6 +126,20 @@ describe('localTripRepository', () => {
     expect(trips[0].id).toBe(custom.id);
   });
 
+  it('does not re-seed the demo trip after it has been deleted, even if no other trips remain', () => {
+    // First visit — demo trip is seeded
+    let trips = localTripRepository.list();
+    expect(trips).toHaveLength(1);
+    expect(trips[0].id).toBe(DEMO_TRIP_ID);
+
+    // Delete the demo trip, leaving trips empty
+    localTripRepository.delete(DEMO_TRIP_ID);
+
+    // Listing trips should return empty, not re-seed
+    trips = localTripRepository.list();
+    expect(trips).toHaveLength(0);
+  });
+
   it('preserves domain data through save/load round-trip', () => {
     const trip = createEmptyTrip('Data Test', 'Testville', '🧪');
     trip.cards = [

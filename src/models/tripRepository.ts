@@ -32,15 +32,24 @@ function writeAll(trips: Trip[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(trips));
 }
 
+const SEEDED_KEY = 'wayfarer_demo_seeded';
+
 /**
  * Seed the Demo Trip on first visit.
- * Called once during initialization — if no trips exist,
+ * Called once during initialization — if no trips exist and we haven't seeded before,
  * the Kyoto demo trip is pre-loaded.
  */
 function ensureDemoTrip(trips: Trip[]): Trip[] {
-  if (trips.length > 0) return trips;
+  if (localStorage.getItem(SEEDED_KEY) === 'true') {
+    return trips;
+  }
+  if (trips.length > 0) {
+    localStorage.setItem(SEEDED_KEY, 'true');
+    return trips;
+  }
   const demo = createDemoTrip();
   writeAll([demo]);
+  localStorage.setItem(SEEDED_KEY, 'true');
   return [demo];
 }
 

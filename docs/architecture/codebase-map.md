@@ -4,9 +4,14 @@ This map describes the current Wayfarer prototype at a high level. It uses the d
 
 ```mermaid
 flowchart TD
-  main["main.tsx"] --> app["App"]
-  app --> landing["LandingPage"]
-  app --> workspace["TripWorkspace"]
+  main["main.tsx"] --> app["App (react-router-dom)"]
+  app -- "/" --> landing["LandingPage"]
+  app -- "/trips" --> triplist["TripListPage"]
+  app -- "/trips/:tripId" --> workspace["TripWorkspace"]
+
+  triplist --> repo["localTripRepository"]
+  workspace --> repo
+  repo --> modelTrip["trip model"]
 
   workspace --> hookState["useTripWorkspaceState"]
   workspace --> hookViewport["useSpatialViewport"]
@@ -16,7 +21,7 @@ flowchart TD
   workspace --> toast["OnboardingToast"]
 
   hookState --> model["tripWorkspaceReducer (tripWorkspaceModel)"]
-  hookState --> data["tripData"]
+  hookState --> data["tripData (demo trip creator)"]
   hookViewport --> data
   model --> data
 
@@ -27,81 +32,41 @@ flowchart TD
 
 ## Top Layer
 
-`src/App.tsx` is a two-screen router. It switches between the marketing/demo entry screen and the Trip Workspace:
+`src/App.tsx` is a three-screen router powered by `react-router-dom`. It coordinates screen switches and addressable URL routes:
 
-- `landing` renders `LandingPage`
-- `app` renders `TripWorkspace`
+- `/` renders `LandingPage` (marketing and live chat mockup).
+- `/trips` renders `TripListPage` (trip grid, prompt bar for trip creation, and deleting/adding trips).
+- `/trips/:tripId` renders `TripWorkspace` (planning workspace for a single trip).
 
-`src/components/LandingPage.tsx` is mostly a product/demo shell. It animates sample Trip Material and hands off into the Trip Workspace through `onEnterDemo`.
+`src/components/LandingPage.tsx` is a product/demo entry point. It animates sample Trip Material and navigates into the Demo Trip workspace via `onEnterDemo`.
+
+`src/components/TripListPage.tsx` lists all active Trips. It provides a prompt bar that detects traveler intents to create a new trip or parse pasted links directly into a newly created trip's inbox.
+
+## Persistence & Repository
+
+To enable persistent plans without backend infra, we use a clean repository pattern:
+
+- `src/models/trip.ts`: Defines the unified domain schema for a `Trip` containing its details (id, name, destination, emoji) and workspace data (cards, connections, days, dayLabels, inboxItems).
+- `src/models/tripRepository.ts` (`localTripRepository`): Concrete localStorage-based repository implementing list, load, save, and delete operations. It seeds the Kyoto Demo Trip on very first visit.
 
 ## Domain Model
 
-`src/data/tripData.ts` is the current domain seed. It defines:
+`src/data/tripData.ts` defines static Kyoto seed fixtures and the `createDemoTrip()` factory wrapping it.
 
-- `InboxItem`: raw Trip Material from WhatsApp, links, notes, flights, and hotels
-- `CanvasCard`: organized travel objects on the Spatial Canvas
-- `DayCluster`: the older day-level itinerary grouping interface
-- `inboxItems`, `canvasCards`, `dayGroups`, `connections`: the initial Kyoto trip state
+`src/models/tripWorkspaceModel.ts` is the pure state logic module:
 
-This file is acting as fixture data and as part of the implicit domain schema. New Trip Workspace behavior should prefer the model types in `src/models/tripWorkspaceModel.ts` when describing mutable workspace transitions.
-
-`src/models/tripWorkspaceModel.ts` is the Trip Workspace behavior module. It owns the pure `tripWorkspaceReducer` and deterministic state transitions that can be tested without rendering React:
-
-- `tripWorkspaceReducer`: handles 19 distinct semantic state transitions (adding inbox items, promoting items to canvas cards, card deletions, manual card creation, connection linking sessions, custom days, and mock AI prompts).
-- `buildInboxItem`: classifies pasted Trip Material into an Inbox Item.
-- `buildProcessedCanvasCard`: marks an Inbox Item processed, creates the corresponding Canvas Card, places it near a Day Label, and returns the optional dynamic Connection.
-- `applyAiPromptToTripWorkspace`: applies the mocked AI Prompt effects for Day 5 planning, Arashiyama ryokan suggestions, Gion restaurant suggestions, and fallback AI answer cards.
-- `getCardCenter`: computes Connection endpoints from Canvas Card dimensions.
-
-`src/models/tripWorkspaceModel.test.ts` contains characterization tests for this module.
+- `tripWorkspaceReducer`: handles semantic transitions (adding inbox items, processing inbox items, custom day groups, card edits, manual cards, and mock AI suggestions).
+- `buildInboxItem`: parses pasted Trip Material text into structured Inbox Items.
+- `buildProcessedCanvasCard`: handles promoting raw items into canvas cards placed dynamically near their active Day Label coordinates.
 
 ## State Coordinator & Viewport Hooks
 
-To decouple complex viewport physics and deep React state orchestration from rendering layout:
+To decouple rendering layout from state orchestration:
 
-- `src/hooks/useTripWorkspaceState.ts` (`useTripWorkspaceState`): coordinates all application state transitions by wrapping the pure `tripWorkspaceReducer` under React `useReducer`. It exposes neat, typed action handlers (e.g. `addInboxItem`, `processInboxItem`, `deleteCard`, `addCustomDay`, `createManualCard`, `startLinking`).
-- `src/hooks/useSpatialViewport.ts` (`useSpatialViewport`): isolates mouse/touch event listeners and normalizations, panning and zoom scale boundaries, screen-to-canvas mathematical coordinate translations, and card-dragging physics.
-
-Both hooks are covered by comprehensive unit tests (`useSpatialViewport.test.ts` and `tripWorkspaceModel.test.ts`).
+- `src/hooks/useTripWorkspaceState.ts` (`useTripWorkspaceState`): coordinates all state transitions using the pure reducer. It exposes typed callbacks for UI actions.
+- `src/hooks/useSpatialViewport.ts` (`useSpatialViewport`): isolates viewport physics, dragging logic, screen-to-canvas coordinate maps, and zoom limits.
+- `src/hooks/useLinkingSession.ts` (`useLinkingSession`): encapsulates linking state for manual connection creation.
 
 ## Main Workspace
 
-`src/components/TripWorkspace.tsx` is the orchestration module. It acts as a thin presentation view that mounts our custom hooks and binds their state and physics APIs to the rendering tree:
-
-- Delegates active viewport dimensions, panning offsets, zoom scaling, and dragging events to `useSpatialViewport`.
-- Delegates Inbox Items, Canvas Cards, Day Groups, and dialog/modal states to `useTripWorkspaceState`.
-- Renders SVGs for connection lines, maps over card arrays to render cards, and loads the `InboxPanel` and dialog panels.
-
-The main flows are:
-
-1. Inbox capture: `handleAddItem` dispatches to `addInboxItem`.
-2. Inbox organization: `handleProcessItem` dispatches to `processInboxItem`.
-3. AI Prompt handling: `handleSendQuery` dispatches to `sendAiQuery`.
-4. Canvas editing: card deletion, position updates, and modal/dialog states invoke hook callbacks directly.
-5. Manual creation: manual card creation dispatches to `createManualCard`.
-
-## Rendering Modules
-
-`src/components/CanvasCards.tsx` is a Canvas Card renderer dispatcher. It converts `CanvasCard.type` into one of six visual shapes:
-
-- `polaroid`
-- `sticky`
-- `article`
-- `flight`
-- `hotel`
-- `note`
-
-It is presentation-focused and receives card position and drag state from `TripWorkspace`.
-
-`src/components/InboxPanel.tsx` renders the Inbox Item list. It does not own the source of truth; it calls back into `TripWorkspace` through `onAddItem`, `onProcessItem`, and `onOpenAddManual`.
-
-`src/components/CardDetailPanel.tsx` edits the selected Canvas Card. It keeps local edit fields in sync with the selected card, then pushes changes back through `onUpdateCard`.
-
-## Current Shape
-
-The app is highly decoupled, robust, and unit-tested:
-1. **Domain State Coordinator (`tripWorkspaceReducer`)**: Completely separate from the UI layer. Fully unit-tested and verified.
-2. **Physics Layer (`useSpatialViewport`)**: Math translations and scale limits are purely isolated, eliminating event leakage.
-3. **Orchestrator (`TripWorkspace`)**: Focused purely on styling, rendering layout, CSS animations, and structure.
-
-This clean candidate architecture makes the codebase extremely testable, performant, and resilient to rapid UI iterations.
+`src/components/TripWorkspace.tsx` is the primary screen coordinator. It loads the requested Trip by ID via `localTripRepository` on mount, mounts state and physics hooks, renders the spatial grid, SVG links, and sub-components, and persists all workspace changes to the repository reactively.
