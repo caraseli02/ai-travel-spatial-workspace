@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   Compass, ChevronLeft, MapPin, Calendar,
   ZoomIn, ZoomOut, Maximize2, Grid3X3, Share2, Download,
@@ -9,25 +10,40 @@ import { CanvasCardRenderer } from './CanvasCards';
 import InboxPanel from './InboxPanel';
 import OnboardingToast from './OnboardingToast';
 import CardDetailPanel from './CardDetailPanel';
-import { canvasCards, inboxItems, dayGroups, connections } from '../data/tripData';
 import type { CanvasCard, InboxItem } from '../data/tripData';
 import {
   cardTypeOptions,
   dayLabelConfig,
   getCardCenter,
 } from '../models/tripWorkspaceModel';
-import type { CardType } from '../models/tripWorkspaceModel';
+import type { CardType, TripWorkspaceState } from '../models/tripWorkspaceModel';
 import { useTripWorkspaceState } from '../hooks/useTripWorkspaceState';
 import { useSpatialViewport } from '../hooks/useSpatialViewport';
 import { useLinkingSession } from '../hooks/useLinkingSession';
+import { localTripRepository } from '../models/tripRepository';
+import type { Trip } from '../models/trip';
 
-interface TripWorkspaceProps {
-  onBack: () => void;
-}
-
-export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
+export default function TripWorkspace() {
+  const { tripId } = useParams<{ tripId: string }>();
+  const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(true);
+  const [trip, setTrip] = useState<Trip | null>(null);
+  const [notFound, setNotFound] = useState(false);
+
+  // Load trip from repository on mount
+  useEffect(() => {
+    if (!tripId) {
+      setNotFound(true);
+      return;
+    }
+    const loaded = localTripRepository.load(tripId);
+    if (!loaded) {
+      setNotFound(true);
+      return;
+    }
+    setTrip(loaded);
+  }, [tripId]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -42,6 +58,25 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   const [showDayLabels, setShowDayLabels] = useState(true);
+
+  // Build initial state from loaded trip
+  const initialState = useMemo<TripWorkspaceState | null>(() => {
+    if (!trip) return null;
+    return {
+      activeDay: null,
+      days: trip.days,
+      dayLabels: trip.dayLabels,
+      cards: trip.cards,
+      connections: trip.connections,
+      items: trip.inboxItems,
+      selectedCard: null,
+      isAiThinking: false,
+      showCreateModal: false,
+      createModalCoords: null,
+      showAddDayModal: false,
+      showOverflow: false,
+    };
+  }, [trip]);
 
   // Initialize unified State coordinator hook
   const {
@@ -62,13 +97,13 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
     updateCardPosition,
     setActiveDay,
     createManualCard,
-  } = useTripWorkspaceState({
+  } = useTripWorkspaceState(initialState ?? {
     activeDay: null,
-    days: dayGroups,
-    dayLabels: dayLabelConfig,
-    cards: canvasCards,
-    connections: connections,
-    items: inboxItems,
+    days: [],
+    dayLabels: [],
+    cards: [],
+    connections: [],
+    items: [],
     selectedCard: null,
     isAiThinking: false,
     showCreateModal: false,
@@ -156,6 +191,47 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
   });
 
   const canvasRef = useRef<HTMLDivElement>(null);
+  // Persist domain state to repository on every change
+  useEffect(() => {
+    if (!trip || !tripId) return;
+    localTripRepository.save({
+      ...trip,
+      cards: state.cards,
+      connections: activeConnections,
+      inboxItems: items,
+      days,
+      dayLabels,
+    });
+  }, [state.cards, activeConnections, items, days, dayLabels, trip, tripId]);
+
+  // Handle not found or loading states
+  if (notFound) {
+    return (
+      <div className="flex items-center justify-center h-screen" style={{ backgroundColor: '#faf9f7' }}>
+        <div className="text-center">
+          <p className="text-stone-500 text-lg mb-4">Trip not found</p>
+          <button
+            onClick={() => navigate('/trips')}
+            className="text-sm font-medium px-4 py-2 rounded-lg transition-all hover:opacity-90"
+            style={{ backgroundColor: '#92400e', color: 'white' }}
+          >
+            Back to trips
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!trip || !initialState) {
+    return (
+      <div className="flex items-center justify-center h-screen" style={{ backgroundColor: '#faf9f7' }}>
+        <div className="flex items-center gap-2 text-stone-400">
+          <Compass size={16} className="animate-spin" />
+          <span className="text-sm">Loading workspace...</span>
+        </div>
+      </div>
+    );
+  }
 
   const filteredCards = activeDay
     ? cards.filter(c => c.day === activeDay || c.day === 0)
@@ -173,8 +249,8 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
 
           {/* Back + brand */}
           <button
-            onClick={onBack}
-            aria-label="Back to home"
+            onClick={() => navigate('/trips')}
+            aria-label="Back to trips"
             className="flex items-center gap-1.5 text-stone-500 hover:text-stone-800 transition-colors text-sm flex-shrink-0 cursor-pointer"
           >
             <ChevronLeft size={15} />
@@ -186,8 +262,8 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
 
           {/* Trip identity */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-6 h-6 rounded flex items-center justify-center text-sm">🇯🇵</div>
-            <h1 className="font-semibold text-stone-800" style={{ fontSize: '14px' }}>7 Days in Kyoto</h1>
+            <div className="w-6 h-6 rounded flex items-center justify-center text-sm">{trip.emoji}</div>
+            <h1 className="font-semibold text-stone-800" style={{ fontSize: '14px' }}>{trip.name}</h1>
             <span className="hidden md:flex items-center gap-1 text-xs px-2 py-0.5 rounded-full flex-shrink-0"
               style={{ backgroundColor: '#d1fae5', color: '#065f46' }}>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
@@ -416,7 +492,7 @@ export default function TripWorkspace({ onBack }: TripWorkspaceProps) {
                 <div className="w-px h-3 bg-stone-200" />
               </>
             )}
-            <StatItem icon={<MapPin size={11} />} label="Kyoto, JP" />
+            <StatItem icon={<MapPin size={11} />} label={trip.destination} />
             {!isMobile && (
               <>
                 <div className="w-px h-3 bg-stone-200" />

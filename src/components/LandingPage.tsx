@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight, Sparkles, Star, Zap, Globe,
   MessageSquare, Check, ChevronRight,
   Compass, Lock
 } from 'lucide-react';
 import PricingSection from './PricingSection';
-
-interface LandingPageProps {
-  onEnterDemo: () => void;
-}
+import { DEMO_TRIP_ID } from '../models/trip';
 
 const chatMessages = [
   { role: 'user', text: 'https://www.google.com/flights/r/SFO-KIX-Dec14 $743 JAL nonstop 🎉' },
@@ -78,7 +76,9 @@ const testimonials = [
   },
 ];
 
-export default function LandingPage({ onEnterDemo }: LandingPageProps) {
+export default function LandingPage() {
+  const navigate = useNavigate();
+  const onEnterDemo = () => navigate(`/trips/${DEMO_TRIP_ID}`);
   const [typedText, setTypedText] = useState('');
   const [msgIdx, setMsgIdx] = useState(0);
   const [charIdx, setCharIdx] = useState(0);
