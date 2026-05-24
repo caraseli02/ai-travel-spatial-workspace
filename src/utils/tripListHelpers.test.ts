@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Trip } from '../models/trip';
-import { computeStatusCounts, filterTripsByStatus, generateTripFromMessage } from './tripListHelpers';
+import { computeStatusCounts, filterTripsByStatus } from './tripListHelpers';
 
 describe('tripListHelpers - computeStatusCounts', () => {
   it('should return correct counts when trips array is empty', () => {
@@ -80,45 +80,5 @@ describe('tripListHelpers - filterTripsByStatus', () => {
   it('should filter by completed status', () => {
     const filtered = filterTripsByStatus(mockTrips, 'completed');
     expect(filtered.map(t => t.id)).toEqual(['3']);
-  });
-});
-
-describe('tripListHelpers - generateTripFromMessage', () => {
-  it('should extract destination and populate basic trip metadata from a Paris prompt', () => {
-    const prompt = 'Plan a 5-day trip to Paris for 2 people';
-    const trip = generateTripFromMessage(prompt);
-    
-    expect(trip.destination).toBe('Paris, France');
-    expect(trip.country).toBe('France');
-    expect(trip.travelers).toBe(2);
-    expect(trip.budget).toContain('$');
-    expect(trip.status).toBeUndefined();
-    expect(trip.emoji).toBe('🗼');
-    expect(trip.cards.length).toBeGreaterThan(0); // Itinerary cards pre-populated!
-    expect(trip.dates).toBeDefined();
-    if (trip.dates) {
-      const start = new Date(trip.dates.start);
-      const end = new Date(trip.dates.end);
-      const diffTime = Math.abs(end.getTime() - start.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      expect(diffDays).toBe(5); // 5-day duration
-    }
-  });
-
-  it('should extract travelers and duration from a Bali prompt', () => {
-    const prompt = 'Create a beach vacation to Bali for 4 guests for 7 days';
-    const trip = generateTripFromMessage(prompt);
-    
-    expect(trip.destination).toBe('Bali, Indonesia');
-    expect(trip.country).toBe('Indonesia');
-    expect(trip.travelers).toBe(4);
-    expect(trip.emoji).toBe('🌴');
-    if (trip.dates) {
-      const start = new Date(trip.dates.start);
-      const end = new Date(trip.dates.end);
-      const diffTime = Math.abs(end.getTime() - start.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      expect(diffDays).toBe(7); // 7-day duration
-    }
   });
 });

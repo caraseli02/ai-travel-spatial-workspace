@@ -13,8 +13,8 @@ export function useTripWorkspaceState(initialState: TripWorkspaceState) {
     dispatch({ type: 'ADD_INBOX_ITEM', content });
   }, []);
 
-  const processInboxItem = useCallback((id: string) => {
-    dispatch({ type: 'PROCESS_INBOX_ITEM', id });
+  const processInboxItem = useCallback((id: string, coords?: { x: number; y: number }) => {
+    dispatch({ type: 'PROCESS_INBOX_ITEM', id, coords });
   }, []);
 
   const deleteCard = useCallback((id: string) => {

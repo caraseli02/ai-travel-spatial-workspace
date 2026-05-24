@@ -1,5 +1,6 @@
 import type { CanvasCard, InboxItem, Connection, DayGroup, DayLabel } from './trip';
 import { dayLabelConfig } from './trip';
+import { buildInboxItem } from './tripMaterialIntake';
 
 export type { Connection, DayGroup, DayLabel };
 export { dayLabelConfig };
@@ -61,38 +62,6 @@ export function getCardCenter(card: CanvasCard) {
 
 export function isCardType(value: string): value is CardType {
   return cardTypeOptions.some(option => option.value === value);
-}
-
-export function buildInboxItem(content: string, now = Date.now): InboxItem {
-  let type: InboxItem['type'] = 'note';
-  let source = 'Inbox Clip';
-  let avatar: string | undefined = undefined;
-
-  const lower = content.toLowerCase();
-  if (lower.includes('flight') || lower.includes('jl') || lower.includes('ana') || lower.includes('sfo-') || lower.includes('kix')) {
-    type = 'flight';
-    source = 'Flight Parser';
-  } else if (lower.includes('hotel') || lower.includes('ryokan') || lower.includes('booking') || lower.includes('stay') || lower.includes('airbnb') || lower.includes('hoshinoya') || lower.includes('hostel')) {
-    type = 'hotel';
-    source = 'Hotel Scanner';
-  } else if (lower.includes('http') || lower.includes('.com') || lower.includes('reddit') || lower.includes('eater') || lower.includes('blog')) {
-    type = 'link';
-    source = 'Web Parser';
-  } else if (lower.includes('chat') || lower.includes('says') || lower.includes(':') || lower.includes('mom') || lower.includes('yuki') || lower.includes('friend')) {
-    type = 'whatsapp';
-    source = 'WhatsApp Sync';
-    avatar = '💬';
-  }
-
-  return {
-    id: `i_spawn_${now()}`,
-    type,
-    source,
-    content,
-    timestamp: 'Just now',
-    processed: false,
-    avatar,
-  };
 }
 
 export function buildProcessedCanvasCard({
@@ -435,7 +404,7 @@ export function connectCards(
 
 export type TripWorkspaceAction =
   | { type: 'ADD_INBOX_ITEM'; content: string }
-  | { type: 'PROCESS_INBOX_ITEM'; id: string }
+  | { type: 'PROCESS_INBOX_ITEM'; id: string; coords?: { x: number; y: number } }
   | { type: 'DELETE_CARD'; id: string }
   | { type: 'UPDATE_CARD'; card: CanvasCard }
   | { type: 'ADD_CONNECTION'; fromId: string; toId: string }
@@ -474,6 +443,11 @@ export function tripWorkspaceReducer(
         dayLabels: state.dayLabels,
         cards: state.cards,
       });
+
+      if (action.coords) {
+        result.newCard.x = action.coords.x;
+        result.newCard.y = action.coords.y;
+      }
 
       const nextConnections = result.connection
         ? [...state.connections, result.connection]
@@ -608,4 +582,3 @@ export function tripWorkspaceReducer(
       return state;
   }
 }
-

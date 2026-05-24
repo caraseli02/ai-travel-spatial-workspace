@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { canvasCards, connections, dayGroups, inboxItems } from '../data/tripData';
 import {
   applyAiPromptToTripWorkspace,
-  buildInboxItem,
   buildProcessedCanvasCard,
   dayLabelConfig,
   getCardCenter,
@@ -16,23 +15,6 @@ const zeroRandom = () => 0.5;
 const fixedNow = () => 1_774_200_000_000;
 
 describe('Trip Workspace model', () => {
-  it('classifies new trip material into Inbox Items', () => {
-    expect(buildInboxItem('ANA flight SFO-KIX JL69', fixedNow)).toMatchObject({
-      id: 'i_spawn_1774200000000',
-      type: 'flight',
-      source: 'Flight Parser',
-      content: 'ANA flight SFO-KIX JL69',
-      timestamp: 'Just now',
-      processed: false,
-    });
-
-    expect(buildInboxItem('Mom says: buy matcha kit-kats', fixedNow)).toMatchObject({
-      type: 'whatsapp',
-      source: 'WhatsApp Sync',
-      avatar: '💬',
-    });
-  });
-
   it('turns a processed Inbox Item into a day-associated Canvas Card and dynamic connection', () => {
     const result = buildProcessedCanvasCard({
       item: inboxItems.find(item => item.id === 'i7')!,

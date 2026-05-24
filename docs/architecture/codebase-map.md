@@ -10,6 +10,8 @@ flowchart TD
   app -- "/trips/:tripId" --> workspace["TripWorkspace"]
 
   triplist --> repo["localTripRepository"]
+  triplist --> intake["tripMaterialIntake"]
+  triplist --> generator["proceduralTripGenerator"]
   workspace --> repo
   repo --> modelTrip["trip model"]
 
@@ -25,6 +27,7 @@ flowchart TD
   hookViewport --> data
   model --> data
 
+  hookState --> intake
   inbox --> workspace
   detail --> workspace
   cards --> cardTypes["Polaroid / Sticky / Article / Flight / Hotel / Note"]
@@ -40,7 +43,7 @@ flowchart TD
 
 `src/components/LandingPage.tsx` is a product/demo entry point. It animates sample Trip Material and navigates into the Demo Trip workspace via `onEnterDemo`.
 
-`src/components/TripListPage.tsx` lists all active Trips. It provides a prompt bar that detects traveler intents to create a new trip or parse pasted links directly into a newly created trip's inbox.
+`src/components/TripListPage.tsx` lists all active Trips. It provides a prompt bar that detects traveler intents to create a new trip through the Procedural Trip Generator or parse pasted links through Trip Material intake directly into a newly created trip's inbox.
 
 ## Persistence & Repository
 
@@ -53,10 +56,17 @@ To enable persistent plans without backend infra, we use a clean repository patt
 
 `src/data/tripData.ts` defines static Kyoto seed fixtures and the `createDemoTrip()` factory wrapping it.
 
+`src/models/tripMaterialIntake.ts` is the pure Trip Material intake module:
+
+- `buildInboxItem`: classifies pasted Trip Material text into structured Inbox Items.
+
+`src/models/proceduralTripGenerator.ts` is the mocked AI-native Trip creation module:
+
+- `generateTripFromMessage`: translates a conversational prompt into a structured Trip with metadata and starter Canvas Cards.
+
 `src/models/tripWorkspaceModel.ts` is the pure state logic module:
 
 - `tripWorkspaceReducer`: handles semantic transitions (adding inbox items, processing inbox items, custom day groups, card edits, manual cards, and mock AI suggestions).
-- `buildInboxItem`: parses pasted Trip Material text into structured Inbox Items.
 - `buildProcessedCanvasCard`: handles promoting raw items into canvas cards placed dynamically near their active Day Label coordinates.
 
 ## State Coordinator & Viewport Hooks

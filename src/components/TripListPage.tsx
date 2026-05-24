@@ -7,9 +7,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { localTripRepository } from '../models/tripRepository';
 import { createEmptyTrip } from '../models/trip';
 import type { Trip } from '../models/trip';
-import { buildInboxItem } from '../models/tripWorkspaceModel';
+import { buildInboxItem } from '../models/tripMaterialIntake';
+import { generateTripFromMessage } from '../models/proceduralTripGenerator';
 import TripCard from './TripCard';
-import { computeStatusCounts, filterTripsByStatus, generateTripFromMessage } from '../utils/tripListHelpers';
+import { computeStatusCounts, filterTripsByStatus } from '../utils/tripListHelpers';
 
 const EMOJI_PRESETS = ['🏖️', '🏔️', '🌆', '🏯', '⛷️', '🌴', '🎭', '✈️', '🚢', '🏕️', '🗺️', '🌸',
   '🇯🇵', '🇪🇸', '🇮🇹', '🇫🇷', '🇬🇷', '🇹🇭', '🇧🇷', '🇬🇧', '🇩🇪', '🇵🇹', '🇲🇽', '🇺🇸'];

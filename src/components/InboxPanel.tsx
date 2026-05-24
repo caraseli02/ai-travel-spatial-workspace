@@ -200,7 +200,14 @@ function InboxItemCard({
 
   return (
     <div
-      className="rounded-xl p-3 transition-all duration-200 group"
+      className={`rounded-xl p-3 transition-all duration-200 group ${!dimmed ? 'cursor-grab active:cursor-grabbing hover:shadow-md hover:border-stone-400' : ''}`}
+      draggable={!dimmed}
+      onDragStart={(e) => {
+        if (!dimmed) {
+          e.dataTransfer.setData('text/plain', item.id);
+          e.dataTransfer.effectAllowed = 'copyMove';
+        }
+      }}
       style={{
         backgroundColor: dimmed ? '#faf9f7' : '#fefcf8',
         border: `1px solid ${dimmed ? '#f0ece6' : '#e7e3dc'}`,
