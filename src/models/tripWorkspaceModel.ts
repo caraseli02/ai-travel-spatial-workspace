@@ -1,27 +1,10 @@
-import type { CanvasCard, InboxItem } from '../data/tripData';
+import type { CanvasCard, InboxItem, Connection, DayGroup, DayLabel } from './trip';
+import { dayLabelConfig } from './trip';
+
+export type { Connection, DayGroup, DayLabel };
+export { dayLabelConfig };
 
 export type CardType = CanvasCard['type'];
-
-export interface DayLabel {
-  day: number;
-  x: number;
-  y: number;
-  color: string;
-  bg: string;
-  border: string;
-}
-
-export interface Connection {
-  from: string;
-  to: string;
-  label: string;
-}
-
-export interface DayGroup {
-  day: number;
-  label: string;
-  color: string;
-}
 
 export interface TripWorkspaceState {
   activeDay: number | null;
@@ -46,13 +29,6 @@ export const cardTypeOptions = [
   { value: 'article', label: '📄 Saved Article' },
   { value: 'note', label: '📝 Quick Note' },
 ] satisfies { value: CardType; label: string }[];
-
-export const dayLabelConfig: DayLabel[] = [
-  { day: 1, x: 38, y: 46, color: '#f59e0b', bg: '#fef3c7', border: '#fde68a' },
-  { day: 2, x: 38, y: 285, color: '#f97316', bg: '#ffedd5', border: '#fed7aa' },
-  { day: 3, x: 38, y: 555, color: '#10b981', bg: '#d1fae5', border: '#a7f3d0' },
-  { day: 4, x: 775, y: 255, color: '#f43f5e', bg: '#ffe4e6', border: '#fecdd3' },
-];
 
 export const dayColorPresets = [
   '#8b5cf6',

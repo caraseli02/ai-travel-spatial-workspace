@@ -10,12 +10,12 @@ import { CanvasCardRenderer } from './CanvasCards';
 import InboxPanel from './InboxPanel';
 import OnboardingToast from './OnboardingToast';
 import CardDetailPanel from './CardDetailPanel';
-import type { CanvasCard, InboxItem } from '../data/tripData';
+import type { CanvasCard, InboxItem } from '../models/trip';
 import {
   cardTypeOptions,
-  dayLabelConfig,
   getCardCenter,
 } from '../models/tripWorkspaceModel';
+import { dayLabelConfig } from '../models/trip';
 import type { CardType, TripWorkspaceState } from '../models/tripWorkspaceModel';
 import { useTripWorkspaceState } from '../hooks/useTripWorkspaceState';
 import { useSpatialViewport } from '../hooks/useSpatialViewport';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Star, Plane, MapPin, Wifi } from 'lucide-react';
-import type { CanvasCard } from '../data/tripData';
+import type { CanvasCard } from '../models/trip';
 
 const tagColorMap: Record<string, { bg: string; text: string; border: string }> = {
   amber:   { bg: '#fef3c7', text: '#92400e', border: '#fde68a' },
