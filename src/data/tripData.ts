@@ -1,39 +1,5 @@
-export interface InboxItem {
-  id: string;
-  type: 'whatsapp' | 'link' | 'note' | 'flight' | 'hotel';
-  source: string;
-  content: string;
-  timestamp: string;
-  processed: boolean;
-  avatar?: string;
-}
+import type { CanvasCard, InboxItem } from '../models/trip';
 
-export interface CanvasCard {
-  id: string;
-  type: 'polaroid' | 'sticky' | 'article' | 'flight' | 'hotel' | 'note';
-  x: number;
-  y: number;
-  rotation: number;
-  title: string;
-  subtitle?: string;
-  image?: string;
-  color?: string;
-  tag?: string;
-  tagColor?: string;
-  day?: number;
-  details?: string[];
-  price?: string;
-  rating?: number;
-  width?: number;
-}
-
-export interface DayCluster {
-  day: number;
-  label: string;
-  x: number;
-  y: number;
-  color: string;
-}
 
 export const inboxItems: InboxItem[] = [
   {
@@ -311,8 +277,7 @@ export const connections = [
 // --- Demo Trip factory ---
 
 import type { Trip } from '../models/trip';
-import { DEMO_TRIP_ID } from '../models/trip';
-import { dayLabelConfig } from '../models/tripWorkspaceModel';
+import { DEMO_TRIP_ID, dayLabelConfig } from '../models/trip';
 
 /**
  * Create the pre-loaded "7 Days in Kyoto" Demo Trip.

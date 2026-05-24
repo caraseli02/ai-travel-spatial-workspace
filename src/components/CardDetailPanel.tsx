@@ -3,7 +3,7 @@ import {
   X, MapPin, Star, Plane, Calendar, ExternalLink, Clock, Check,
   Edit3, Trash2, Link, Plus, Trash, Eye
 } from 'lucide-react';
-import type { CanvasCard } from '../data/tripData';
+import type { CanvasCard } from '../models/trip';
 
 interface CardDetailPanelProps {
   card: CanvasCard | null;

@@ -4,7 +4,7 @@ import {
   Plane, Hotel, ChevronRight, Plus, Send,
   CheckCircle2, Circle, X
 } from 'lucide-react';
-import type { InboxItem } from '../data/tripData';
+import type { InboxItem } from '../models/trip';
 
 interface InboxPanelProps {
   items: InboxItem[];

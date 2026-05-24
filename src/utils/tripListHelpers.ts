@@ -1,6 +1,6 @@
 import type { Trip } from '../models/trip';
 import { deriveTripStatus } from './tripCardHelpers';
-import type { CanvasCard } from '../data/tripData';
+import type { CanvasCard } from '../models/trip';
 
 export function computeStatusCounts(trips: Trip[]) {
   const counts = {

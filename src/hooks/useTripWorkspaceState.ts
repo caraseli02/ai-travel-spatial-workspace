@@ -4,7 +4,7 @@ import {
   type TripWorkspaceState,
   type TripWorkspaceAction
 } from '../models/tripWorkspaceModel';
-import type { CanvasCard } from '../data/tripData';
+import type { CanvasCard } from '../models/trip';
 
 export function useTripWorkspaceState(initialState: TripWorkspaceState) {
   const [state, dispatch] = useReducer(tripWorkspaceReducer, initialState);
