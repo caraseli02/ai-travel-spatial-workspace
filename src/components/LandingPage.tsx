@@ -428,8 +428,11 @@ export default function LandingPage() {
                 style={{ left: card.x, top: card.y }}
               >
                 <div
-                  className={`${card.color} rounded-lg polaroid-shadow hover:polaroid-shadow-hover`}
-                  style={{ width: i === 3 ? "160px" : "180px", padding: "10px" }}
+                  className={cn(
+                    card.color,
+                    "rounded-lg p-2.5 polaroid-shadow hover:polaroid-shadow-hover",
+                    i === 3 ? "w-[160px]" : "w-[180px]",
+                  )}
                 >
                   {card.hasImage && (
                     <div className="mb-2 h-20 w-full overflow-hidden rounded bg-border">
@@ -447,7 +450,7 @@ export default function LandingPage() {
                     </div>
                   )}
                   <div className="flex items-start gap-1.5">
-                    {card.icon && <span style={{ fontSize: "14px" }}>{card.icon}</span>}
+                    {card.icon && <span className="text-sm">{card.icon}</span>}
                     <div className="min-w-0">
                       <p className="truncate text-xs font-semibold text-foreground">{card.label}</p>
                       <p className="mt-0.5 text-xs leading-tight text-muted-foreground">
@@ -777,6 +780,21 @@ export default function LandingPage() {
   );
 }
 
+function messageBubbleClass(role: "user" | "ai") {
+  return cn(
+    "max-w-xs rounded-xl border px-3 py-2 text-xs leading-relaxed text-foreground",
+    role === "user" ? "border-border bg-muted" : "border-amber-200 bg-amber-100",
+  );
+}
+
+function AiAvatar() {
+  return (
+    <div className="mt-0.5 mr-2 flex size-6 shrink-0 items-center justify-center rounded-full bg-amber-100">
+      <Sparkles size={11} className="text-primary" />
+    </div>
+  );
+}
+
 // --- Sub-component: Live Chat Preview in Hero ---
 function LiveChatPreview({
   messages,
@@ -793,81 +811,47 @@ function LiveChatPreview({
     <div className="relative">
       {/* Chat panel */}
       <div
-        className={`rounded-2xl overflow-hidden transition-all duration-700 ${showCanvas ? "opacity-0 scale-95 pointer-events-none absolute inset-0" : "opacity-100"}`}
-        style={{
-          backgroundColor: "#fefcf8",
-          border: "1px solid #e7e3dc",
-          boxShadow: "0 8px 40px rgba(0,0,0,0.10)",
-        }}
+        className={cn(
+          "overflow-hidden rounded-2xl border border-border bg-card shadow-lg transition-all duration-700",
+          showCanvas ? "pointer-events-none absolute inset-0 scale-95 opacity-0" : "opacity-100",
+        )}
       >
         {/* Chat header */}
-        <div
-          className="flex items-center gap-2 px-4 py-3"
-          style={{ borderBottom: "1px solid #e7e3dc" }}
-        >
+        <div className="flex items-center gap-2 border-b border-border px-4 py-3">
           <div className="flex gap-1.5">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#f87171" }} />
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#fbbf24" }} />
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#34d399" }} />
+            <div className="size-3 rounded-full bg-red-400" />
+            <div className="size-3 rounded-full bg-amber-400" />
+            <div className="size-3 rounded-full bg-emerald-400" />
           </div>
-          <span className="text-xs text-stone-400 ml-2">7 Days in Kyoto · Inbox</span>
-          <div className="ml-auto flex items-center gap-1 text-xs" style={{ color: "#92400e" }}>
+          <span className="ml-2 text-xs text-muted-foreground">7 Days in Kyoto · Inbox</span>
+          <div className="ml-auto flex items-center gap-1 text-xs text-primary">
             <Sparkles size={11} />
             AI active
           </div>
         </div>
 
         {/* Messages */}
-        <div className="p-4 space-y-3" style={{ minHeight: "280px" }}>
+        <div className="min-h-[280px] space-y-3 p-4">
           {messages.slice(0, msgIdx).map((msg, i) => (
             <div
               key={i}
-              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}
             >
-              {msg.role === "ai" && (
-                <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mr-2 mt-0.5"
-                  style={{ backgroundColor: "#fef3c7" }}
-                >
-                  <Sparkles size={11} color="#92400e" />
-                </div>
-              )}
-              <div
-                className={`max-w-xs rounded-xl px-3 py-2 text-xs leading-relaxed ${
-                  msg.role === "user" ? "text-stone-700" : "text-stone-700"
-                }`}
-                style={{
-                  backgroundColor: msg.role === "user" ? "#f5f3ef" : "#fef3c7",
-                  border: "1px solid",
-                  borderColor: msg.role === "user" ? "#e7e3dc" : "#fde68a",
-                }}
-              >
-                {msg.text}
-              </div>
+              {msg.role === "ai" && <AiAvatar />}
+              <div className={messageBubbleClass(msg.role)}>{msg.text}</div>
             </div>
           ))}
 
           {/* Currently typing */}
           {msgIdx < messages.length && (
             <div
-              className={`flex ${messages[msgIdx].role === "user" ? "justify-end" : "justify-start"}`}
-            >
-              {messages[msgIdx].role === "ai" && (
-                <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mr-2 mt-0.5"
-                  style={{ backgroundColor: "#fef3c7" }}
-                >
-                  <Sparkles size={11} color="#92400e" />
-                </div>
+              className={cn(
+                "flex",
+                messages[msgIdx].role === "user" ? "justify-end" : "justify-start",
               )}
-              <div
-                className="max-w-xs rounded-xl px-3 py-2 text-xs leading-relaxed text-stone-700"
-                style={{
-                  backgroundColor: messages[msgIdx].role === "user" ? "#f5f3ef" : "#fef3c7",
-                  border: "1px solid",
-                  borderColor: messages[msgIdx].role === "user" ? "#e7e3dc" : "#fde68a",
-                }}
-              >
+            >
+              {messages[msgIdx].role === "ai" && <AiAvatar />}
+              <div className={messageBubbleClass(messages[msgIdx].role)}>
                 {typedText}
                 <span className="cursor-blink">|</span>
               </div>
@@ -876,139 +860,96 @@ function LiveChatPreview({
         </div>
 
         {/* Input */}
-        <div
-          className="px-4 py-3 flex items-center gap-2"
-          style={{ borderTop: "1px solid #e7e3dc" }}
-        >
-          <div
-            className="flex-1 rounded-lg px-3 py-2 text-xs text-stone-400"
-            style={{ backgroundColor: "#f5f3ef", border: "1px solid #e7e3dc" }}
-          >
+        <div className="flex items-center gap-2 border-t border-border px-4 py-3">
+          <div className="flex-1 rounded-lg border border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
             Paste a link or message…
           </div>
-          <button
-            className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-            style={{ backgroundColor: "#92400e" }}
-          >
-            <ArrowRight size={13} color="white" />
-          </button>
+          <Button size="icon-sm" className="shrink-0">
+            <ArrowRight size={13} />
+          </Button>
         </div>
       </div>
 
       {/* Canvas preview (after typing) */}
       <div
-        className={`transition-all duration-700 ${showCanvas ? "opacity-100 scale-100" : "opacity-0 scale-105 pointer-events-none absolute inset-0"}`}
+        className={cn(
+          "transition-all duration-700",
+          showCanvas
+            ? "scale-100 opacity-100"
+            : "pointer-events-none absolute inset-0 scale-105 opacity-0",
+        )}
       >
-        <div
-          className="rounded-2xl overflow-hidden relative"
-          style={{
-            height: "380px",
-            backgroundColor: "#f5f3ef",
-            backgroundImage: "radial-gradient(circle, #d6cfc3 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-            border: "1px solid #e7e3dc",
-            boxShadow: "0 8px 40px rgba(0,0,0,0.10)",
-          }}
-        >
+        <div className="canvas-bg relative h-[380px] overflow-hidden rounded-2xl border border-border shadow-lg">
           {/* Mini canvas cards */}
-          <div
-            className="absolute"
-            style={{ left: "12px", top: "16px", transform: "rotate(-1.5deg)" }}
-          >
+          <div className="absolute top-4 left-3 -rotate-1.5">
             <MiniCard
               label="JAL JL69 · SFO→KIX"
               sub="Dec 14 · $743"
               icon="✈️"
-              tagBg="#fef3c7"
-              tagColor="#92400e"
+              tagClass="bg-amber-100 text-primary"
               tag="Day 1"
             />
           </div>
-          <div className="absolute" style={{ left: "44%", top: "8px", transform: "rotate(1deg)" }}>
+          <div className="absolute top-2 left-[44%] rotate-1">
             <MiniCard
               label="Hiiragiya Ryokan"
               sub="¥45,000/night · 4.9★"
               icon="🏯"
               hasImg
               imgSrc="/images/ryokan.jpg"
-              tagBg="#ffe4e6"
-              tagColor="#be123c"
+              tagClass="bg-rose-100 text-rose-700"
               tag="Stay"
             />
           </div>
-          <div
-            className="absolute"
-            style={{ left: "10px", top: "52%", transform: "rotate(-2deg)" }}
-          >
+          <div className="absolute top-[52%] left-2.5 -rotate-2">
             <MiniCard
               label="Fushimi Inari"
               sub="5am · No crowds"
               icon="⛩️"
               hasImg
               imgSrc="/images/fushimi-inari.jpg"
-              tagBg="#ffedd5"
-              tagColor="#c2410c"
+              tagClass="bg-orange-100 text-orange-700"
               tag="Day 2"
             />
           </div>
-          <div className="absolute" style={{ left: "42%", top: "50%", transform: "rotate(2deg)" }}>
-            <StickyMini text='"Go at 5am!!" — Yuki 🌅' color="#fef3c7" />
+          <div className="absolute top-1/2 left-[42%] rotate-2">
+            <StickyMini text='"Go at 5am!!" — Yuki 🌅' />
           </div>
-          <div
-            className="absolute"
-            style={{ left: "68%", top: "22%", transform: "rotate(1.5deg)" }}
-          >
+          <div className="absolute top-[22%] left-[68%] rotate-1.5">
             <MiniCard
               label="Arashiyama Bamboo"
               sub="Day 3 · Morning"
               icon="🌿"
               hasImg
               imgSrc="/images/arashiyama.jpg"
-              tagBg="#d1fae5"
-              tagColor="#065f46"
+              tagClass="bg-emerald-100 text-emerald-800"
               tag="Day 3"
             />
           </div>
 
           {/* Connection lines */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none">
-            <line
-              x1="22%"
-              y1="22%"
-              x2="45%"
-              y2="15%"
-              stroke="#c4b5a0"
-              strokeWidth="1.2"
-              strokeDasharray="4,3"
-              opacity="0.7"
-            />
-            <line
-              x1="20%"
-              y1="65%"
-              x2="43%"
-              y2="60%"
-              stroke="#c4b5a0"
-              strokeWidth="1.2"
-              strokeDasharray="4,3"
-              opacity="0.7"
-            />
+          <svg className="ink-line pointer-events-none absolute inset-0 h-full w-full">
+            <line x1="22%" y1="22%" x2="45%" y2="15%" opacity="0.7" />
+            <line x1="20%" y1="65%" x2="43%" y2="60%" opacity="0.7" />
           </svg>
 
           {/* AI label */}
-          <div
-            className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full text-xs"
-            style={{ backgroundColor: "#fef3c7", color: "#92400e", border: "1px solid #fde68a" }}
+          <Badge
+            variant="outline"
+            className="absolute top-3 right-3 gap-1 border-amber-200 bg-amber-100 text-primary"
           >
             <Sparkles size={10} />
             Organized by AI
-          </div>
+          </Badge>
         </div>
       </div>
 
       {/* Toggle hint */}
       {showCanvas && (
-        <div className="text-center mt-3">
-          <span className="text-xs text-stone-400">Canvas auto-generated from your 3 pastes ↑</span>
+        <div className="mt-3 text-center">
+          <span className="text-xs text-muted-foreground">
+            Canvas auto-generated from your 3 pastes ↑
+          </span>
         </div>
       )}
     </div>
@@ -1022,8 +963,7 @@ function MiniCard({
   hasImg,
   imgSrc,
   tag,
-  tagBg,
-  tagColor,
+  tagClass,
 }: {
   label: string;
   sub: string;
@@ -1031,46 +971,33 @@ function MiniCard({
   hasImg?: boolean;
   imgSrc?: string;
   tag: string;
-  tagBg: string;
-  tagColor: string;
+  tagClass: string;
 }) {
   return (
-    <div
-      className="rounded-lg polaroid-shadow"
-      style={{ width: "155px", backgroundColor: "#fefcf8", padding: "8px" }}
-    >
+    <div className="w-[155px] rounded-lg bg-card p-2 polaroid-shadow">
       {hasImg && imgSrc && (
-        <div
-          className="w-full h-14 rounded mb-1.5 overflow-hidden"
-          style={{ backgroundColor: "#e7e3dc" }}
-        >
-          <img src={imgSrc} alt={label} className="w-full h-full object-cover" />
+        <div className="mb-1.5 h-14 w-full overflow-hidden rounded bg-border">
+          <img src={imgSrc} alt={label} className="h-full w-full object-cover" />
         </div>
       )}
       <div className="flex items-start gap-1">
-        <span style={{ fontSize: "12px" }}>{icon}</span>
+        <span className="text-xs">{icon}</span>
         <div>
-          <p className="text-xs font-semibold text-stone-800 leading-tight">{label}</p>
-          <p className="text-xs text-stone-400 leading-tight">{sub}</p>
+          <p className="text-xs leading-tight font-semibold text-foreground">{label}</p>
+          <p className="text-xs leading-tight text-muted-foreground">{sub}</p>
         </div>
       </div>
-      <span
-        className="mt-1.5 inline-block text-xs px-1.5 py-0.5 rounded-full"
-        style={{ backgroundColor: tagBg, color: tagColor, fontSize: "10px" }}
-      >
+      <span className={cn("mt-1.5 inline-block rounded-full px-1.5 py-0.5 text-[10px]", tagClass)}>
         {tag}
       </span>
     </div>
   );
 }
 
-function StickyMini({ text, color }: { text: string; color: string }) {
+function StickyMini({ text }: { text: string }) {
   return (
-    <div
-      className="rounded-lg sticky-shadow"
-      style={{ width: "140px", backgroundColor: color, padding: "8px 10px" }}
-    >
-      <p className="text-xs text-stone-700 leading-relaxed">{text}</p>
+    <div className="sticky-shadow w-[140px] rounded-lg bg-amber-100 px-2.5 py-2">
+      <p className="text-xs leading-relaxed text-foreground">{text}</p>
     </div>
   );
 }
