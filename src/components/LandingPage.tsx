@@ -16,6 +16,7 @@ import PricingSection from "./PricingSection";
 import { WayfarerLogo } from "./WayfarerLogo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { DEMO_TRIP_ID } from "../models/trip";
@@ -540,64 +541,64 @@ export default function LandingPage() {
       </section>
 
       {/* BEFORE / AFTER SECTION */}
-      <section className="py-16 px-6 md:px-12">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-xs font-semibold uppercase tracking-widest text-stone-400 mb-3">
+      <section className="px-6 py-16 md:px-12">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-12 text-center">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               The problem
             </p>
-            <h2 className="font-serif text-4xl text-stone-800">Sound familiar?</h2>
+            <h2 className="font-serif text-4xl text-foreground">Sound familiar?</h2>
           </div>
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Before */}
-            <div
-              className="rounded-2xl p-6"
-              style={{ backgroundColor: "#fef2f2", border: "1.5px solid #fecaca" }}
-            >
-              <div className="flex items-center gap-2 mb-5">
-                <span className="text-lg">😩</span>
-                <h3 className="font-semibold text-stone-800">Before Wayfarer</h3>
-              </div>
-              <ul className="space-y-3">
-                {[
-                  "14 open browser tabs for flights, hotels, and activities",
-                  "WhatsApp messages from friends buried under memes",
-                  "A Notion doc that never quite captures the feeling",
-                  "Booking.com & Google Flights links sent to yourself",
-                  "Printed itinerary immediately out of date",
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm text-stone-600">
-                    <span className="mt-0.5 text-red-400 flex-shrink-0">✗</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div className="grid gap-8 md:grid-cols-2">
+            <Card className="border-red-200 bg-red-50 ring-red-200/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <span className="text-lg">😩</span>
+                  Before Wayfarer
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  {[
+                    "14 open browser tabs for flights, hotels, and activities",
+                    "WhatsApp messages from friends buried under memes",
+                    "A Notion doc that never quite captures the feeling",
+                    "Booking.com & Google Flights links sent to yourself",
+                    "Printed itinerary immediately out of date",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2.5 text-sm text-stone-600">
+                      <span className="mt-0.5 shrink-0 text-red-400">✗</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
 
-            {/* After */}
-            <div
-              className="rounded-2xl p-6"
-              style={{ backgroundColor: "#f0fdf4", border: "1.5px solid #bbf7d0" }}
-            >
-              <div className="flex items-center gap-2 mb-5">
-                <span className="text-lg">😌</span>
-                <h3 className="font-semibold text-stone-800">With Wayfarer</h3>
-              </div>
-              <ul className="space-y-3">
-                {[
-                  "One canvas with every detail, spatially organized",
-                  "WhatsApp tips auto-pinned as sticky notes",
-                  "Flight & hotel cards with full details extracted",
-                  "Days cluster naturally — see the whole trip at once",
-                  "Live canvas updates as plans evolve",
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm text-stone-600">
-                    <span className="mt-0.5 text-emerald-500 flex-shrink-0">✓</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <Card className="border-emerald-200 bg-emerald-50 ring-emerald-200/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <span className="text-lg">😌</span>
+                  With Wayfarer
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  {[
+                    "One canvas with every detail, spatially organized",
+                    "WhatsApp tips auto-pinned as sticky notes",
+                    "Flight & hotel cards with full details extracted",
+                    "Days cluster naturally — see the whole trip at once",
+                    "Live canvas updates as plans evolve",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2.5 text-sm text-stone-600">
+                      <span className="mt-0.5 shrink-0 text-emerald-500">✓</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
@@ -691,35 +692,33 @@ export default function LandingPage() {
       <PricingSection />
 
       {/* TESTIMONIALS */}
-      <section className="py-20 px-6 md:px-12">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-xs font-semibold uppercase tracking-widest text-stone-400 mb-3">
+      <section className="px-6 py-20 md:px-12">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-14 text-center">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Early access
             </p>
-            <h2 className="font-serif text-4xl text-stone-800">Travelers love it.</h2>
+            <h2 className="font-serif text-4xl text-foreground">Travelers love it.</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
-              <div
-                key={i}
-                className="rounded-xl p-6"
-                style={{ backgroundColor: "#fefcf8", border: "1px solid #e7e3dc" }}
-              >
-                <div className="flex gap-1 mb-4">
-                  {[...Array(5)].map((_, si) => (
-                    <Star key={si} size={13} className="text-amber-400 fill-amber-400" />
-                  ))}
-                </div>
-                <p className="text-stone-600 text-sm leading-relaxed mb-5">{t.text}</p>
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{t.avatar}</span>
-                  <div>
-                    <p className="font-semibold text-stone-800 text-sm">{t.name}</p>
-                    <p className="text-xs text-stone-400">{t.role}</p>
+          <div className="grid gap-6 md:grid-cols-3">
+            {testimonials.map((t) => (
+              <Card key={t.name}>
+                <CardContent className="pt-6">
+                  <div className="mb-4 flex gap-1">
+                    {[...Array(5)].map((_, si) => (
+                      <Star key={si} size={13} className="fill-amber-400 text-amber-400" />
+                    ))}
                   </div>
-                </div>
-              </div>
+                  <p className="mb-5 text-sm leading-relaxed text-muted-foreground">{t.text}</p>
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{t.avatar}</span>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{t.name}</p>
+                      <p className="text-xs text-muted-foreground">{t.role}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
