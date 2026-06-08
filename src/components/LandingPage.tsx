@@ -16,6 +16,8 @@ import PricingSection from "./PricingSection";
 import { WayfarerLogo } from "./WayfarerLogo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 import { DEMO_TRIP_ID } from "../models/trip";
 
 const chatMessages = [
@@ -105,6 +107,27 @@ const canvasPreviewCards = [
     icon: "🍜",
   },
 ];
+
+const canvasDayTabs = [
+  {
+    value: "day-1",
+    label: "Day 1 · Arrival",
+    className:
+      "border-amber-200 bg-amber-100 text-primary data-active:bg-amber-100 data-active:text-primary",
+  },
+  {
+    value: "day-2",
+    label: "Day 2 · Explore",
+    className:
+      "border-orange-200 bg-orange-100 text-orange-700 data-active:bg-orange-100 data-active:text-orange-700",
+  },
+  {
+    value: "day-3",
+    label: "Day 3 · Nature",
+    className:
+      "border-emerald-200 bg-emerald-100 text-emerald-800 data-active:bg-emerald-100 data-active:text-emerald-800",
+  },
+] as const;
 
 const features = [
   {
@@ -298,48 +321,40 @@ export default function LandingPage() {
       </section>
 
       {/* CANVAS SHOWCASE */}
-      <section className="py-20 px-6 md:px-12" style={{ backgroundColor: "#f5f3ef" }}>
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-xs font-semibold uppercase tracking-widest text-stone-400 mb-3">
+      <section className="bg-muted px-6 py-20 md:px-12">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-12 text-center">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               The Canvas
             </p>
-            <h2 className="font-serif text-4xl md:text-5xl text-stone-800 mb-4">
+            <h2 className="mb-4 font-serif text-4xl text-foreground md:text-5xl">
               Chaos, beautifully organized.
             </h2>
-            <p className="text-stone-500 max-w-xl mx-auto leading-relaxed">
+            <p className="mx-auto max-w-xl leading-relaxed text-muted-foreground">
               Your pasted links and messages arrange themselves into a spatial moodboard. Not a
               list. Not a table. A canvas that feels alive.
             </p>
           </div>
 
           {/* Big canvas preview */}
-          <div
-            className="relative w-full rounded-2xl overflow-hidden"
-            style={{
-              height: "520px",
-              backgroundColor: "#f5f3ef",
-              backgroundImage: "radial-gradient(circle, #d6cfc3 1px, transparent 1px)",
-              backgroundSize: "28px 28px",
-              border: "1px solid #e7e3dc",
-            }}
-          >
-            {/* Day labels */}
-            <div className="absolute top-4 left-4 flex gap-2 flex-wrap z-20">
-              {["Day 1 · Arrival", "Day 2 · Explore", "Day 3 · Nature"].map((d, i) => (
-                <span
-                  key={i}
-                  className="text-xs font-medium px-2.5 py-1 rounded-full"
-                  style={{
-                    backgroundColor: ["#fef3c7", "#ffedd5", "#d1fae5"][i],
-                    color: ["#92400e", "#c2410c", "#065f46"][i],
-                    border: `1px solid ${["#fde68a", "#fed7aa", "#a7f3d0"][i]}`,
-                  }}
-                >
-                  {d}
-                </span>
-              ))}
-            </div>
+          <div className="canvas-bg relative h-[520px] w-full overflow-hidden rounded-2xl border border-border">
+            {/* Day tabs */}
+            <Tabs defaultValue="day-1" className="absolute top-4 left-4 z-20">
+              <TabsList className="h-auto flex-wrap gap-2 bg-transparent p-0">
+                {canvasDayTabs.map((day) => (
+                  <TabsTrigger
+                    key={day.value}
+                    value={day.value}
+                    className={cn(
+                      "h-auto rounded-full border px-2.5 py-1 text-xs shadow-none",
+                      day.className,
+                    )}
+                  >
+                    {day.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
 
             {/* Canvas cards */}
             {canvasPreviewCards.map((card, i) => (
@@ -353,10 +368,7 @@ export default function LandingPage() {
                   style={{ width: i === 3 ? "160px" : "180px", padding: "10px" }}
                 >
                   {card.hasImage && (
-                    <div
-                      className="w-full h-20 rounded mb-2 overflow-hidden"
-                      style={{ backgroundColor: "#e7e3dc" }}
-                    >
+                    <div className="mb-2 h-20 w-full overflow-hidden rounded bg-border">
                       <img
                         src={
                           i === 1
@@ -373,8 +385,10 @@ export default function LandingPage() {
                   <div className="flex items-start gap-1.5">
                     {card.icon && <span style={{ fontSize: "14px" }}>{card.icon}</span>}
                     <div className="min-w-0">
-                      <p className="text-xs font-semibold text-stone-800 truncate">{card.label}</p>
-                      <p className="text-xs text-stone-400 leading-tight mt-0.5">{card.sub}</p>
+                      <p className="truncate text-xs font-semibold text-foreground">{card.label}</p>
+                      <p className="mt-0.5 text-xs leading-tight text-muted-foreground">
+                        {card.sub}
+                      </p>
                     </div>
                   </div>
                   {card.tag && (
@@ -416,20 +430,13 @@ export default function LandingPage() {
             </svg>
 
             {/* Bottom fade */}
-            <div
-              className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
-              style={{ background: "linear-gradient(to top, #f5f3ef, transparent)" }}
-            />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-muted to-transparent" />
 
             {/* CTA overlay */}
-            <div className="absolute bottom-6 right-6">
-              <button
-                onClick={onEnterDemo}
-                className="flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all"
-                style={{ backgroundColor: "#92400e", color: "white" }}
-              >
+            <div className="absolute right-6 bottom-6">
+              <Button onClick={onEnterDemo} className="shadow-sm hover:shadow-md">
                 Explore full canvas <ChevronRight size={14} />
-              </button>
+              </Button>
             </div>
           </div>
         </div>
