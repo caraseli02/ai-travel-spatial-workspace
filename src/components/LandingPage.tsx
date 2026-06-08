@@ -130,6 +130,69 @@ const canvasDayTabs = [
   },
 ] as const;
 
+const howItWorksSteps = [
+  {
+    num: "01",
+    icon: <MessageSquare size={22} />,
+    title: "Dump everything in",
+    desc: "Paste any URL, forward a WhatsApp message, type a half-formed idea. Wayfarer is your trip's inbox — it accepts anything.",
+    iconClass: "bg-amber-100 text-primary",
+  },
+  {
+    num: "02",
+    icon: <Sparkles size={22} />,
+    title: "AI silently organizes",
+    desc: "Behind the scenes, Wayfarer extracts dates, prices, locations, and tips — and places them on the canvas without asking.",
+    iconClass: "bg-orange-100 text-orange-700",
+  },
+  {
+    num: "03",
+    icon: <Globe size={22} />,
+    title: "Your spatial trip emerges",
+    desc: "The canvas fills up. Cards cluster by day. Lines connect related ideas. Your trip starts looking exactly how it feels in your head.",
+    iconClass: "bg-emerald-100 text-emerald-800",
+  },
+] as const;
+
+const featureGridItems = [
+  {
+    emoji: "✈️",
+    label: "Flights",
+    count: "Auto-extracted",
+    className: "border-amber-200 bg-amber-50",
+  },
+  {
+    emoji: "🏯",
+    label: "Hotels",
+    count: "With pricing",
+    className: "border-rose-200 bg-rose-50",
+  },
+  {
+    emoji: "🗺️",
+    label: "Activities",
+    count: "From any link",
+    className: "border-emerald-200 bg-emerald-50",
+  },
+  {
+    emoji: "💬",
+    label: "Tips",
+    count: "From messages",
+    className: "border-blue-200 bg-blue-50",
+  },
+  {
+    emoji: "📍",
+    label: "Locations",
+    count: "Spatially grouped",
+    className: "border-purple-200 bg-purple-50",
+  },
+  {
+    emoji: "📎",
+    label: "Articles",
+    count: "Clipped & tagged",
+    className: "border-orange-200 bg-orange-50",
+  },
+] as const;
+
 const features = [
   {
     icon: <MessageSquare size={20} />,
@@ -444,8 +507,8 @@ export default function LandingPage() {
       </section>
 
       {/* PHOTO STRIP */}
-      <section className="py-10 overflow-hidden">
-        <div className="flex gap-4 animate-none" style={{ padding: "0 24px" }}>
+      <section className="overflow-hidden py-10">
+        <div className="flex animate-none gap-4 px-6">
           {[
             { src: "/images/fushimi-inari.jpg", label: "Fushimi Inari" },
             { src: "/images/arashiyama.jpg", label: "Arashiyama" },
@@ -453,26 +516,19 @@ export default function LandingPage() {
             { src: "/images/gion.jpg", label: "Gion District" },
             { src: "/images/ryokan.jpg", label: "Hiiragiya Ryokan" },
             { src: "/images/kinkakuji.jpg", label: "Kinkaku-ji" },
-          ].map((photo, i) => (
+          ].map((photo) => (
             <div
-              key={i}
-              className="flex-shrink-0 relative rounded-2xl overflow-hidden group cursor-pointer"
-              style={{ width: "200px", height: "260px" }}
+              key={photo.label}
+              className="group relative h-[260px] w-[200px] shrink-0 cursor-pointer overflow-hidden rounded-2xl"
             >
               <img
                 src={photo.src}
                 alt={photo.label}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
-              <div
-                className="absolute inset-0 transition-opacity duration-300 group-hover:opacity-60"
-                style={{
-                  background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%)",
-                  opacity: 0.4,
-                }}
-              />
-              <div className="absolute bottom-3 left-3 right-3">
-                <p className="text-white text-xs font-semibold">{photo.label}</p>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-40 transition-opacity duration-300 group-hover:opacity-60" />
+              <div className="absolute right-3 bottom-3 left-3">
+                <p className="text-xs font-semibold text-white">{photo.label}</p>
               </div>
             </div>
           ))}
@@ -480,61 +536,41 @@ export default function LandingPage() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section className="py-20 px-6 md:px-12">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <p className="text-xs font-semibold uppercase tracking-widest text-stone-400 mb-3">
+      <section className="px-6 py-20 md:px-12">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-16 text-center">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               How it works
             </p>
-            <h2 className="font-serif text-4xl text-stone-800">Capture first. Structure later.</h2>
+            <h2 className="font-serif text-4xl text-foreground">Capture first. Structure later.</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                num: "01",
-                icon: <MessageSquare size={22} />,
-                title: "Dump everything in",
-                desc: "Paste any URL, forward a WhatsApp message, type a half-formed idea. Wayfarer is your trip's inbox — it accepts anything.",
-                color: "#92400e",
-                bg: "#fef3c7",
-              },
-              {
-                num: "02",
-                icon: <Sparkles size={22} />,
-                title: "AI silently organizes",
-                desc: "Behind the scenes, Wayfarer extracts dates, prices, locations, and tips — and places them on the canvas without asking.",
-                color: "#c2410c",
-                bg: "#ffedd5",
-              },
-              {
-                num: "03",
-                icon: <Globe size={22} />,
-                title: "Your spatial trip emerges",
-                desc: "The canvas fills up. Cards cluster by day. Lines connect related ideas. Your trip starts looking exactly how it feels in your head.",
-                color: "#065f46",
-                bg: "#d1fae5",
-              },
-            ].map((step, i) => (
-              <div key={i} className="relative">
-                <div className="flex items-start gap-4 mb-4">
-                  <div
-                    className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: step.bg, color: step.color }}
-                  >
-                    {step.icon}
+          <div className="grid gap-8 md:grid-cols-3">
+            {howItWorksSteps.map((step, i) => (
+              <Card
+                key={step.num}
+                className="relative border-none bg-transparent shadow-none ring-0"
+              >
+                <CardContent className="p-0">
+                  <div className="mb-4 flex items-start gap-4">
+                    <div
+                      className={cn(
+                        "flex size-11 shrink-0 items-center justify-center rounded-xl",
+                        step.iconClass,
+                      )}
+                    >
+                      {step.icon}
+                    </div>
+                    <span className="mt-1 text-5xl font-bold text-border">{step.num}</span>
                   </div>
-                  <span className="text-5xl font-bold mt-1" style={{ color: "#e7e3dc" }}>
-                    {step.num}
-                  </span>
-                </div>
-                <h3 className="font-semibold text-stone-800 text-lg mb-2">{step.title}</h3>
-                <p className="text-stone-500 leading-relaxed text-sm">{step.desc}</p>
-                {i < 2 && (
-                  <div className="hidden md:block absolute top-5 right-0 translate-x-1/2">
-                    <ChevronRight size={18} className="text-stone-300" />
-                  </div>
-                )}
-              </div>
+                  <h3 className="mb-2 text-lg font-semibold text-foreground">{step.title}</h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">{step.desc}</p>
+                  {i < 2 && (
+                    <div className="absolute top-5 right-0 hidden translate-x-1/2 md:block">
+                      <ChevronRight size={18} className="text-border" />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
@@ -604,84 +640,47 @@ export default function LandingPage() {
       </section>
 
       {/* FEATURES */}
-      <section className="py-20 px-6 md:px-12" style={{ backgroundColor: "#f5f3ef" }}>
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+      <section className="bg-muted px-6 py-20 md:px-12">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid items-center gap-16 lg:grid-cols-2">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-stone-400 mb-3">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                 Features
               </p>
-              <h2 className="font-serif text-4xl text-stone-800 mb-8">
+              <h2 className="mb-8 font-serif text-4xl text-foreground">
                 Designed for how
                 <br />
                 people actually plan.
               </h2>
               <div className="space-y-6">
-                {features.map((f, i) => (
-                  <div key={i} className="flex gap-4">
+                {features.map((f) => (
+                  <div key={f.title} className="flex gap-4">
                     <div
-                      className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${f.bg} ${f.color}`}
+                      className={cn(
+                        "flex size-9 shrink-0 items-center justify-center rounded-lg",
+                        f.bg,
+                        f.color,
+                      )}
                     >
                       {f.icon}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-stone-800 mb-1">{f.title}</h3>
-                      <p className="text-sm text-stone-500 leading-relaxed">{f.desc}</p>
+                      <h3 className="mb-1 font-semibold text-foreground">{f.title}</h3>
+                      <p className="text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              {[
-                {
-                  emoji: "✈️",
-                  label: "Flights",
-                  count: "Auto-extracted",
-                  bg: "bg-amber-50",
-                  border: "border-amber-200",
-                },
-                {
-                  emoji: "🏯",
-                  label: "Hotels",
-                  count: "With pricing",
-                  bg: "bg-rose-50",
-                  border: "border-rose-200",
-                },
-                {
-                  emoji: "🗺️",
-                  label: "Activities",
-                  count: "From any link",
-                  bg: "bg-emerald-50",
-                  border: "border-emerald-200",
-                },
-                {
-                  emoji: "💬",
-                  label: "Tips",
-                  count: "From messages",
-                  bg: "bg-blue-50",
-                  border: "border-blue-200",
-                },
-                {
-                  emoji: "📍",
-                  label: "Locations",
-                  count: "Spatially grouped",
-                  bg: "bg-purple-50",
-                  border: "border-purple-200",
-                },
-                {
-                  emoji: "📎",
-                  label: "Articles",
-                  count: "Clipped & tagged",
-                  bg: "bg-orange-50",
-                  border: "border-orange-200",
-                },
-              ].map((item, i) => (
-                <div key={i} className={`${item.bg} rounded-xl p-4 border ${item.border}`}>
-                  <span className="text-2xl mb-2 block">{item.emoji}</span>
-                  <p className="font-semibold text-stone-800 text-sm">{item.label}</p>
-                  <p className="text-xs text-stone-400 mt-0.5">{item.count}</p>
-                </div>
+              {featureGridItems.map((item) => (
+                <Card key={item.label} className={cn("border", item.className)}>
+                  <CardContent className="p-4">
+                    <span className="mb-2 block text-2xl">{item.emoji}</span>
+                    <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{item.count}</p>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>
