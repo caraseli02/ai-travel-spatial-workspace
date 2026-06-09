@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { Trip } from './trip';
 import { DEMO_TRIP_ID, createEmptyTrip } from './trip';
+import { PARIS_FIXTURE_TRIP_ID } from '../data/tripData';
 import { localTripRepository } from './tripRepository';
 
 // Mock localStorage
@@ -26,9 +27,9 @@ describe('localTripRepository', () => {
     vi.clearAllMocks();
   });
 
-  it('seeds the Demo Trip on first visit when no trips exist', () => {
+  it('seeds design fixture trips on first visit when no trips exist', () => {
     const trips = localTripRepository.list();
-    expect(trips).toHaveLength(1);
+    expect(trips).toHaveLength(2);
     expect(trips[0].id).toBe(DEMO_TRIP_ID);
     expect(trips[0].name).toBe('7 Days in Kyoto');
     expect(trips[0].destination).toBe('Kyoto, Japan');
@@ -109,33 +110,28 @@ describe('localTripRepository', () => {
   });
 
   it('handles deleting the demo trip', () => {
-    // First visit — demo trip is seeded
     let trips = localTripRepository.list();
-    expect(trips).toHaveLength(1);
+    expect(trips).toHaveLength(2);
     expect(trips[0].id).toBe(DEMO_TRIP_ID);
 
-    // Add a real trip so deletion doesn't re-seed
     const custom = createEmptyTrip('My Trip', 'Somewhere', '✈️');
     localTripRepository.save(custom);
 
-    // Delete the demo trip
     localTripRepository.delete(DEMO_TRIP_ID);
 
     trips = localTripRepository.list();
-    expect(trips).toHaveLength(1);
-    expect(trips[0].id).toBe(custom.id);
+    expect(trips).toHaveLength(2);
+    expect(trips.find((t) => t.id === custom.id)).toBeDefined();
+    expect(trips.find((t) => t.id === DEMO_TRIP_ID)).toBeUndefined();
   });
 
   it('does not re-seed the demo trip after it has been deleted, even if no other trips remain', () => {
-    // First visit — demo trip is seeded
     let trips = localTripRepository.list();
-    expect(trips).toHaveLength(1);
-    expect(trips[0].id).toBe(DEMO_TRIP_ID);
+    expect(trips).toHaveLength(2);
 
-    // Delete the demo trip, leaving trips empty
     localTripRepository.delete(DEMO_TRIP_ID);
+    localTripRepository.delete(PARIS_FIXTURE_TRIP_ID);
 
-    // Listing trips should return empty, not re-seed
     trips = localTripRepository.list();
     expect(trips).toHaveLength(0);
   });

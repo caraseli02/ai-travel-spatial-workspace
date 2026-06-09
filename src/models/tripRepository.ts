@@ -1,6 +1,6 @@
 import type { Trip } from './trip';
 import { DEMO_TRIP_ID } from './trip';
-import { createDemoTrip } from '../data/tripData';
+import { createDemoTrip, createParisFixtureTrip } from '../data/tripData';
 
 const STORAGE_KEY = 'wayfarer_trips';
 
@@ -59,9 +59,10 @@ function ensureDemoTrip(trips: Trip[]): Trip[] {
     return trips;
   }
   const demo = createDemoTrip();
-  writeAll([demo]);
+  const paris = createParisFixtureTrip();
+  writeAll([demo, paris]);
   safeSetItem(SEEDED_KEY, 'true');
-  return [demo];
+  return [demo, paris];
 }
 
 /** localStorage implementation of Trip persistence. */

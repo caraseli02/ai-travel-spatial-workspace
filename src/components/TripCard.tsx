@@ -9,7 +9,6 @@ import {
   Clock,
   Plane,
   Compass,
-  ChevronRight,
   Sparkles,
   Trash2,
 } from "lucide-react";
@@ -90,7 +89,7 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
       }}
       className="group relative h-full"
     >
-      <Card className="relative flex h-full flex-col justify-between gap-0 overflow-hidden py-0 ring-border transition-all duration-300 hover:ring-foreground/20">
+      <Card className="relative flex h-full min-h-[420px] flex-col justify-between gap-0 overflow-hidden rounded-2xl py-0 ring-border transition-all duration-300 hover:ring-foreground/20">
         <AnimatePresence>
           {showConfirm && (
             <motion.div
@@ -152,7 +151,7 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
           aria-label={`Open trip workspace for ${trip.name}`}
           className="flex flex-1 cursor-pointer flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
         >
-          <div className="relative h-48 overflow-hidden">
+          <div className="relative h-[192px] overflow-hidden">
             <img
               src={image}
               alt={trip.destination}
@@ -163,12 +162,11 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
 
             <Badge
               className={cn(
-                "absolute top-3 left-3 gap-1.5 px-3 py-1.5 text-[11px] font-semibold backdrop-blur-md",
+                "absolute top-3 left-3 gap-1.5 border-0 px-2.5 py-1 text-[11px] font-semibold backdrop-blur-md",
                 config.bg,
                 config.color,
-                config.border,
               )}
-              variant="outline"
+              variant="secondary"
             >
               <StatusIcon className="size-3" />
               {config.label}
@@ -188,21 +186,21 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
             )}
 
             <div className="absolute right-4 bottom-3 left-4">
-              <h3 className="flex items-center gap-2 truncate text-xl font-bold tracking-tight text-foreground drop-shadow-md">
-                <span className="text-2xl" role="img" aria-label="trip emoji">
+              <h3 className="flex items-center gap-2 truncate text-lg font-bold tracking-tight text-white drop-shadow-md">
+                <span className="text-xl" role="img" aria-label="trip emoji">
                   {trip.emoji}
                 </span>
                 <span className="truncate">{trip.name}</span>
               </h3>
-              <div className="mt-0.5 flex items-center gap-1 text-xs font-medium text-muted-foreground">
+              <div className="mt-1 flex items-center gap-1 text-xs font-medium text-white/70">
                 <MapPin className="size-3.5 shrink-0" />
                 <span className="truncate">{country}</span>
               </div>
             </div>
           </div>
 
-          <CardContent className="space-y-3 pt-4">
-            <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground">
+          <CardContent className="space-y-3 p-4">
+            <div className="grid grid-cols-2 gap-3 text-[13px] text-muted-foreground">
               <div className="flex min-w-0 items-center gap-2">
                 <Calendar className="size-4 shrink-0 text-muted-foreground/70" />
                 <span className="truncate font-medium">{formatTripDates(trip.dates)}</span>
@@ -215,7 +213,7 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
               </div>
             </div>
 
-            <div className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex min-w-0 items-center gap-2 text-[13px] text-muted-foreground">
               <Wallet className="size-4 shrink-0 text-muted-foreground/70" />
               <span className="truncate font-medium">
                 Budget: <span className="font-semibold text-foreground">{budget}</span>
@@ -228,16 +226,16 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
                   {activities.slice(0, 3).map((activity, i) => (
                     <Badge
                       key={i}
-                      variant="secondary"
-                      className="max-w-[110px] truncate px-2 py-1 text-[10px] font-medium"
+                      variant="outline"
+                      className="max-w-[110px] truncate px-2 py-1 text-[10px] font-medium text-muted-foreground"
                     >
                       {activity}
                     </Badge>
                   ))}
                   {activities.length > 3 && (
                     <Badge
-                      variant="secondary"
-                      className="shrink-0 px-2 py-1 text-[10px] font-medium"
+                      variant="outline"
+                      className="shrink-0 px-2 py-1 text-[10px] font-medium text-muted-foreground"
                     >
                       +{activities.length - 3}
                     </Badge>
@@ -266,7 +264,7 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
           <Trash2 className="size-4 lg:size-3.5" />
         </Button>
 
-        <CardFooter className="border-t border-border bg-transparent p-4 pt-0">
+        <CardFooter className="border-0 bg-transparent p-4 pt-0">
           <Button
             variant="outline"
             className="w-full"
@@ -277,7 +275,6 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
             }}
           >
             View Details
-            <ChevronRight className="size-3.5 text-muted-foreground" />
           </Button>
         </CardFooter>
       </Card>

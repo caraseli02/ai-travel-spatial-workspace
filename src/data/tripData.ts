@@ -283,13 +283,45 @@ import { DEMO_TRIP_ID, dayLabelConfig } from '../models/trip';
  * Create the pre-loaded "7 Days in Kyoto" Demo Trip.
  * Wraps existing fixture data into a proper Trip entity.
  */
+export const PARIS_FIXTURE_TRIP_ID = 'fixture-paris';
+
+/** Design-fixture trip matching Pencil Trip List (WApFW). */
+export function createParisFixtureTrip(): Trip {
+  const now = new Date().toISOString();
+  return {
+    id: PARIS_FIXTURE_TRIP_ID,
+    name: 'Paris Romance',
+    destination: 'Paris, France',
+    emoji: '🇫🇷',
+    country: 'France',
+    status: 'planning',
+    travelers: 2,
+    budget: '$2,500',
+    activities: ['Eiffel Tower', 'Louvre', 'Seine cruise'],
+    image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80',
+    createdAt: now,
+    updatedAt: now,
+    cards: [],
+    connections: [],
+    inboxItems: [],
+    days: [],
+    dayLabels: [],
+  };
+}
+
 export function createDemoTrip(): Trip {
   return {
     id: DEMO_TRIP_ID,
     name: '7 Days in Kyoto',
     destination: 'Kyoto, Japan',
     emoji: '🇯🇵',
+    country: 'Japan',
+    status: 'upcoming',
     dates: { start: '2025-12-14', end: '2025-12-21' },
+    travelers: 2,
+    budget: '$3,200',
+    activities: ['Fushimi Inari', 'Arashiyama', 'Nishiki Market'],
+    image: '/images/kyoto-hero.jpg',
     createdAt: '2025-01-01T00:00:00.000Z',
     updatedAt: new Date().toISOString(),
     cards: [...canvasCards],

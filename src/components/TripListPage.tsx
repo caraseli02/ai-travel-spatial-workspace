@@ -9,7 +9,7 @@ import {
   Filter,
   Globe,
   Plane,
-  Clock,
+  Clock3,
   CheckCircle2,
   Send,
   MessageSquare,
@@ -167,14 +167,14 @@ export default function TripListPage() {
     { key: "all" as const, label: "All", icon: Globe, count: counts.all },
     { key: "upcoming" as const, label: "Upcoming", icon: Plane, count: counts.upcoming },
     { key: "ongoing" as const, label: "Ongoing", icon: Compass, count: counts.ongoing },
-    { key: "planning" as const, label: "Planning", icon: Clock, count: counts.planning },
+    { key: "planning" as const, label: "Planning", icon: Clock3, count: counts.planning },
     { key: "completed" as const, label: "Completed", icon: CheckCircle2, count: counts.completed },
   ];
 
   return (
     <div className="dark flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground selection:bg-primary/30">
-      <header className="z-20 shrink-0 border-b border-border bg-background">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 md:px-8">
+      <header className="z-20 h-16 shrink-0 border-b border-border bg-background">
+        <div className="mx-auto flex h-full w-full max-w-[1344px] items-center justify-between px-12">
           <button
             onClick={() => navigate("/")}
             className="flex cursor-pointer items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
@@ -204,7 +204,7 @@ export default function TripListPage() {
 
             <Button onClick={() => setShowNewTripModal(true)} size="sm">
               <Plus className="size-3.5" />
-              New Trip
+              New trip
             </Button>
           </div>
         </div>
@@ -340,8 +340,8 @@ export default function TripListPage() {
 
         <div className="relative flex flex-1 flex-col overflow-hidden bg-background">
           <div className="shrink-0 border-b border-border bg-background">
-            <div className="mx-auto flex w-full max-w-6xl items-center gap-2.5 overflow-x-auto px-4 py-4 md:px-8">
-              <Button variant="outline" size="icon" className="shrink-0 rounded-full" disabled>
+            <div className="mx-auto flex w-full max-w-[1344px] items-center gap-2.5 overflow-x-auto px-12 py-4">
+              <Button variant="outline" size="icon" className="shrink-0" aria-hidden>
                 <Filter className="size-4 text-muted-foreground" />
               </Button>
 
@@ -354,9 +354,9 @@ export default function TripListPage() {
                       key={tab.key}
                       onClick={() => setSelectedFilter(tab.key)}
                       className={cn(
-                        "group flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-xs whitespace-nowrap transition-all",
+                        "group flex cursor-pointer items-center gap-2 rounded-full border py-1 pr-1 pl-2 text-xs whitespace-nowrap transition-all",
                         active
-                          ? "border-border bg-muted font-semibold text-foreground shadow-sm"
+                          ? "border-border bg-accent font-semibold text-foreground"
                           : "border-transparent bg-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                       )}
                     >
@@ -370,8 +370,11 @@ export default function TripListPage() {
                       />
                       <span>{tab.label}</span>
                       <Badge
-                        variant={active ? "secondary" : "outline"}
-                        className="h-5 min-w-5 justify-center px-1.5 text-[10px]"
+                        variant="secondary"
+                        className={cn(
+                          "h-5 min-w-5 justify-center px-1.5 text-[10px]",
+                          !active && "bg-transparent text-muted-foreground",
+                        )}
                       >
                         {tab.count}
                       </Badge>
@@ -383,11 +386,11 @@ export default function TripListPage() {
           </div>
 
           <div className="@container flex-1 overflow-y-auto bg-background pt-8 pb-40">
-            <div className="mx-auto w-full max-w-6xl px-4 md:px-8">
+            <div className="mx-auto w-full max-w-[1344px] px-12">
               <div className="grid grid-cols-1 gap-6 pb-24 @2xl:grid-cols-2 @5xl:grid-cols-3">
                 <motion.div layout onClick={() => setShowNewTripModal(true)}>
                   <Card
-                    className="group h-full min-h-[110px] cursor-pointer border-2 border-dashed border-border bg-transparent py-6 transition-all duration-300 hover:border-primary/40 hover:bg-muted/30 md:min-h-[340px]"
+                    className="group h-full min-h-[420px] cursor-pointer border-2 border-dashed border-border/60 bg-white/[0.01] py-0 ring-0 transition-all duration-300 hover:border-primary/40 hover:bg-muted/30"
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => {
@@ -397,15 +400,21 @@ export default function TripListPage() {
                       }
                     }}
                   >
-                    <CardContent className="flex h-full w-full flex-row items-center justify-start gap-4 p-5 text-left md:flex-col md:justify-center md:text-center">
-                      <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-border bg-muted text-muted-foreground transition-colors group-hover:border-primary/30 group-hover:bg-primary/10 group-hover:text-primary md:mb-4 md:size-14">
-                        <Plus className="size-6 transition-transform duration-300 group-hover:scale-110 md:size-7" />
-                      </div>
-                      <div className="flex-1 md:flex-none">
+                    <CardContent className="flex h-full min-h-[420px] flex-col items-center justify-center gap-4 p-6 text-center">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="pointer-events-none shrink-0"
+                        tabIndex={-1}
+                        aria-hidden
+                      >
+                        <Plus className="size-4" />
+                      </Button>
+                      <div className="space-y-1.5">
                         <span className="block text-sm font-semibold text-foreground">
                           New Trip
                         </span>
-                        <p className="mt-0.5 max-w-[200px] text-xs leading-relaxed text-muted-foreground md:mx-auto md:mt-1.5 md:max-w-[170px]">
+                        <p className="mx-auto max-w-[170px] text-xs leading-relaxed text-muted-foreground">
                           Start planning your next destination
                         </p>
                       </div>
@@ -419,22 +428,29 @@ export default function TripListPage() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                   >
-                    <Card className="h-full min-h-[350px] border-border bg-card">
-                      <CardContent className="flex h-full flex-col justify-between p-8">
-                        <div>
-                          <div className="mb-6 flex size-10 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
-                            <Sparkles className="size-5 animate-pulse text-primary" />
+                    <Card className="h-full min-h-[420px] border-border bg-card py-0">
+                      <CardContent className="flex h-full min-h-[420px] flex-col justify-between p-8">
+                        <div className="space-y-6">
+                          <Button
+                            size="icon"
+                            className="pointer-events-none shrink-0"
+                            tabIndex={-1}
+                            aria-hidden
+                          >
+                            <Sparkles className="size-4" />
+                          </Button>
+                          <div className="space-y-2">
+                            <h3 className="text-base font-bold text-foreground">Plan with AI</h3>
+                            <p className="text-xs leading-relaxed text-muted-foreground">
+                              Describe your dream journey in the search bar below. Tell Wayfarer
+                              where you want to go, who you are traveling with, and what you&apos;d
+                              love to see.
+                            </p>
                           </div>
-                          <h3 className="mb-2 text-base font-bold text-foreground">Plan with AI</h3>
-                          <p className="text-xs leading-relaxed text-muted-foreground">
-                            Describe your dream journey in the search bar below. Tell Wayfarer where
-                            you want to go, who you are traveling with, and what you&apos;d love to
-                            see.
-                          </p>
                         </div>
                         <Badge
                           variant="outline"
-                          className="w-fit text-[10px] tracking-wider uppercase"
+                          className="w-fit border-primary/30 text-[10px] font-semibold tracking-widest text-primary uppercase"
                         >
                           AI-Powered Planning
                         </Badge>
@@ -449,20 +465,29 @@ export default function TripListPage() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                   >
-                    <Card className="h-full min-h-[350px] border-border bg-card">
-                      <CardContent className="flex h-full flex-col justify-between p-8">
-                        <div>
-                          <div className="mb-6 flex size-10 items-center justify-center rounded-xl border border-border bg-muted">
-                            <Compass className="size-5 text-muted-foreground" />
+                    <Card className="h-full min-h-[420px] border-border bg-card py-0">
+                      <CardContent className="flex h-full min-h-[420px] flex-col justify-between p-8">
+                        <div className="space-y-6">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="pointer-events-none shrink-0"
+                            tabIndex={-1}
+                            aria-hidden
+                          >
+                            <Compass className="size-4 text-muted-foreground" />
+                          </Button>
+                          <div className="space-y-2">
+                            <h3 className="text-base font-bold text-muted-foreground">
+                              No {selectedFilter} trips
+                            </h3>
+                            <p className="text-xs leading-relaxed text-muted-foreground">
+                              There are currently no travel plans matching the &ldquo;
+                              {selectedFilter}
+                              &rdquo; status filter. Select another filter tab above to view other
+                              trips.
+                            </p>
                           </div>
-                          <h3 className="mb-2 text-base font-bold text-foreground">
-                            No {selectedFilter} trips
-                          </h3>
-                          <p className="text-xs leading-relaxed text-muted-foreground">
-                            There are currently no travel plans matching the &ldquo;{selectedFilter}
-                            &rdquo; status filter. Select another filter tab above to view other
-                            trips.
-                          </p>
                         </div>
                         <Button
                           variant="outline"
@@ -504,8 +529,8 @@ export default function TripListPage() {
             </div>
           </div>
 
-          <div className="absolute right-0 bottom-6 left-0 z-40 px-4">
-            <div className="mx-auto flex w-full max-w-2xl flex-col gap-3">
+          <div className="absolute right-0 bottom-0 left-0 z-40 px-12 pb-6">
+            <div className="mx-auto flex w-full max-w-[672px] flex-col gap-3">
               <div className="scrollbar-none -mx-4 flex flex-nowrap items-center justify-start gap-2 overflow-x-auto px-4 pb-2 md:mx-0 md:px-0 md:pb-1">
                 {suggestions.map((suggestion, i) => (
                   <button
@@ -526,18 +551,22 @@ export default function TripListPage() {
               <form
                 onSubmit={handlePromptSubmit}
                 className={cn(
-                  "flex items-center gap-2 rounded-2xl border bg-card/90 px-3 py-2.5 backdrop-blur-xl transition-all duration-200",
-                  promptFocused
-                    ? "border-primary/50 shadow-lg shadow-primary/5"
-                    : "border-border shadow-xl shadow-black/20",
+                  "flex items-center gap-2 rounded-2xl border bg-card py-1 pr-1 pl-2 transition-all duration-200",
+                  promptFocused ? "border-primary/50" : "border-border",
                 )}
               >
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/25 select-none">
+                <Button
+                  type="button"
+                  size="icon"
+                  className="pointer-events-none shrink-0"
+                  tabIndex={-1}
+                  aria-hidden
+                >
                   <Sparkles className="size-4" />
-                </div>
+                </Button>
 
                 <Input
-                  className="h-auto flex-1 border-0 bg-transparent py-1 shadow-none focus-visible:ring-0 dark:bg-transparent"
+                  className="h-8 flex-1 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
                   placeholder="Describe your dream trip..."
                   value={promptValue}
                   onChange={(e) => setPromptValue(e.target.value)}
@@ -547,16 +576,15 @@ export default function TripListPage() {
 
                 <Button
                   type="submit"
-                  variant="outline"
                   size="icon"
                   disabled={!promptValue.trim()}
-                  className="shrink-0 rounded-xl"
+                  className="shrink-0"
                 >
                   <Send className="size-4" />
                 </Button>
               </form>
 
-              <p className="text-center text-[10px] tracking-tight text-muted-foreground/60 select-none">
+              <p className="text-center text-[10px] text-muted-foreground select-none">
                 AI can make mistakes. Double-check important details.
               </p>
             </div>
