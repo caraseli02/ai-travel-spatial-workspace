@@ -6,12 +6,27 @@ Marketing surface at route `/`. Introduces Wayfarer, demonstrates the inbox → 
 
 | Artifact | Location |
 |----------|----------|
-| Pencil design | `pencil-shadcn.pen` (local Pencil file; not committed) |
+| Pencil design | `pencil-shadcn.pen` → **Desktop** `scbFm` · **Mobile** `LWbNo` ([README.md](README.md)) |
 | Theme tokens | `src/index.css` — Stone base + Orange accent, aligned with the Pencil file |
+| Layout patterns | **A** header + content, marketing sections ([patterns.md](patterns.md)) |
 | shadcn config | `components.json` — style `radix-nova`, base color `stone`, icons `lucide` |
 | Implementation | `src/components/LandingPage.tsx`, `src/components/PricingSection.tsx` |
 
 Migration was done in vertical slices (PRs #10–#18): bootstrap shadcn → pricing → nav/hero → canvas tabs → testimonials/before-after → how-it-works/features → live chat preview.
+
+## Pencil screens
+
+### Desktop — `Wayfarer / Desktop / Landing` (`scbFm`)
+
+| Frame | Node ID | Size | Purpose |
+|-------|---------|------|---------|
+| **Landing — Default** | `s6fLZ` | 1440 × fit | Full marketing page — all sections |
+
+### Mobile — `Wayfarer / Mobile / Landing` (`LWbNo`)
+
+| Frame | Node ID | Size | Purpose |
+|-------|---------|------|---------|
+| **Landing — Default (390px)** | `qJIYB` | 390 × fit | Status bar; hamburger nav; stacked hero + live chat preview; single-column sections (canvas, pricing, testimonials, CTA) |
 
 ## Page sections (top to bottom)
 

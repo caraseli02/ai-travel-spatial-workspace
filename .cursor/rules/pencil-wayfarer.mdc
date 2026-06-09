@@ -1,0 +1,47 @@
+---
+description: Pencil design file conventions — separate pages for DS layers, desktop, and mobile
+globs: docs/design/**
+alwaysApply: false
+---
+
+# Pencil Wayfarer conventions
+
+Load `.agents/skills/pencil-wayfarer/SKILL.md` for full workflows.
+
+## File access
+
+- `.pen` files — Pencil MCP only, never Read/Grep
+- Start at **Wayfarer / Index** (`d3HbiR`)
+
+## Top-level structure
+
+Never use a single "Design System" or surface frame that mixes concerns:
+
+| Frame prefix | Contains |
+|--------------|----------|
+| `Wayfarer / DS / 01–06` | One design layer per frame |
+| `Wayfarer / Desktop / *` | 1440px screens only |
+| `Wayfarer / Mobile / *` | 390px screens only |
+
+Desktop and mobile are **sibling top-level frames**, not sections inside one surface.
+
+## Screen page anatomy
+
+```
+Wayfarer / Desktop / Trip List
+├── Cover          route, breakpoint, theme
+└── Screens        vertical, 80px gap, state frames
+```
+
+## Component page anatomy (DS / 05–06)
+
+Domain components grouped with labels:
+
+- Trip List: **Chrome** | **Cards**
+- Trip Canvas: **Chrome** | **Inbox** | **Canvas Cards** | **Panels & Modals**
+
+## Code sync
+
+- Patterns: `docs/design/patterns.md`
+- Crosswalk: `.agents/skills/pencil-wayfarer/CROSSWALK.md`
+- shadcn: `.cursor/rules/shadcn-ui.mdc`

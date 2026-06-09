@@ -10,26 +10,39 @@ Primary app surface at route `/trips`. Dark-themed hub for browsing, filtering, 
 | Theme tokens | `src/index.css` — Stone base + Orange accent (`.dark`); Pencil also defines `wf-dark-*` variables |
 | shadcn config | `components.json` — style `radix-nova`, base color `stone`, icons `lucide` |
 | Implementation | `src/components/TripListPage.tsx`, `src/components/TripCard.tsx` |
+| Layout pattern | **C** — fixed prompt bar + **A** — header + content ([patterns.md](patterns.md)) |
 | Nav pattern | **Wayfarer / Trip List Header** (`l6uTL`) — composes Brand Mark + `Button/Ghost` + `Button/Default` |
 | Filter pattern | **Wayfarer / Trip List Filter Bar** (`ZPaim`) — `Icon Button/Outline` + `Tab Item` + `Badge/Secondary` |
 | Prompt pattern | **Wayfarer / Trip List Prompt Bar** (`YK92H`) — `Badge/Outline` chips + `Input/Default` + `Icon Button` |
 | Card pattern | **Wayfarer / Trip Card** (`GK0nB`) — `Card` + `Badge` + `Button/Outline` |
 
-Screens live in a dedicated top-level frame **Wayfarer / Trip List** (sibling to **Wayfarer / Screens** / **Wayfarer / Design System**). Landing Page remains under **Wayfarer / Screens** (`s6fLZ`).
+Desktop: **Wayfarer / Desktop / Trip List** (`i8BjSi`). Mobile: **Wayfarer / Mobile / Trip List** (`uqZ1a`). See [README.md](README.md).
+
+Domain components: **Wayfarer / DS / 05 Components · Trip List** (`x76EWb`) — groups **Chrome** | **Cards**.
 
 ## Pencil screens
 
+### Desktop — `i8BjSi`
+
 | Frame | Node ID | Purpose |
 |-------|---------|---------|
-| **Trip List (1440px)** | `WApFW` | Default populated state — 3-column grid with New Trip card + 2 sample trips |
-| **Trip List — Chat Open** | `rkU8h` | Left chat sidebar (380px) with sample user/AI exchange |
-| **Trip List — New Trip Dialog** | `rVIzu` | Modal overlay with **Dialog / Modal/Center** (`5:X6bmd`) form |
-| **Trip List — Empty** | `IV3cl` | Zero trips — New Trip card + **Plan with AI** helper card |
-| **Trip List — No Matches** | `N5RjEK` | Filtered empty — New Trip card + **No matching trips** helper card |
+| **Trip List — Default (1440px)** | `WApFW` | Default populated state — 3-column grid with New Trip card + 2 sample trips |
+| **Trip List — Chat Open (1440px)** | `rkU8h` | Left chat sidebar (380px) with sample user/AI exchange |
+| **Trip List — New Trip Dialog (1440px)** | `rVIzu` | Modal overlay with **Modal/Center** (`5:X6bmd`) form |
+| **Trip List — Empty (1440px)** | `IV3cl` | Zero trips — New Trip card + **Plan with AI** helper card |
+| **Trip List — No Matches (1440px)** | `N5RjEK` | Filtered empty — New Trip card + **No matching trips** helper card |
 
-Container: **Wayfarer / Trip List** (`r1rP9w`) → **Screens Container** (`gZ1Fa`, vertical stack, 80px gap). Positioned to the right of **Wayfarer / Screens** (`YdtCx`).
+### Mobile — `uqZ1a`
 
-All screens: **1440 × 1024**, theme `Stone` base + `Orange` accent + `Dark` mode.
+| Frame | Node ID | Purpose |
+|-------|---------|---------|
+| **Trip List — Default (390px)** | `CXcSq` | Status bar + 1-col card stack, `ZPaim` filter bar, `YK92H` prompt bar pinned bottom |
+| **Trip List — Chat Open (390px)** | `zjmBk` | Default + dim overlay; chat history as bottom sheet (~54% height) |
+| **Trip List — New Trip Dialog (390px)** | `SCroq` | Default + centered `5:X6bmd` modal (358px wide) |
+| **Trip List — Empty (390px)** | `YHSxu` | `ZQPee` + `vCVf6` Plan with AI card |
+| **Trip List — No Matches (390px)** | `nhghj` | `ZQPee` + `McIXx` No matching trips card |
+
+All desktop screens: **1440 × 1024**, theme `Stone` + `Orange` + `Dark`.
 
 ## Page sections (top to bottom)
 
@@ -40,7 +53,7 @@ All screens: **1440 × 1024**, theme `Stone` base + `Orange` accent + `Dark` mod
 | 3 | **Trip grid** | 3 columns @ 1440px: dashed New Trip card, two trip samples | Ref `ZQPee` (new trip), `GK0nB` (trip card); status badge via `5:WuUMk` |
 | 4 | **Prompt bar** | Suggestion chips + AI input + send | Ref `YK92H` → `5:3IiAS`, `5:fEUdI`, `5:urnwK` |
 
-All section refs live under **Wayfarer / Design System → 04 Trip List** (`Tazid`).
+All section refs live under **Wayfarer / DS / 05 Components · Trip List** (`x76EWb`).
 
 ## Trip card anatomy
 
