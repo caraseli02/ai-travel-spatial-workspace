@@ -11,3 +11,5 @@ This repo uses the canonical mattpocock/skills triage labels. See `docs/agents/t
 ### Domain docs
 
 This repo uses a single-context domain documentation layout. See `docs/agents/domain.md`.
+
+For the Landing Page Pencil design and shadcn/ui migration, see `docs/design/landing-page.md` and `docs/adr/0003-shadcn-ui-foundation.md`.
