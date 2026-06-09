@@ -1,17 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Calendar,
-  Users,
-  Wallet,
-  MapPin,
-  CheckCircle2,
-  Clock3,
-  Plane,
-  Compass,
-  Sparkles,
-  Trash2,
-} from "lucide-react";
+import { Calendar, Users, Wallet, MapPin, Sparkles, Trash2 } from "lucide-react";
 import type { Trip } from "../models/trip";
 import {
   deriveTripStatus,
@@ -36,20 +25,23 @@ interface TripCardProps {
 }
 
 const statusConfig = {
-  upcoming: { color: "text-emerald-400", icon: Plane, label: "Upcoming" },
-  ongoing: { color: "text-amber-400", icon: Compass, label: "Ongoing" },
-  completed: { color: "text-muted-foreground", icon: CheckCircle2, label: "Completed" },
-  planning: { color: "text-sky-400", icon: Clock3, label: "Planning" },
-};
+  upcoming: { color: "text-[#34d399]", label: "Upcoming" },
+  ongoing: { color: "text-amber-400", label: "Ongoing" },
+  completed: { color: "text-[#a8a29e]", label: "Completed" },
+  planning: { color: "text-[#38bdf8]", label: "Planning" },
+} as const;
 
 const tripCardClassName =
-  "relative flex h-full min-h-[420px] flex-col justify-between gap-0 overflow-hidden rounded-2xl border border-border bg-card py-0 shadow-sm ring-0";
+  "relative flex h-full min-h-[420px] flex-col justify-between gap-0 overflow-hidden rounded-2xl border border-white/10 bg-[#1c1917] py-0 shadow-sm ring-0";
+
+const metaClassName = "text-[13px] font-medium text-[#a8a29e]";
+const activityChipClassName =
+  "max-w-[110px] truncate rounded-2xl border border-white/10 bg-transparent px-2 py-0.5 text-[10px] font-medium text-[#a8a29e]";
 
 export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripCardProps) {
   const [showConfirm, setShowConfirm] = useState(false);
   const status = deriveTripStatus(trip);
   const config = statusConfig[status];
-  const StatusIcon = config.icon;
 
   const image = deriveTripImage(trip);
   const country = deriveTripCountry(trip);
@@ -137,18 +129,16 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
               className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#1c1917] from-0% via-transparent via-60% to-transparent" />
 
-            <Badge
-              variant="secondary"
+            <span
               className={cn(
-                "absolute top-3 left-3 gap-1.5 px-2.5 py-1 text-[11px] font-semibold",
+                "absolute top-3 left-3 rounded-2xl bg-[#292524] px-2 py-0.5 text-xs font-semibold",
                 config.color,
               )}
             >
-              <StatusIcon className="size-3" />
               {config.label}
-            </Badge>
+            </span>
 
             {isNew && (
               <motion.div
@@ -171,54 +161,47 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
                 <span className="truncate">{trip.name}</span>
               </h3>
               <div className="mt-1 flex items-center gap-1 text-xs font-medium text-white/70">
-                <MapPin className="size-3.5 shrink-0" />
+                <MapPin className="size-3.5 shrink-0 text-white/70" />
                 <span className="truncate">{country}</span>
               </div>
             </div>
           </div>
 
           <CardContent className="space-y-3 p-4 [--card-spacing:--spacing(4)]">
-            <div className="grid grid-cols-2 gap-x-3 gap-y-3 text-[13px] text-muted-foreground">
-              <div className="flex min-w-0 items-center gap-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className={cn("flex min-w-0 items-center gap-2", metaClassName)}>
                 <Calendar className="size-4 shrink-0" />
-                <span className="truncate font-medium">{formatTripDates(trip.dates)}</span>
+                <span className="truncate">{formatTripDates(trip.dates)}</span>
               </div>
-              <div className="flex min-w-0 items-center gap-2">
+              <div className={cn("flex min-w-0 items-center gap-2", metaClassName)}>
                 <Users className="size-4 shrink-0" />
-                <span className="truncate font-medium">
+                <span className="truncate">
                   {travelers} {travelers === 1 ? "traveler" : "travelers"}
                 </span>
               </div>
             </div>
 
-            <div className="flex min-w-0 items-center gap-2 text-[13px] text-muted-foreground">
+            <div className={cn("flex min-w-0 items-center gap-2", metaClassName)}>
               <Wallet className="size-4 shrink-0" />
-              <span className="truncate font-medium">Budget: {budget}</span>
+              <span className="truncate">Budget: {budget}</span>
             </div>
 
             <div className="flex flex-wrap gap-1.5">
               {activities.length > 0 ? (
                 <>
                   {activities.slice(0, 3).map((activity, i) => (
-                    <Badge
-                      key={i}
-                      variant="outline"
-                      className="max-w-[110px] truncate px-2 py-1 text-[10px] font-medium text-muted-foreground"
-                    >
+                    <span key={i} className={activityChipClassName}>
                       {activity}
-                    </Badge>
+                    </span>
                   ))}
                   {activities.length > 3 && (
-                    <Badge
-                      variant="outline"
-                      className="shrink-0 px-2 py-1 text-[10px] font-medium text-muted-foreground"
-                    >
+                    <span className={cn(activityChipClassName, "max-w-none shrink-0")}>
                       +{activities.length - 3}
-                    </Badge>
+                    </span>
                   )}
                 </>
               ) : (
-                <span className="text-[10px] font-medium text-muted-foreground italic">
+                <span className="text-[10px] font-medium text-[#a8a29e] italic">
                   Workspace is empty
                 </span>
               )}
@@ -233,7 +216,7 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
             e.stopPropagation();
             setShowConfirm(true);
           }}
-          className="absolute top-3 right-3 z-10 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
+          className="absolute top-3 right-3 z-10 text-white/80 opacity-0 transition-opacity hover:bg-white/10 hover:text-white group-hover:opacity-100 group-focus-within:opacity-100"
           aria-label={`Delete trip ${trip.name}`}
           title="Delete Trip"
         >
@@ -242,9 +225,8 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
 
         <CardFooter className="border-0 bg-transparent p-4 pt-0 [--card-spacing:--spacing(4)]">
           <Button
-            variant="outline"
-            className="w-full"
-            size="sm"
+            variant="ghost"
+            className="h-9 w-full rounded-md border border-white/10 bg-[#0c0a09] text-sm font-medium text-zinc-50 shadow-[0_1px_3.5px_rgba(0,0,0,0.05)] hover:bg-[#0c0a09]/90 hover:text-zinc-50"
             onClick={(e) => {
               e.stopPropagation();
               onOpen();
