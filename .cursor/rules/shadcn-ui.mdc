@@ -48,6 +48,8 @@ Use `lucide-react` — matches `components.json` `iconLibrary` setting.
 
 ## Reference docs
 
+- Design index: `docs/design/README.md`
+- Tokens + crosswalk: `docs/design/foundations.md`
 - Theme tokens: `src/index.css` (`:root` / `.dark`)
-- Landing page section map: `docs/design/landing-page.md`
+- Pencil skill: `.agents/skills/pencil-wayfarer/SKILL.md`
 - Decision record: `docs/adr/0003-shadcn-ui-foundation.md`

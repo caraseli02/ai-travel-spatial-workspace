@@ -1,8 +1,17 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Trip } from '../models/trip';
 import { computeStatusCounts, filterTripsByStatus, generateTripFromMessage } from './tripListHelpers';
 
 describe('tripListHelpers - computeStatusCounts', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-05-20T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('should return correct counts when trips array is empty', () => {
     const trips: Trip[] = [];
     const counts = computeStatusCounts(trips);
@@ -49,6 +58,15 @@ describe('tripListHelpers - computeStatusCounts', () => {
 });
 
 describe('tripListHelpers - filterTripsByStatus', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-05-20T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   const mockTrips = [
     { id: '1', name: 'Trip 1', dates: { start: '2026-06-01', end: '2026-06-10' } }, // upcoming
     { id: '2', name: 'Trip 2', dates: { start: '2026-05-15', end: '2026-05-30' } }, // ongoing

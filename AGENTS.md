@@ -1,15 +1,35 @@
-## Agent skills
+# Wayfarer Agent Entry
 
-### Issue tracker
+Wayfarer is a React/Vite prototype for an AI-native travel workspace. It helps a traveler collect loose Trip Material, organize it on a Spatial Canvas, and shape it into Trip Workspace structure.
 
-Issues and PRDs are tracked in GitHub Issues for `caraseli02/ai-travel-spatial-workspace`. See `docs/agents/issue-tracker.md`.
+## Quick Start
 
-### Triage labels
+- Install dependencies: `make setup`
+- Run locally: `make dev`
+- Run tests: `make test`
+- Full verification: `make check`
 
-This repo uses the canonical mattpocock/skills triage labels. See `docs/agents/triage-labels.md`.
+## Hard Constraints
 
-### Domain docs
+- Treat the repository as the system of record. Do not rely on chat history for durable project decisions.
+- Use domain vocabulary from `CONTEXT.md`; do not drift to avoided synonyms listed there.
+- Follow ADRs in `docs/adr/` unless the user explicitly asks to revisit a decision.
+- Keep this file short and routing-oriented. Put topic-specific instructions in focused docs.
+- Preserve localStorage-first persistence behind the Trip Repository interface.
+- Preserve `react-router-dom` routes: `/`, `/trips`, and `/trips/:tripId`.
+- New interactive UI should compose shadcn primitives from `src/components/ui/` before custom markup.
 
-This repo uses a single-context domain documentation layout. See `docs/agents/domain.md`.
+## Fresh Session Map
 
-For the Landing Page Pencil design and shadcn/ui migration, see `docs/design/landing-page.md` and `docs/adr/0003-shadcn-ui-foundation.md`.
+- What this system is: `CONTEXT.md`
+- How it is organized: `docs/architecture/codebase-map.md` and `src/AGENTS.md`
+- How to run and verify it: `Makefile` and `package.json`
+- Current progress and open harness state: `PROGRESS.md`
+- Harness maintenance rules: `docs/agents/harness.md`
+
+## Topic Docs
+
+- Issue tracker: GitHub Issues for `caraseli02/ai-travel-spatial-workspace`; see `docs/agents/issue-tracker.md`.
+- Triage labels: canonical mattpocock/skills labels; see `docs/agents/triage-labels.md`.
+- Domain docs: single-context layout; see `docs/agents/domain.md`.
+- Product design: for Pencil designs and shadcn/ui migration, load `.agents/skills/pencil-wayfarer/SKILL.md`, then `docs/design/README.md`, surface docs (`landing-page.md`, `trip-list.md`, `trip-canvas.md`), and `docs/adr/0003-shadcn-ui-foundation.md`.
