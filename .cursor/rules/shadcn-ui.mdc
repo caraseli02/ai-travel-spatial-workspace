@@ -1,0 +1,53 @@
+---
+description: shadcn/ui and theme token conventions for React components
+globs: src/components/**/*.tsx
+alwaysApply: false
+---
+
+# shadcn/ui conventions
+
+## Use primitives first
+
+Import interactive UI from `@/components/ui/` before writing custom buttons, cards, or tabs:
+
+```tsx
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+```
+
+Add missing components: `vp dlx shadcn@latest add <name>`
+
+## Semantic tokens over hardcoded colors
+
+For layout chrome (backgrounds, text, borders), use theme tokens:
+
+```tsx
+// ✅ GOOD
+<div className="bg-background text-foreground border-border">
+<p className="text-muted-foreground">
+
+// ❌ BAD for generic UI
+<div className="bg-stone-50 text-stone-800 border-stone-200">
+```
+
+Hardcoded amber/orange/emerald/rose classes are OK for **domain accents** (day colors, canvas cards, sticky notes) — not for nav, buttons, or standard cards.
+
+## Compose with `cn()`
+
+Merge shadcn defaults with one-off layout classes via `cn()` from `@/lib/utils`:
+
+```tsx
+<Button variant="outline" size="lg" className="h-auto px-8 py-4">
+<Card className={cn("border", item.className)}>
+```
+
+## Icons
+
+Use `lucide-react` — matches `components.json` `iconLibrary` setting.
+
+## Reference docs
+
+- Theme tokens: `src/index.css` (`:root` / `.dark`)
+- Landing page section map: `docs/design/landing-page.md`
+- Decision record: `docs/adr/0003-shadcn-ui-foundation.md`
