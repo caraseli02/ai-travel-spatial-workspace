@@ -180,10 +180,10 @@ export default function TripListPage() {
             className="flex cursor-pointer items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
           >
             <ChevronLeft className="size-4" />
-            <div className="flex size-7 items-center justify-center rounded-lg bg-primary">
-              <Compass className="size-4 text-primary-foreground" strokeWidth={2.5} />
+            <div className="flex size-7 items-center justify-center rounded-[6px] bg-primary">
+              <Compass className="size-[15px] text-primary-foreground" strokeWidth={2.5} />
             </div>
-            <span className="text-[15px] font-semibold tracking-tight">Wayfarer</span>
+            <span className="text-[15px] font-semibold tracking-[-0.3px]">Wayfarer</span>
           </button>
 
           <div className="flex items-center gap-3">
@@ -191,7 +191,7 @@ export default function TripListPage() {
               variant="ghost"
               size="sm"
               onClick={() => setShowChatHistory(!showChatHistory)}
-              className={cn(showChatHistory && "bg-muted text-foreground")}
+              className={cn(showChatHistory && "bg-accent text-foreground")}
             >
               <MessageSquare className="size-4" />
               <span className="hidden sm:inline">Chat</span>
@@ -385,12 +385,12 @@ export default function TripListPage() {
             </div>
           </div>
 
-          <div className="@container flex-1 overflow-y-auto bg-background pt-8 pb-40">
+          <div className="flex-1 overflow-y-auto bg-background pt-8 pb-[160px]">
             <div className="mx-auto w-full max-w-[1344px] px-12">
-              <div className="grid grid-cols-1 gap-6 pb-24 @2xl:grid-cols-2 @5xl:grid-cols-3">
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <motion.div layout onClick={() => setShowNewTripModal(true)}>
                   <Card
-                    className="group h-full min-h-[420px] cursor-pointer border-2 border-dashed border-border/60 bg-white/[0.01] py-0 ring-0 transition-all duration-300 hover:border-primary/40 hover:bg-muted/30"
+                    className="group h-full min-h-[420px] cursor-pointer rounded-2xl border-2 border-dashed border-border/60 bg-white/[0.01] py-0 shadow-none ring-0 transition-all duration-300 hover:border-primary/40 hover:bg-muted/30"
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => {
@@ -400,7 +400,7 @@ export default function TripListPage() {
                       }
                     }}
                   >
-                    <CardContent className="flex h-full min-h-[420px] flex-col items-center justify-center gap-4 p-6 text-center">
+                    <CardContent className="flex h-full min-h-[420px] flex-col items-center justify-center gap-4 p-6 text-center [--card-spacing:--spacing(4)]">
                       <Button
                         variant="outline"
                         size="icon"
@@ -428,8 +428,8 @@ export default function TripListPage() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                   >
-                    <Card className="h-full min-h-[420px] border-border bg-card py-0">
-                      <CardContent className="flex h-full min-h-[420px] flex-col justify-between p-8">
+                    <Card className="h-full min-h-[420px] rounded-2xl border border-border bg-card py-0 shadow-sm ring-0">
+                      <CardContent className="flex h-full min-h-[420px] flex-col justify-between p-8 [--card-spacing:--spacing(4)]">
                         <div className="space-y-6">
                           <Button
                             size="icon"
@@ -465,8 +465,8 @@ export default function TripListPage() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                   >
-                    <Card className="h-full min-h-[420px] border-border bg-card py-0">
-                      <CardContent className="flex h-full min-h-[420px] flex-col justify-between p-8">
+                    <Card className="h-full min-h-[420px] rounded-2xl border border-border bg-card py-0 shadow-sm ring-0">
+                      <CardContent className="flex h-full min-h-[420px] flex-col justify-between p-8 [--card-spacing:--spacing(4)]">
                         <div className="space-y-6">
                           <Button
                             variant="outline"
@@ -530,8 +530,8 @@ export default function TripListPage() {
           </div>
 
           <div className="absolute right-0 bottom-0 left-0 z-40 px-12 pb-6">
-            <div className="mx-auto flex w-full max-w-[672px] flex-col gap-3">
-              <div className="scrollbar-none -mx-4 flex flex-nowrap items-center justify-start gap-2 overflow-x-auto px-4 pb-2 md:mx-0 md:px-0 md:pb-1">
+            <div className="mx-auto flex w-full max-w-[672px] flex-col items-center gap-3">
+              <div className="scrollbar-none flex w-full flex-nowrap items-center justify-center gap-2 overflow-x-auto pb-1">
                 {suggestions.map((suggestion, i) => (
                   <button
                     key={i}
@@ -551,7 +551,7 @@ export default function TripListPage() {
               <form
                 onSubmit={handlePromptSubmit}
                 className={cn(
-                  "flex items-center gap-2 rounded-2xl border bg-card py-1 pr-1 pl-2 transition-all duration-200",
+                  "flex w-full items-center gap-2 rounded-2xl border bg-card py-1 pr-1 pl-2 transition-all duration-200",
                   promptFocused ? "border-primary/50" : "border-border",
                 )}
               >
@@ -576,11 +576,12 @@ export default function TripListPage() {
 
                 <Button
                   type="submit"
+                  variant="outline"
                   size="icon"
                   disabled={!promptValue.trim()}
                   className="shrink-0"
                 >
-                  <Send className="size-4" />
+                  <Send className="size-4 text-muted-foreground" />
                 </Button>
               </form>
 

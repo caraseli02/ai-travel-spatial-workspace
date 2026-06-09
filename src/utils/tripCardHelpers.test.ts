@@ -183,12 +183,12 @@ describe('Trip Card Helpers', () => {
 
     it('formats cross-month date ranges in the same year beautifully', () => {
       expect(formatTripDates({ start: '2026-05-30', end: '2026-06-05' }))
-        .toBe('May 30 – Jun 5, 2026');
+        .toBe('May 30–Jun 5, 2026');
     });
 
     it('formats multi-day date ranges in the same month elegantly', () => {
       expect(formatTripDates({ start: '2026-05-14', end: '2026-05-21' }))
-        .toBe('May 14 – 21, 2026');
+        .toBe('May 14–21, 2026');
     });
 
     it('formats single-day dates simple and clean', () => {

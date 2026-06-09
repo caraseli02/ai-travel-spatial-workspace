@@ -1,8 +1,8 @@
-import type { Trip } from './trip';
-import { DEMO_TRIP_ID } from './trip';
-import { createDemoTrip, createParisFixtureTrip } from '../data/tripData';
+import type { Trip } from "./trip";
+import { DEMO_TRIP_ID } from "./trip";
+import { createDemoTrip, createParisFixtureTrip } from "../data/tripData";
 
-const STORAGE_KEY = 'wayfarer_trips';
+const STORAGE_KEY = "wayfarer_trips";
 
 /** Safe wrapper to get items from localStorage. */
 function safeGetItem(key: string): string | null {
@@ -29,7 +29,7 @@ function readAll(): Trip[] {
     const raw = safeGetItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch (err) {
-    console.warn('Failed to parse trips from localStorage:', err);
+    console.warn("Failed to parse trips from localStorage:", err);
     return [];
   }
 }
@@ -39,11 +39,11 @@ function writeAll(trips: Trip[]): void {
   try {
     safeSetItem(STORAGE_KEY, JSON.stringify(trips));
   } catch (err) {
-    console.warn('Failed to serialize trips for localStorage:', err);
+    console.warn("Failed to serialize trips for localStorage:", err);
   }
 }
 
-const SEEDED_KEY = 'wayfarer_demo_seeded';
+const SEEDED_KEY = "wayfarer_demo_seeded";
 
 /**
  * Seed the Demo Trip on first visit.
@@ -51,17 +51,17 @@ const SEEDED_KEY = 'wayfarer_demo_seeded';
  * the Kyoto demo trip is pre-loaded.
  */
 function ensureDemoTrip(trips: Trip[]): Trip[] {
-  if (safeGetItem(SEEDED_KEY) === 'true') {
+  if (safeGetItem(SEEDED_KEY) === "true") {
     return trips;
   }
   if (trips.length > 0) {
-    safeSetItem(SEEDED_KEY, 'true');
+    safeSetItem(SEEDED_KEY, "true");
     return trips;
   }
   const demo = createDemoTrip();
   const paris = createParisFixtureTrip();
   writeAll([demo, paris]);
-  safeSetItem(SEEDED_KEY, 'true');
+  safeSetItem(SEEDED_KEY, "true");
   return [demo, paris];
 }
 
@@ -74,12 +74,12 @@ export const localTripRepository = {
 
   load(id: string): Trip | null {
     const trips = this.list();
-    return trips.find(t => t.id === id) ?? null;
+    return trips.find((t) => t.id === id) ?? null;
   },
 
   save(trip: Trip): void {
     const trips = readAll();
-    const idx = trips.findIndex(t => t.id === trip.id);
+    const idx = trips.findIndex((t) => t.id === trip.id);
     const updated = { ...trip, updatedAt: new Date().toISOString() };
 
     if (idx >= 0) {
@@ -91,7 +91,7 @@ export const localTripRepository = {
   },
 
   delete(id: string): void {
-    const trips = readAll().filter(t => t.id !== id);
+    const trips = readAll().filter((t) => t.id !== id);
     writeAll(trips);
   },
 };

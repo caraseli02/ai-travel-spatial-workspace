@@ -6,7 +6,7 @@ import {
   Wallet,
   MapPin,
   CheckCircle2,
-  Clock,
+  Clock3,
   Plane,
   Compass,
   Sparkles,
@@ -36,35 +36,14 @@ interface TripCardProps {
 }
 
 const statusConfig = {
-  upcoming: {
-    color: "text-emerald-400",
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/20",
-    icon: Plane,
-    label: "Upcoming",
-  },
-  ongoing: {
-    color: "text-amber-400",
-    bg: "bg-amber-500/10",
-    border: "border-amber-500/20",
-    icon: Compass,
-    label: "Ongoing",
-  },
-  completed: {
-    color: "text-muted-foreground",
-    bg: "bg-muted",
-    border: "border-border",
-    icon: CheckCircle2,
-    label: "Completed",
-  },
-  planning: {
-    color: "text-sky-400",
-    bg: "bg-sky-500/10",
-    border: "border-sky-500/20",
-    icon: Clock,
-    label: "Planning",
-  },
+  upcoming: { color: "text-emerald-400", icon: Plane, label: "Upcoming" },
+  ongoing: { color: "text-amber-400", icon: Compass, label: "Ongoing" },
+  completed: { color: "text-muted-foreground", icon: CheckCircle2, label: "Completed" },
+  planning: { color: "text-sky-400", icon: Clock3, label: "Planning" },
 };
+
+const tripCardClassName =
+  "relative flex h-full min-h-[420px] flex-col justify-between gap-0 overflow-hidden rounded-2xl border border-border bg-card py-0 shadow-sm ring-0";
 
 export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripCardProps) {
   const [showConfirm, setShowConfirm] = useState(false);
@@ -89,14 +68,14 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
       }}
       className="group relative h-full"
     >
-      <Card className="relative flex h-full min-h-[420px] flex-col justify-between gap-0 overflow-hidden rounded-2xl py-0 ring-border transition-all duration-300 hover:ring-foreground/20">
+      <Card className={tripCardClassName}>
         <AnimatePresence>
           {showConfirm && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-20 flex items-center justify-center rounded-xl bg-background/90 backdrop-blur-md"
+              className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-background/90 backdrop-blur-md"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="max-w-[80%] space-y-4 p-5 text-center">
@@ -151,7 +130,7 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
           aria-label={`Open trip workspace for ${trip.name}`}
           className="flex flex-1 cursor-pointer flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
         >
-          <div className="relative h-[192px] overflow-hidden">
+          <div className="relative h-[192px] overflow-hidden rounded-t-2xl">
             <img
               src={image}
               alt={trip.destination}
@@ -161,12 +140,11 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
             <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent" />
 
             <Badge
+              variant="secondary"
               className={cn(
-                "absolute top-3 left-3 gap-1.5 border-0 px-2.5 py-1 text-[11px] font-semibold backdrop-blur-md",
-                config.bg,
+                "absolute top-3 left-3 gap-1.5 px-2.5 py-1 text-[11px] font-semibold",
                 config.color,
               )}
-              variant="secondary"
             >
               <StatusIcon className="size-3" />
               {config.label}
@@ -176,9 +154,9 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="absolute top-3 right-16 z-10 transition-all duration-300 lg:right-3 lg:group-hover:right-12 lg:group-focus-within:right-12"
+                className="absolute top-3 right-3 z-10"
               >
-                <Badge className="gap-1 bg-primary/90 px-2.5 py-1.5 text-[11px] text-primary-foreground shadow-lg">
+                <Badge className="gap-1 bg-primary px-2.5 py-1 text-[11px] text-primary-foreground">
                   <Sparkles className="size-3" />
                   New
                 </Badge>
@@ -186,7 +164,7 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
             )}
 
             <div className="absolute right-4 bottom-3 left-4">
-              <h3 className="flex items-center gap-2 truncate text-lg font-bold tracking-tight text-white drop-shadow-md">
+              <h3 className="flex items-center gap-2 truncate text-lg font-bold tracking-tight text-white">
                 <span className="text-xl" role="img" aria-label="trip emoji">
                   {trip.emoji}
                 </span>
@@ -199,14 +177,14 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
             </div>
           </div>
 
-          <CardContent className="space-y-3 p-4">
-            <div className="grid grid-cols-2 gap-3 text-[13px] text-muted-foreground">
+          <CardContent className="space-y-3 p-4 [--card-spacing:--spacing(4)]">
+            <div className="grid grid-cols-2 gap-x-3 gap-y-3 text-[13px] text-muted-foreground">
               <div className="flex min-w-0 items-center gap-2">
-                <Calendar className="size-4 shrink-0 text-muted-foreground/70" />
+                <Calendar className="size-4 shrink-0" />
                 <span className="truncate font-medium">{formatTripDates(trip.dates)}</span>
               </div>
               <div className="flex min-w-0 items-center gap-2">
-                <Users className="size-4 shrink-0 text-muted-foreground/70" />
+                <Users className="size-4 shrink-0" />
                 <span className="truncate font-medium">
                   {travelers} {travelers === 1 ? "traveler" : "travelers"}
                 </span>
@@ -214,13 +192,11 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
             </div>
 
             <div className="flex min-w-0 items-center gap-2 text-[13px] text-muted-foreground">
-              <Wallet className="size-4 shrink-0 text-muted-foreground/70" />
-              <span className="truncate font-medium">
-                Budget: <span className="font-semibold text-foreground">{budget}</span>
-              </span>
+              <Wallet className="size-4 shrink-0" />
+              <span className="truncate font-medium">Budget: {budget}</span>
             </div>
 
-            <div className="flex flex-wrap gap-1.5 pt-1">
+            <div className="flex flex-wrap gap-1.5">
               {activities.length > 0 ? (
                 <>
                   {activities.slice(0, 3).map((activity, i) => (
@@ -252,19 +228,19 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
 
         <Button
           variant="ghost"
-          size="icon"
+          size="icon-sm"
           onClick={(e) => {
             e.stopPropagation();
             setShowConfirm(true);
           }}
-          className="absolute top-3 right-3 z-10 size-11 bg-background/60 opacity-100 backdrop-blur-md hover:bg-destructive hover:text-destructive-foreground lg:size-8 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100 lg:focus:opacity-100"
+          className="absolute top-3 right-3 z-10 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
           aria-label={`Delete trip ${trip.name}`}
           title="Delete Trip"
         >
-          <Trash2 className="size-4 lg:size-3.5" />
+          <Trash2 className="size-3.5" />
         </Button>
 
-        <CardFooter className="border-0 bg-transparent p-4 pt-0">
+        <CardFooter className="border-0 bg-transparent p-4 pt-0 [--card-spacing:--spacing(4)]">
           <Button
             variant="outline"
             className="w-full"
