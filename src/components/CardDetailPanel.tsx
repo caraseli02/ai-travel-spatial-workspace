@@ -176,12 +176,17 @@ export default function CardDetailPanel({
     }
   };
 
+  const handleStartLinking = () => {
+    onStartLinking?.(card.id);
+    onClose();
+  };
+
   return (
     <Sheet open={!!card} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
         side="right"
         showCloseButton={false}
-        className="w-full gap-0 overflow-y-auto p-0 sm:max-w-[280px]"
+        className="gap-0 overflow-y-auto p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-[280px]"
       >
         <SheetHeader className="sticky top-0 z-10 flex-row items-center justify-between border-b border-border bg-card p-0">
           <div className="flex items-center gap-2 px-4 py-3 text-xs font-semibold text-muted-foreground">
@@ -470,7 +475,7 @@ export default function CardDetailPanel({
           {onStartLinking && (
             <Button
               variant="outline"
-              onClick={() => onStartLinking(card.id)}
+              onClick={handleStartLinking}
               className={cn(
                 "w-full text-xs font-semibold",
                 isLinkingActive && "animate-pulse border-amber-300 bg-amber-100 text-amber-900",
