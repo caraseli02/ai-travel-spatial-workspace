@@ -32,7 +32,7 @@ const statusConfig = {
 } as const;
 
 const tripCardClassName =
-  "relative flex h-full min-h-[420px] flex-col justify-between gap-0 overflow-hidden rounded-2xl border border-white/10 bg-[#1c1917] py-0 shadow-sm ring-0";
+  "relative flex h-full min-h-[360px] flex-col justify-between gap-0 overflow-hidden rounded-2xl border border-white/10 bg-[#1c1917] py-0 shadow-sm ring-0 sm:min-h-[420px]";
 
 const metaClassName = "text-[13px] font-medium text-[#a8a29e]";
 const activityChipClassName =
@@ -122,7 +122,7 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
           aria-label={`Open trip workspace for ${trip.name}`}
           className="flex flex-1 cursor-pointer flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
         >
-          <div className="relative h-[192px] overflow-hidden rounded-t-2xl">
+          <div className="relative h-[164px] overflow-hidden rounded-t-2xl sm:h-[192px]">
             <img
               src={image}
               alt={trip.destination}

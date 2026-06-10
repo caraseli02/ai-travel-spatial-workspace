@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Compass, ChevronLeft, MapPin, Calendar,
   ZoomIn, ZoomOut, Maximize2, Grid3X3, Share2, Download,
@@ -70,6 +70,11 @@ const getDurationNights = (startStr?: string, endStr?: string) => {
 export default function TripWorkspace() {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const showOnboardingToast = useMemo(
+    () => new URLSearchParams(location.search).get('onboarding') === '1',
+    [location.search],
+  );
   const [isMobile, setIsMobile] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(true);
   const [trip, setTrip] = useState<Trip | null>(null);
@@ -134,31 +139,31 @@ export default function TripWorkspace() {
   return (
     <TripWorkspacePresenter
       trip={trip}
-      tripId={tripId}
       isMobile={isMobile}
       inboxOpen={inboxOpen}
       setInboxOpen={setInboxOpen}
       navigate={navigate}
+      showOnboardingToast={showOnboardingToast}
     />
   );
 }
 
 interface PresenterProps {
   trip: Trip;
-  tripId: string;
   isMobile: boolean;
   inboxOpen: boolean;
   setInboxOpen: React.Dispatch<React.SetStateAction<boolean>>;
   navigate: ReturnType<typeof useNavigate>;
+  showOnboardingToast: boolean;
 }
 
 function TripWorkspacePresenter({
   trip,
-  tripId,
   isMobile,
   inboxOpen,
   setInboxOpen,
   navigate,
+  showOnboardingToast,
 }: PresenterProps) {
   const [showDayLabels, setShowDayLabels] = useState(true);
 
@@ -753,8 +758,7 @@ function TripWorkspacePresenter({
             </div>
           </div>
 
-          {/* Onboarding toast */}
-          <OnboardingToast />
+          {showOnboardingToast && <OnboardingToast />}
 
           {/* Card detail panel */}
           <CardDetailPanel
