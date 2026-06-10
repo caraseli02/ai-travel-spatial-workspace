@@ -1,6 +1,6 @@
 # Progress
 
-Last updated: 2026-06-09
+Last updated: 2026-06-10
 
 This file is the durable handoff point for current project state. Update it when work changes the roadmap, verification baseline, or harness expectations.
 
@@ -24,7 +24,7 @@ This file is the durable handoff point for current project state. Update it when
 - Standard test command: `make test`
 - Standard build command: `make build`
 - Full consistency check: `make check`
-- Last verified on 2026-06-09: `make check` passed.
+- Last verified on 2026-06-10: `make check` passed (Trip Workspace shadcn migration + design parity fixes).
 
 When verification cannot be run, record the reason in the final task handoff rather than editing this file for transient failures.
 

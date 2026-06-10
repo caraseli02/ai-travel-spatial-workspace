@@ -1,21 +1,55 @@
-import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
-  Compass, ChevronLeft, MapPin, Calendar,
-  ZoomIn, ZoomOut, Maximize2, Grid3X3, Share2, Download,
-  Sparkles, PanelLeftClose, PanelLeftOpen, Plus,
-  Clock, X, MoreHorizontal
-} from 'lucide-react';
-import { CanvasCardRenderer } from './CanvasCards';
-import InboxPanel from './InboxPanel';
-import OnboardingToast from './OnboardingToast';
-import CardDetailPanel from './CardDetailPanel';
-import type { CanvasCard } from '../models/trip';
+  Compass,
+  ChevronLeft,
+  MapPin,
+  Calendar,
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+  Grid3X3,
+  Share2,
+  Download,
+  Sparkles,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Plus,
+  Clock,
+  X,
+  MoreHorizontal,
+} from "lucide-react";
+import { CanvasCardRenderer } from "./CanvasCards";
+import InboxPanel from "./InboxPanel";
+import OnboardingToast from "./OnboardingToast";
+import CardDetailPanel from "./CardDetailPanel";
+import type { CanvasCard } from "../models/trip";
 import {
   cardTypeOptions,
   getCardCenter,
-} from '../models/tripWorkspaceModel';
-import type { CardType, TripWorkspaceState } from '../models/tripWorkspaceModel';
+  isCardType,
+} from "../models/tripWorkspaceModel";
+import type { CardType, TripWorkspaceState } from "../models/tripWorkspaceModel";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import { useTripWorkspaceState } from '../hooks/useTripWorkspaceState';
 import { useSpatialViewport } from '../hooks/useSpatialViewport';
 import { useLinkingSession } from '../hooks/useLinkingSession';
@@ -28,10 +62,26 @@ import {
 } from '../utils/tripCardHelpers';
 
 const workspaceStatusConfig = {
-  upcoming: { bg: '#d1fae5', text: '#065f46', dot: '#10b981', label: 'Upcoming' },
-  ongoing: { bg: '#fef3c7', text: '#92400e', dot: '#f59e0b', label: 'Ongoing' },
-  completed: { bg: '#f3f4f6', text: '#374151', dot: '#6b7280', label: 'Completed' },
-  planning: { bg: '#e0f2fe', text: '#0369a1', dot: '#0ea5e9', label: 'Planning' },
+  upcoming: {
+    className: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    dot: "bg-emerald-500",
+    label: "Upcoming",
+  },
+  ongoing: {
+    className: "border-amber-200 bg-amber-50 text-amber-900",
+    dot: "bg-amber-500",
+    label: "Ongoing",
+  },
+  completed: {
+    className: "border-border bg-muted text-muted-foreground",
+    dot: "bg-muted-foreground",
+    label: "Completed",
+  },
+  planning: {
+    className: "border-sky-200 bg-sky-50 text-sky-800",
+    dot: "bg-sky-500",
+    label: "Planning",
+  },
 };
 
 const formatRange = (startStr?: string, endStr?: string) => {
@@ -110,16 +160,10 @@ export default function TripWorkspace() {
   // Handle not found or loading states
   if (notFound) {
     return (
-      <div className="flex items-center justify-center h-screen" style={{ backgroundColor: '#faf9f7' }}>
+      <div className="flex h-screen items-center justify-center bg-background">
         <div className="text-center">
-          <p className="text-stone-500 text-lg mb-4">Trip not found</p>
-          <button
-            onClick={() => navigate('/trips')}
-            className="text-sm font-medium px-4 py-2 rounded-lg transition-all hover:opacity-90"
-            style={{ backgroundColor: '#92400e', color: 'white' }}
-          >
-            Back to trips
-          </button>
+          <p className="mb-4 text-lg text-muted-foreground">Trip not found</p>
+          <Button onClick={() => navigate("/trips")}>Back to trips</Button>
         </div>
       </div>
     );
@@ -127,8 +171,8 @@ export default function TripWorkspace() {
 
   if (!trip) {
     return (
-      <div className="flex items-center justify-center h-screen" style={{ backgroundColor: '#faf9f7' }}>
-        <div className="flex items-center gap-2 text-stone-400">
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="flex items-center gap-2 text-muted-foreground">
           <Compass size={16} className="animate-spin" />
           <span className="text-sm">Loading workspace...</span>
         </div>
@@ -313,216 +357,237 @@ function TripWorkspacePresenter({
     : cards;
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ backgroundColor: '#faf9f7' }}>
+    <div className="flex h-screen flex-col overflow-hidden bg-background">
 
       {/* TOP NAV */}
-      <header className="flex-shrink-0 z-40"
-        style={{ backgroundColor: '#fefcf8', borderBottom: '1px solid #e7e3dc' }}>
+      <header className="z-40 shrink-0 border-b border-border bg-card">
 
         {/* ── Single Row (desktop) / Top Row (mobile) ── */}
-        <div className="flex items-center gap-2 px-4" style={{ height: '52px' }}>
+        <div className="flex h-[52px] items-center gap-2 px-4">
 
           {/* Back + brand */}
-          <button
-            onClick={() => navigate('/trips')}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/trips")}
             aria-label="Back to trips"
-            className="flex items-center gap-1.5 text-stone-500 hover:text-stone-800 transition-colors text-sm flex-shrink-0 cursor-pointer"
+            className="h-auto shrink-0 gap-1.5 px-1 text-muted-foreground hover:text-foreground"
           >
-            <ChevronLeft size={15} />
-            <Compass size={15} color="#92400e" />
-            <span className="font-semibold text-stone-700 hidden sm:block" style={{ fontSize: '13px' }}>Wayfarer</span>
-          </button>
+            <ChevronLeft className="size-4" />
+            <Compass className="size-4 text-primary" />
+            <span className="hidden text-[13px] font-semibold sm:block">Wayfarer</span>
+          </Button>
 
-          <div className="w-px h-5 bg-stone-200 flex-shrink-0" />
+          <div className="h-5 w-px shrink-0 bg-border" />
 
           {/* Trip identity */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-6 h-6 rounded flex items-center justify-center text-sm">{trip.emoji}</div>
-            <h1 className="font-semibold text-stone-800" style={{ fontSize: '14px' }}>{trip.name}</h1>
+          <div className="flex shrink-0 items-center gap-2">
+            <div className="flex size-6 items-center justify-center rounded text-sm">{trip.emoji}</div>
+            <h1 className="text-[14px] font-semibold text-foreground">{trip.name}</h1>
             {(() => {
               const tripStatus = deriveTripStatus(trip);
               const statusCfg = workspaceStatusConfig[tripStatus];
               return (
-                <span className="hidden md:flex items-center gap-1 text-xs px-2 py-0.5 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: statusCfg.bg, color: statusCfg.text }}>
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusCfg.dot }} />
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "hidden shrink-0 gap-1 rounded-full px-2 py-0.5 text-xs md:flex",
+                    statusCfg.className,
+                  )}
+                >
+                  <span className={cn("size-1.5 rounded-full", statusCfg.dot)} />
                   {statusCfg.label}
-                </span>
+                </Badge>
               );
             })()}
           </div>
 
           {/* Desktop center: Day filter pills (hidden on mobile — shown in row 2 below) */}
-          <div className="hidden md:flex flex-1 items-center justify-center gap-1.5 overflow-x-auto scrollbar-none px-2">
-            <button
+          <div className="scrollbar-none hidden flex-1 items-center justify-center gap-1.5 overflow-x-auto px-2 md:flex">
+            <Button
+              variant={activeDay === null ? "default" : "secondary"}
+              size="sm"
               onClick={() => setActiveDay(null)}
-              className="flex-shrink-0 text-xs px-2.5 py-1 rounded-full font-medium transition-all cursor-pointer"
-              style={{
-                backgroundColor: activeDay === null ? '#1c1917' : '#f5f3ef',
-                color: activeDay === null ? 'white' : '#78716c',
-              }}
+              className="h-7 shrink-0 rounded-full px-2.5 text-xs"
             >
               All days
-            </button>
-            {days.map(d => (
-              <button
+            </Button>
+            {days.map((d) => (
+              <Button
                 key={d.day}
+                variant={activeDay === d.day ? "default" : "secondary"}
+                size="sm"
                 onClick={() => setActiveDay(activeDay === d.day ? null : d.day)}
-                className="flex-shrink-0 flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium transition-all cursor-pointer"
-                style={{
-                  backgroundColor: activeDay === d.day ? d.color : '#f5f3ef',
-                  color: activeDay === d.day ? 'white' : '#78716c',
-                }}
+                className={cn(
+                  "h-7 shrink-0 gap-1 rounded-full px-2.5 text-xs",
+                  activeDay === d.day && "text-primary-foreground",
+                )}
+                style={activeDay === d.day ? { backgroundColor: d.color, borderColor: d.color } : undefined}
               >
-                <span className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: activeDay === d.day ? 'rgba(255,255,255,0.7)' : d.color }} />
+                <span
+                  className="size-1.5 shrink-0 rounded-full"
+                  style={{
+                    backgroundColor: activeDay === d.day ? "rgba(255,255,255,0.7)" : d.color,
+                  }}
+                />
                 Day&nbsp;{d.day}
-              </button>
+              </Button>
             ))}
-            <button
+            <Button
+              variant="outline"
+              size="icon-sm"
               onClick={openAddDayModal}
-              className="flex-shrink-0 w-6 h-6 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 transition-all flex items-center justify-center cursor-pointer ml-1"
-              style={{ border: '1px solid #e7e3dc' }}
+              className="ml-1 size-6 shrink-0 rounded-full"
               title="Add Custom Day"
             >
-              <Plus size={12} />
-            </button>
+              <Plus className="size-3" />
+            </Button>
           </div>
 
           {/* Mobile: push actions to the right */}
           <div className="flex-1 md:hidden" />
 
           {/* Desktop-only secondary actions */}
-          <div className="hidden md:flex items-center gap-1 flex-shrink-0">
-            <div className="flex items-center -space-x-2 mr-1">
+          <div className="hidden shrink-0 items-center gap-1 md:flex">
+            <div className="-space-x-2 mr-1 flex items-center">
               {Array.from({ length: Math.min(deriveTripTravelers(trip), 3) }).map((_, i) => {
-                const avatars = ['🧑', '👩', '🧔'];
+                const avatars = ["🧑", "👩", "🧔"];
                 return (
-                  <div key={i} className="w-6 h-6 rounded-full flex items-center justify-center text-xs ring-2 ring-white select-none"
-                    style={{ backgroundColor: '#e7e3dc', fontSize: '13px' }}>
+                  <div
+                    key={i}
+                    className="flex size-6 items-center justify-center rounded-full bg-muted text-xs ring-2 ring-card select-none"
+                  >
                     {avatars[i % avatars.length]}
                   </div>
                 );
               })}
             </div>
-            <span className="text-xs text-stone-400 mr-2 hidden lg:block select-none">
-              {deriveTripTravelers(trip)} {deriveTripTravelers(trip) === 1 ? 'traveler' : 'travelers'}
+            <span className="mr-2 hidden text-xs text-muted-foreground select-none lg:block">
+              {deriveTripTravelers(trip)}{" "}
+              {deriveTripTravelers(trip) === 1 ? "traveler" : "travelers"}
             </span>
-            <button className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all hover:bg-stone-100 cursor-pointer"
-              style={{ color: '#78716c' }}>
-              <Share2 size={13} />
+            <Button variant="ghost" size="sm" className="h-auto gap-1 px-2.5 py-1.5 text-xs">
+              <Share2 className="size-3.5" />
               <span>Share</span>
-            </button>
-            <button className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all hover:bg-stone-100 cursor-pointer"
-              style={{ color: '#78716c' }}>
-              <Download size={13} />
+            </Button>
+            <Button variant="ghost" size="sm" className="h-auto gap-1 px-2.5 py-1.5 text-xs">
+              <Download className="size-3.5" />
               <span>Export</span>
-            </button>
+            </Button>
           </div>
 
           {/* Mobile overflow ··· */}
           <div className="relative md:hidden">
-            <button
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={() => toggleOverflow()}
               aria-label="More workspace actions"
               aria-expanded={showOverflow}
-              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all hover:bg-stone-100 cursor-pointer"
-              style={{ color: '#78716c' }}
             >
-              <MoreHorizontal size={16} />
-            </button>
+              <MoreHorizontal className="size-4" />
+            </Button>
             {showOverflow && (
               <>
-                {/* backdrop */}
                 <div className="fixed inset-0 z-40" onClick={() => toggleOverflow(false)} />
-                {/* popover */}
-                <div className="absolute right-0 top-full mt-1 z-50 rounded-xl shadow-xl py-1.5 min-w-[160px]"
-                  style={{ backgroundColor: '#fefcf8', border: '1px solid #e7e3dc' }}>
-                  <div className="flex items-center gap-2 px-3 py-2 border-b" style={{ borderColor: '#e7e3dc' }}>
-                    <div className="flex items-center -space-x-1.5">
+                <div className="absolute top-full right-0 z-50 mt-1 min-w-[160px] rounded-xl border border-border bg-card py-1.5 shadow-xl">
+                  <div className="flex items-center gap-2 border-b border-border px-3 py-2">
+                    <div className="-space-x-1.5 flex items-center">
                       {Array.from({ length: Math.min(deriveTripTravelers(trip), 3) }).map((_, i) => {
-                        const avatars = ['🧑', '👩', '🧔'];
+                        const avatars = ["🧑", "👩", "🧔"];
                         return (
-                          <div key={i} className="w-5 h-5 rounded-full flex items-center justify-center ring-2 ring-white select-none"
-                            style={{ backgroundColor: '#e7e3dc', fontSize: '11px' }}>{avatars[i % avatars.length]}</div>
+                          <div
+                            key={i}
+                            className="flex size-5 items-center justify-center rounded-full bg-muted text-[11px] ring-2 ring-card select-none"
+                          >
+                            {avatars[i % avatars.length]}
+                          </div>
                         );
                       })}
                     </div>
-                    <span className="text-xs text-stone-500">
-                      {deriveTripTravelers(trip)} {deriveTripTravelers(trip) === 1 ? 'traveler' : 'travelers'}
+                    <span className="text-xs text-muted-foreground">
+                      {deriveTripTravelers(trip)}{" "}
+                      {deriveTripTravelers(trip) === 1 ? "traveler" : "travelers"}
                     </span>
                   </div>
-                  <button className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-stone-50 transition-colors cursor-pointer"
-                    style={{ color: '#78716c' }} onClick={() => toggleOverflow(false)}>
-                    <Share2 size={14} />
+                  <Button
+                    variant="ghost"
+                    className="h-auto w-full justify-start gap-2.5 rounded-none px-3 py-2.5"
+                    onClick={() => toggleOverflow(false)}
+                  >
+                    <Share2 className="size-3.5" />
                     <span className="text-sm">Share</span>
-                  </button>
-                  <button className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-stone-50 transition-colors cursor-pointer"
-                    style={{ color: '#78716c' }} onClick={() => toggleOverflow(false)}>
-                    <Download size={14} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="h-auto w-full justify-start gap-2.5 rounded-none px-3 py-2.5"
+                    onClick={() => toggleOverflow(false)}
+                  >
+                    <Download className="size-3.5" />
                     <span className="text-sm">Export</span>
-                  </button>
+                  </Button>
                 </div>
               </>
             )}
           </div>
 
-          {/* Inbox toggle — always visible */}
-          <button
-            onClick={() => setInboxOpen(o => !o)}
-            aria-label={`${inboxOpen ? 'Close' : 'Open'} inbox`}
-            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-all font-medium cursor-pointer flex-shrink-0"
-            style={{
-              backgroundColor: inboxOpen ? '#fef3c7' : '#f5f3ef',
-              color: inboxOpen ? '#92400e' : '#78716c',
-            }}
-          >
-            {inboxOpen ? <PanelLeftClose size={13} /> : <PanelLeftOpen size={13} />}
-            <span className="hidden sm:block">Inbox</span>
-            {items.filter(i => !i.processed).length > 0 && (
-              <span className="w-4 h-4 rounded-full text-xs flex items-center justify-center font-semibold"
-                style={{ backgroundColor: '#ef4444', color: 'white', fontSize: '10px' }}>
-                {items.filter(i => !i.processed).length}
-              </span>
+          <Button
+            variant={inboxOpen ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setInboxOpen((o) => !o)}
+            aria-label={`${inboxOpen ? "Close" : "Open"} inbox`}
+            className={cn(
+              "h-auto shrink-0 gap-1 px-2.5 py-1.5 text-xs font-medium",
+              inboxOpen && "border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-50",
             )}
-          </button>
+          >
+            {inboxOpen ? <PanelLeftClose className="size-3.5" /> : <PanelLeftOpen className="size-3.5" />}
+            <span className="hidden sm:block">Inbox</span>
+            {items.filter((i) => !i.processed).length > 0 && (
+              <Badge variant="destructive" className="size-4 justify-center p-0 text-[10px]">
+                {items.filter((i) => !i.processed).length}
+              </Badge>
+            )}
+          </Button>
         </div>
 
         {/* ── Row 2: Day filter strip — mobile only ── */}
-        <div className="md:hidden flex items-center gap-1.5 px-4 pb-2.5 overflow-x-auto scrollbar-none flex-nowrap">
-          <button
+        <div className="scrollbar-none flex flex-nowrap items-center gap-1.5 overflow-x-auto px-4 pb-2.5 md:hidden">
+          <Button
+            variant={activeDay === null ? "default" : "secondary"}
+            size="sm"
             onClick={() => setActiveDay(null)}
-            className="flex-shrink-0 text-xs px-3 py-1.5 rounded-full font-medium transition-all cursor-pointer"
-            style={{
-              backgroundColor: activeDay === null ? '#1c1917' : '#f5f3ef',
-              color: activeDay === null ? 'white' : '#78716c',
-            }}
+            className="h-8 shrink-0 rounded-full px-3 text-xs"
           >
             All
-          </button>
-          {days.map(d => (
-            <button
+          </Button>
+          {days.map((d) => (
+            <Button
               key={d.day}
+              variant={activeDay === d.day ? "default" : "secondary"}
+              size="sm"
               onClick={() => setActiveDay(activeDay === d.day ? null : d.day)}
-              className="flex-shrink-0 flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-medium transition-all cursor-pointer"
-              style={{
-                backgroundColor: activeDay === d.day ? d.color : '#f5f3ef',
-                color: activeDay === d.day ? 'white' : '#78716c',
-              }}
+              className="h-8 shrink-0 gap-1 rounded-full px-3 text-xs"
+              style={activeDay === d.day ? { backgroundColor: d.color, borderColor: d.color } : undefined}
             >
-              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                style={{ backgroundColor: activeDay === d.day ? 'rgba(255,255,255,0.7)' : d.color }} />
+              <span
+                className="size-1.5 shrink-0 rounded-full"
+                style={{
+                  backgroundColor: activeDay === d.day ? "rgba(255,255,255,0.7)" : d.color,
+                }}
+              />
               Day&nbsp;{d.day}
-            </button>
+            </Button>
           ))}
-          <button
+          <Button
+            variant="outline"
+            size="icon-sm"
             onClick={openAddDayModal}
-            className="flex-shrink-0 w-7 h-7 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 transition-all flex items-center justify-center cursor-pointer"
-            style={{ border: '1px solid #e7e3dc' }}
+            className="size-7 shrink-0 rounded-full"
             title="Add Day"
           >
-            <Plus size={12} />
-          </button>
+            <Plus className="size-3" />
+          </Button>
         </div>
       </header>
 
@@ -531,10 +596,12 @@ function TripWorkspacePresenter({
 
         {/* INBOX SIDEBAR */}
         <aside
-          className="flex-shrink-0 overflow-hidden transition-all duration-300 z-30 animate-in fade-in absolute md:relative h-full bg-[#fefcf8] shadow-2xl md:shadow-none"
+          className={cn(
+            "absolute z-30 h-full shrink-0 overflow-hidden bg-card transition-all duration-300 animate-in fade-in md:relative md:shadow-none",
+            inboxOpen ? "border-r border-border shadow-2xl md:shadow-none" : "border-r-0",
+          )}
           style={{
-            width: inboxOpen ? (isMobile ? '100%' : '280px') : '0px',
-            borderRight: inboxOpen ? '1px solid #e7e3dc' : 'none',
+            width: inboxOpen ? (isMobile ? "100%" : "280px") : "0px",
           }}
         >
           {inboxOpen && (
@@ -559,12 +626,11 @@ function TripWorkspacePresenter({
         <main className="flex-1 relative overflow-hidden">
 
           {/* Canvas toolbar */}
-          <div className="absolute top-3 left-3 z-20 flex items-center gap-1 rounded-xl px-1 py-1"
-            style={{ backgroundColor: '#fefcf8', border: '1px solid #e7e3dc', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+          <div className="absolute top-3 left-3 z-20 flex items-center gap-1 rounded-xl border border-border bg-card px-1 py-1 shadow-sm">
             <ToolBtn icon={<ZoomIn size={14} />} onClick={() => handleZoom('in')} title="Zoom in" />
-            <span className="text-xs text-stone-400 px-1.5 font-mono">{Math.round(zoom * 100)}%</span>
-            <ToolBtn icon={<ZoomOut size={14} />} onClick={() => handleZoom('out')} title="Zoom out" />
-            <div className="w-px h-4 bg-stone-200 mx-0.5" />
+            <span className="px-1.5 font-mono text-xs text-muted-foreground">{Math.round(zoom * 100)}%</span>
+            <ToolBtn icon={<ZoomOut size={14} />} onClick={() => handleZoom("out")} title="Zoom out" />
+            <div className="mx-0.5 h-4 w-px bg-border" />
             <ToolBtn icon={<Maximize2 size={14} />} onClick={handleReset} title="Reset view" />
             <ToolBtn
               icon={<Grid3X3 size={14} />}
@@ -575,12 +641,11 @@ function TripWorkspacePresenter({
           </div>
 
           {/* Trip stats pill */}
-          <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 md:gap-2.5 rounded-xl px-2 py-1.5 md:px-3 md:py-2 select-none"
-            style={{ backgroundColor: '#fefcf8', border: '1px solid #e7e3dc', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+          <div className="absolute top-3 right-3 z-20 flex select-none items-center gap-1.5 rounded-xl border border-border bg-card px-2 py-1.5 shadow-sm md:gap-2.5 md:px-3 md:py-2">
             {!isMobile && (
               <>
                 <StatItem icon={<Calendar size={11} />} label={formatRange(trip.dates?.start, trip.dates?.end)} />
-                <div className="w-px h-3 bg-stone-200" />
+                <div className="h-3 w-px bg-border" />
               </>
             )}
             <StatItem icon={<MapPin size={11} />} label={trip.destination} />
@@ -588,17 +653,17 @@ function TripWorkspacePresenter({
               <>
                 {trip.dates && (
                   <>
-                    <div className="w-px h-3 bg-stone-200" />
+                    <div className="h-3 w-px bg-border" />
                     <StatItem icon={<Clock size={11} />} label={getDurationNights(trip.dates?.start, trip.dates?.end)} />
                   </>
                 )}
-                <div className="w-px h-3 bg-stone-200" />
-                <span className="text-xs text-stone-400">
-                  Budget: <span className="font-semibold text-stone-600">{deriveTripBudget(trip)}</span>
+                <div className="h-3 w-px bg-border" />
+                <span className="text-xs text-muted-foreground">
+                  Budget: <span className="font-semibold text-foreground">{deriveTripBudget(trip)}</span>
                 </span>
               </>
             )}
-            <div className="w-px h-3 bg-stone-200" />
+            <div className="h-3 w-px bg-border" />
             <span className="text-xs">🌤️ 8°C</span>
           </div>
 
@@ -749,11 +814,12 @@ function TripWorkspacePresenter({
                 className="absolute flex items-center gap-1.5 cursor-pointer group hover:scale-105 active:scale-95 transition-all select-none"
                 style={{ left: 880, top: 640 }}
               >
-                <div className="w-9 h-9 rounded-xl border-2 border-dashed flex items-center justify-center transition-all group-hover:border-stone-400"
-                  style={{ borderColor: '#d6cfc3' }}>
-                  <Plus size={16} className="text-stone-300 group-hover:text-stone-500 transition-colors" />
+                <div className="flex size-9 items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/30 transition-all group-hover:border-muted-foreground/50">
+                  <Plus size={16} className="text-muted-foreground/40 transition-colors group-hover:text-muted-foreground" />
                 </div>
-                <span className="text-xs text-stone-300 group-hover:text-stone-400 transition-colors">Add card</span>
+                <span className="text-xs text-muted-foreground/40 transition-colors group-hover:text-muted-foreground">
+                  Add card
+                </span>
               </div>
             </div>
           </div>
@@ -792,7 +858,10 @@ function TripWorkspacePresenter({
 }
 
 function ToolBtn({
-  icon, onClick, title, active
+  icon,
+  onClick,
+  title,
+  active,
 }: {
   icon: React.ReactNode;
   onClick: () => void;
@@ -800,29 +869,21 @@ function ToolBtn({
   active?: boolean;
 }) {
   return (
-    <button
+    <Button
+      variant={active ? "secondary" : "ghost"}
+      size="icon-sm"
       onClick={onClick}
       title={title}
-      className="w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer"
-      style={{
-        backgroundColor: active ? '#fef3c7' : 'transparent',
-        color: active ? '#92400e' : '#78716c',
-      }}
-      onMouseEnter={e => {
-        if (!active) (e.currentTarget as HTMLElement).style.backgroundColor = '#f5f3ef';
-      }}
-      onMouseLeave={e => {
-        if (!active) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
-      }}
+      className={cn("size-7", active && "border-amber-200 bg-amber-50 text-amber-900")}
     >
       {icon}
-    </button>
+    </Button>
   );
 }
 
 function StatItem({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <div className="flex items-center gap-1 text-stone-400">
+    <div className="flex items-center gap-1 text-muted-foreground">
       {icon}
       <span className="text-xs">{label}</span>
     </div>
@@ -855,53 +916,70 @@ function AiPromptBar({ onSendQuery, isThinking }: AiPromptBarProps) {
   };
 
   return (
-    <div className="absolute bottom-6 md:bottom-14 left-1/2 -translate-x-1/2 z-20 w-full max-w-lg px-4 select-none">
-      <form onSubmit={handleSubmit} className={`rounded-xl transition-all duration-200 ${focused ? 'shadow-lg' : 'shadow-sm'}`}
-        style={{ backgroundColor: '#fefcf8', border: `1.5px solid ${focused ? '#fde68a' : '#e7e3dc'}` }}>
+    <div className="absolute bottom-6 left-1/2 z-20 w-full max-w-lg -translate-x-1/2 px-4 select-none md:bottom-14">
+      <form
+        onSubmit={handleSubmit}
+        className={cn(
+          "rounded-xl border bg-card transition-all duration-200",
+          focused ? "border-amber-300 shadow-lg" : "border-border shadow-sm",
+        )}
+      >
         <div className="flex items-center gap-2 px-3 py-2.5">
           {isThinking ? (
-            <Sparkles size={14} className="text-amber-500 animate-spin" />
+            <Sparkles size={14} className="animate-spin text-amber-500" />
           ) : (
-            <Sparkles size={14} color="#92400e" />
+            <Sparkles size={14} className="text-primary" />
           )}
-          <input
-            className="flex-1 text-xs outline-none bg-transparent placeholder-stone-300 text-stone-700 disabled:opacity-50"
-            placeholder={isThinking ? 'AI is thinking...' : 'Ask AI: "Plan Day 5" or "Suggest a ryokan in Arashiyama"'}
+          <Input
+            className="h-auto flex-1 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:ring-0"
+            placeholder={
+              isThinking
+                ? "AI is thinking..."
+                : 'Ask AI: "Plan Day 5" or "Suggest a ryokan in Arashiyama"'
+            }
             value={value}
-            onChange={e => setValue(e.target.value)}
+            onChange={(e) => setValue(e.target.value)}
             onFocus={() => setFocused(true)}
             onBlur={() => setTimeout(() => setFocused(false), 200)}
             disabled={isThinking}
-            style={{ fontFamily: 'inherit' }}
           />
           {isThinking ? (
             <div className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              <span
+                className="size-1.5 animate-bounce rounded-full bg-amber-500"
+                style={{ animationDelay: "0ms" }}
+              />
+              <span
+                className="size-1.5 animate-bounce rounded-full bg-amber-500"
+                style={{ animationDelay: "150ms" }}
+              />
+              <span
+                className="size-1.5 animate-bounce rounded-full bg-amber-500"
+                style={{ animationDelay: "300ms" }}
+              />
             </div>
           ) : (
             value && (
-              <button type="submit" className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 hover:opacity-90 active:scale-95 transition-all cursor-pointer"
-                style={{ backgroundColor: '#92400e' }}>
-                <Plus size={12} color="white" style={{ transform: 'rotate(45deg)' }} />
-              </button>
+              <Button type="submit" size="icon-sm" className="size-6 shrink-0">
+                <Plus size={12} className="rotate-45" />
+              </Button>
             )
           )}
         </div>
 
         {focused && !value && !isThinking && (
-          <div className="px-3 pb-2.5 flex flex-wrap gap-1.5 animate-in fade-in slide-in-from-bottom-1">
+          <div className="flex animate-in flex-wrap gap-1.5 px-3 pb-2.5 fade-in slide-in-from-bottom-1">
             {suggestions.map((s, i) => (
-              <button
+              <Button
                 key={i}
                 type="button"
+                variant="secondary"
+                size="sm"
                 onClick={() => handleSuggestionClick(s)}
-                className="text-xs px-2.5 py-1 rounded-full transition-all hover:opacity-80 active:scale-95 cursor-pointer"
-                style={{ backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }}
+                className="h-auto rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs text-amber-900 hover:bg-amber-100"
               >
                 {s}
-              </button>
+              </Button>
             ))}
           </div>
         )}
@@ -920,52 +998,49 @@ function CreateCardModal({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (cardData: Omit<CanvasCard, 'id' | 'x' | 'y' | 'rotation'>) => void;
+  onSubmit: (cardData: Omit<CanvasCard, "id" | "x" | "y" | "rotation">) => void;
   days: { day: number; label: string }[];
 }) {
-  const [type, setType] = useState<CardType>('sticky');
-  const [title, setTitle] = useState('');
-  const [subtitle, setSubtitle] = useState('');
-  const [day, setDay] = useState(0);
-  const [tag, setTag] = useState('');
-  const [tagColor, setTagColor] = useState('slate');
-  const [detailsString, setDetailsString] = useState('');
-  const [price, setPrice] = useState('');
-  const [rating, setRating] = useState('4.5');
+  const [type, setType] = useState<CardType>("sticky");
+  const [title, setTitle] = useState("");
+  const [subtitle, setSubtitle] = useState("");
+  const [day, setDay] = useState("0");
+  const [detailsString, setDetailsString] = useState("");
+  const [price, setPrice] = useState("");
+  const [rating, setRating] = useState("4.5");
 
   useEffect(() => {
     if (isOpen) {
-      setType('sticky');
-      setTitle('');
-      setSubtitle('');
-      setDay(0);
-      setTag('');
-      setTagColor('slate');
-      setDetailsString('');
-      setPrice('');
-      setRating('4.5');
+      setType("sticky");
+      setTitle("");
+      setSubtitle("");
+      setDay("0");
+      setDetailsString("");
+      setPrice("");
+      setRating("4.5");
     }
   }, [isOpen]);
-
-  if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
 
     const details = detailsString
-      ? detailsString.split('\n').map(s => s.trim()).filter(Boolean)
+      ? detailsString
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean)
       : [];
 
     let image = undefined;
     let color = undefined;
 
-    if (type === 'polaroid') {
-      image = '/images/gion.jpg';
-    } else if (type === 'hotel') {
-      image = '/images/ryokan.jpg';
-    } else if (type === 'sticky') {
-      color = '#fef3c7';
+    if (type === "polaroid") {
+      image = "/images/gion.jpg";
+    } else if (type === "hotel") {
+      image = "/images/ryokan.jpg";
+    } else if (type === "sticky") {
+      color = "#fef3c7";
     }
 
     onSubmit({
@@ -973,153 +1048,139 @@ function CreateCardModal({
       title,
       subtitle: subtitle || undefined,
       day: Number(day),
-      tag: tag || undefined,
-      tagColor: tagColor || undefined,
       details: details.length > 0 ? details : undefined,
       price: price || undefined,
-      rating: (type === 'hotel' || type === 'polaroid') ? Number(rating) : undefined,
+      rating: type === "hotel" || type === "polaroid" ? Number(rating) : undefined,
       image,
       color,
     });
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm bg-stone-900/40 p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-md bg-stone-50 border border-stone-200 shadow-2xl rounded-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200"
-      >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-stone-200 bg-white">
-          <h3 className="font-bold text-stone-800 text-sm">Create Spatial Card</h3>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close dialog"
-            className="text-stone-300 hover:text-stone-600 transition-colors cursor-pointer p-1 rounded hover:bg-stone-50"
-          >
-            <X size={15} />
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-md">
+        <form onSubmit={handleSubmit} className="flex max-h-[90vh] flex-col">
+          <DialogHeader className="border-b border-border px-5 py-4">
+            <DialogTitle>Create Spatial Card</DialogTitle>
+          </DialogHeader>
 
-        <div className="p-5 space-y-4 overflow-y-auto flex-1 scrollbar-thin">
-          {/* Card Type Selector */}
-          <div>
-            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Card Type</label>
-            <select
-              value={type}
-              onChange={e => {
-                if (isCardType(e.target.value)) {
-                  setType(e.target.value);
-                }
-              }}
-              className="w-full text-xs border rounded-xl px-3 py-2 bg-white border-stone-200 outline-none focus:border-amber-500 text-stone-700 h-[36px]"
-            >
-              {cardTypeOptions.map(option => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-              ))}
-            </select>
+          <div className="scrollbar-thin flex-1 space-y-4 overflow-y-auto p-5">
+            <div className="space-y-1">
+              <Label className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+                Card Type
+              </Label>
+              <Select value={type} onValueChange={(v) => isCardType(v) && setType(v)}>
+                <SelectTrigger className="h-9 w-full text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {cardTypeOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+                Title
+              </Label>
+              <Input
+                required
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="text-xs"
+                placeholder="e.g. Kyoto Tower visit"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+                Subtitle / Description
+              </Label>
+              <Input
+                value={subtitle}
+                onChange={(e) => setSubtitle(e.target.value)}
+                className="text-xs"
+                placeholder="e.g. Evening panorama of the city lights"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+                Associate Day
+              </Label>
+              <Select value={day} onValueChange={setDay}>
+                <SelectTrigger className="h-9 w-full text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">Unassigned (Logistics)</SelectItem>
+                  {days.map((d) => (
+                    <SelectItem key={d.day} value={String(d.day)}>
+                      Day {d.day}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+                Details (one bullet per line)
+              </Label>
+              <Textarea
+                value={detailsString}
+                onChange={(e) => setDetailsString(e.target.value)}
+                className="h-16 resize-none text-xs"
+                placeholder={"Detail line 1\nDetail line 2"}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {(type === "hotel" || type === "flight") && (
+                <div className="space-y-1">
+                  <Label className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+                    Price
+                  </Label>
+                  <Input
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    className="text-xs"
+                    placeholder="e.g. $140 total"
+                  />
+                </div>
+              )}
+              {(type === "hotel" || type === "polaroid") && (
+                <div className="space-y-1">
+                  <Label className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+                    Rating
+                  </Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="5"
+                    step="0.1"
+                    value={rating}
+                    onChange={(e) => setRating(e.target.value)}
+                    className="text-xs"
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Title */}
-          <div>
-            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Title</label>
-            <input
-              type="text"
-              required
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              className="w-full text-xs border rounded-xl px-3 py-2 bg-white border-stone-200 outline-none focus:border-amber-500 text-stone-700"
-              placeholder="e.g. Kyoto Tower visit"
-            />
-          </div>
-
-          {/* Subtitle */}
-          <div>
-            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Subtitle / Description</label>
-            <input
-              type="text"
-              value={subtitle}
-              onChange={e => setSubtitle(e.target.value)}
-              className="w-full text-xs border rounded-xl px-3 py-2 bg-white border-stone-200 outline-none focus:border-amber-500 text-stone-700"
-              placeholder="e.g. Evening panorama of the city lights"
-            />
-          </div>
-
-          {/* Target Day */}
-          <div>
-            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Associate Day</label>
-            <select
-              value={day}
-              onChange={e => setDay(Number(e.target.value))}
-              className="w-full text-xs border rounded-xl px-3 py-2 bg-white border-stone-200 outline-none focus:border-amber-500 text-stone-700 h-[36px]"
-            >
-              <option value={0}>Unassigned (Logistics)</option>
-              {days.map(d => (
-                <option key={d.day} value={d.day}>Day {d.day}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Details */}
-          <div>
-            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Details (one bullet per line)</label>
-            <textarea
-              value={detailsString}
-              onChange={e => setDetailsString(e.target.value)}
-              className="w-full text-xs border rounded-xl px-3 py-2 bg-white border-stone-200 outline-none focus:border-amber-500 text-stone-700 resize-none h-16"
-              placeholder="Detail line 1&#10;Detail line 2"
-            />
-          </div>
-
-          {/* Type specific inputs */}
-          <div className="grid grid-cols-2 gap-3">
-            {(type === 'hotel' || type === 'flight') && (
-              <div>
-                <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Price</label>
-                <input
-                  type="text"
-                  value={price}
-                  onChange={e => setPrice(e.target.value)}
-                  className="w-full text-xs border rounded-xl px-3 py-2 bg-white border-stone-200 outline-none focus:border-amber-500 text-stone-700"
-                  placeholder="e.g. $140 total"
-                />
-              </div>
-            )}
-            {(type === 'hotel' || type === 'polaroid') && (
-              <div>
-                <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1">Rating</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="5"
-                  step="0.1"
-                  value={rating}
-                  onChange={e => setRating(e.target.value)}
-                  className="w-full text-xs border rounded-xl px-3 py-2 bg-white border-stone-200 outline-none focus:border-amber-500 text-stone-700"
-                />
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="px-5 py-4 border-t border-stone-200 bg-white flex items-center justify-end gap-2 flex-shrink-0">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 border border-stone-200 text-xs font-semibold rounded-xl text-stone-600 hover:bg-stone-50 transition-colors cursor-pointer"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 text-xs font-semibold rounded-xl text-white hover:opacity-90 transition-opacity cursor-pointer animate-pulse"
-            style={{ backgroundColor: '#92400e' }}
-          >
-            Create Card
-          </button>
-        </div>
-      </form>
-    </div>
+          <DialogFooter className="shrink-0">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit">Create Card</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -1134,85 +1195,67 @@ function AddDayModal({
   onSubmit: (dayNum: number, label: string) => void;
   nextDayNum: number;
 }) {
-  const [dayNum, setDayNum] = useState(nextDayNum);
-  const [label, setLabel] = useState('');
+  const [dayNum, setDayNum] = useState(String(nextDayNum));
+  const [label, setLabel] = useState("");
 
   useEffect(() => {
     if (isOpen) {
-      setDayNum(nextDayNum);
-      setLabel('');
+      setDayNum(String(nextDayNum));
+      setLabel("");
     }
   }, [isOpen, nextDayNum]);
-
-  if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!label.trim()) return;
-    onSubmit(dayNum, label);
+    onSubmit(Number(dayNum), label);
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm bg-stone-900/40 p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm bg-stone-50 border border-stone-200 shadow-2xl rounded-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200"
-      >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-stone-200 bg-white">
-          <h3 className="font-bold text-stone-800 text-sm">Add Custom Day</h3>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close dialog"
-            className="text-stone-300 hover:text-stone-600 transition-colors cursor-pointer p-1 rounded hover:bg-stone-50"
-          >
-            <X size={15} />
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="gap-0 p-0 sm:max-w-sm">
+        <form onSubmit={handleSubmit}>
+          <DialogHeader className="border-b border-border px-5 py-4">
+            <DialogTitle>Add Custom Day</DialogTitle>
+          </DialogHeader>
 
-        <div className="p-5 space-y-4">
-          <div>
-            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1 text-xs">Day Index</label>
-            <input
-              type="number"
-              min="1"
-              required
-              value={dayNum}
-              onChange={e => setDayNum(Number(e.target.value))}
-              className="w-full text-xs border rounded-xl px-3 py-2 bg-white border-stone-200 outline-none focus:border-amber-500 text-stone-700"
-            />
+          <div className="space-y-4 p-5">
+            <div className="space-y-1">
+              <Label className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+                Day Index
+              </Label>
+              <Input
+                type="number"
+                min="1"
+                required
+                value={dayNum}
+                onChange={(e) => setDayNum(e.target.value)}
+                className="text-xs"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+                Day Label / Activity
+              </Label>
+              <Input
+                required
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+                className="text-xs"
+                placeholder="e.g. Nanzenji Temple & Tofu dinner"
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block mb-1 text-xs">Day Label / Activity</label>
-            <input
-              type="text"
-              required
-              value={label}
-              onChange={e => setLabel(e.target.value)}
-              className="w-full text-xs border rounded-xl px-3 py-2 bg-white border-stone-200 outline-none focus:border-amber-500 text-stone-700"
-              placeholder="e.g. Nanzenji Temple & Tofu dinner"
-            />
-          </div>
-        </div>
-
-        <div className="px-5 py-4 border-t border-stone-200 bg-white flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 border border-stone-200 text-xs font-semibold rounded-xl text-stone-600 hover:bg-stone-50 transition-colors cursor-pointer"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 text-xs font-semibold rounded-xl text-white hover:opacity-90 transition-opacity cursor-pointer"
-            style={{ backgroundColor: '#92400e' }}
-          >
-            Add Day
-          </button>
-        </div>
-      </form>
-    </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit">Add Day</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

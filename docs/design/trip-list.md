@@ -160,8 +160,11 @@ Counts come from `computeStatusCounts()` in `src/utils/tripListHelpers.ts`.
 
 ## Out of scope (current implementation)
 
-- Trip list UI still uses hardcoded dark colors (`#0d0d0f`, violet accents) — not yet on shadcn semantic tokens; see ADR-0003.
 - Delete confirmation overlay on `TripCard` not drawn in Pencil (interaction state).
 - Chat sidebar uses simulated AI delay; no real backend.
-- Filter bar icons/counts are not yet shadcn `Tabs` — custom pills in code and design.
+- Filter bar uses custom pill buttons with shadcn `Badge` counts — not shadcn `Tabs`.
 - Responsive breakpoints (`@container` grid) simplified to 3-column desktop in Pencil.
+
+## shadcn migration status (2026-06-10)
+
+Trip List and `TripCard` use semantic dark-theme tokens (`bg-card`, `text-muted-foreground`, `bg-background`) via the page-level `.dark` wrapper. Hardcoded `#1c1917` / `#a8a29e` hex values were removed in favor of shadcn tokens aligned to Pencil ref `GK0nB`.

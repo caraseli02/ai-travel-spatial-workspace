@@ -1,10 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
-  Sparkles, MessageSquare, Link2, FileText,
-  Plane, Hotel, ChevronRight, Plus, Send,
-  CheckCircle2, Circle, X
-} from 'lucide-react';
-import type { InboxItem } from '../models/trip';
+  Sparkles,
+  MessageSquare,
+  Link2,
+  FileText,
+  Plane,
+  Hotel,
+  ChevronRight,
+  Plus,
+  Send,
+  CheckCircle2,
+  Circle,
+  X,
+} from "lucide-react";
+import type { InboxItem } from "../models/trip";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 interface InboxPanelProps {
   items: InboxItem[];
@@ -23,147 +37,143 @@ const sourceIcons: Record<string, React.ReactElement> = {
 };
 
 const sourceColors: Record<string, { icon: string; bg: string; border: string }> = {
-  whatsapp: { icon: '#25d366', bg: '#f0fdf4', border: '#bbf7d0' },
-  link:     { icon: '#6366f1', bg: '#eef2ff', border: '#c7d2fe' },
-  note:     { icon: '#f59e0b', bg: '#fef3c7', border: '#fde68a' },
-  flight:   { icon: '#92400e', bg: '#fef3c7', border: '#fde68a' },
-  hotel:    { icon: '#be123c', bg: '#ffe4e6', border: '#fecdd3' },
+  whatsapp: { icon: "#25d366", bg: "#f0fdf4", border: "#bbf7d0" },
+  link: { icon: "#6366f1", bg: "#eef2ff", border: "#c7d2fe" },
+  note: { icon: "#f59e0b", bg: "#fef3c7", border: "#fde68a" },
+  flight: { icon: "#92400e", bg: "#fef3c7", border: "#fde68a" },
+  hotel: { icon: "#be123c", bg: "#ffe4e6", border: "#fecdd3" },
 };
 
 const sampleInputs = [
-  'https://google.com/flights/SFO-KIX-Dec14',
-  'Try Junsei near Nanzenji! — Yuki',
-  'Hiiragiya Ryokan availability?',
+  "https://google.com/flights/SFO-KIX-Dec14",
+  "Try Junsei near Nanzenji! — Yuki",
+  "Hiiragiya Ryokan availability?",
 ];
 
-export default function InboxPanel({ items, onProcessItem, onAddItem, onOpenAddManual, onClose }: InboxPanelProps) {
-  const [inputVal, setInputVal] = useState('');
+export default function InboxPanel({
+  items,
+  onProcessItem,
+  onAddItem,
+  onOpenAddManual,
+  onClose,
+}: InboxPanelProps) {
+  const [inputVal, setInputVal] = useState("");
   const [placeholder, setPlaceholder] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const unprocessed = items.filter(i => !i.processed);
-  const processed = items.filter(i => i.processed);
+  const unprocessed = items.filter((i) => !i.processed);
+  const processed = items.filter((i) => i.processed);
 
   function handleSend() {
     if (!inputVal.trim()) return;
     setIsProcessing(true);
-    // Trigger mock parsing in workspace parent state
     onAddItem(inputVal);
     setTimeout(() => {
       setIsProcessing(false);
-      setInputVal('');
+      setInputVal("");
     }, 1200);
   }
 
   function cyclePlaceholder() {
-    setPlaceholder(p => (p + 1) % sampleInputs.length);
+    setPlaceholder((p) => (p + 1) % sampleInputs.length);
   }
 
   return (
-    <div className="flex flex-col h-full" style={{ backgroundColor: '#fefcf8' }}>
-
-      {/* Header */}
-      <div className="px-4 pt-4 pb-3" style={{ borderBottom: '1px solid #e7e3dc' }}>
-        <div className="flex items-center justify-between mb-1">
-          <h2 className="font-semibold text-stone-800 text-sm">Inbox</h2>
+    <div className="flex h-full flex-col bg-card">
+      <div className="border-b border-border px-4 pt-4 pb-3">
+        <div className="mb-1 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-foreground">Inbox</h2>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
-              style={{ backgroundColor: '#fef3c7', color: '#92400e' }}>
-              <Sparkles size={10} />
-              <span>AI active</span>
-            </div>
+            <Badge
+              variant="secondary"
+              className="gap-1 border-amber-200/80 bg-amber-50 text-amber-900"
+            >
+              <Sparkles className="size-2.5" />
+              AI active
+            </Badge>
             {onClose && (
-              <button
+              <Button
+                variant="ghost"
+                size="icon-sm"
                 onClick={onClose}
-                className="md:hidden hover:bg-stone-100 rounded-full p-1 text-stone-400 hover:text-stone-600 transition-colors cursor-pointer"
+                className="md:hidden text-muted-foreground"
                 aria-label="Close inbox"
               >
-                <X size={15} />
-              </button>
+                <X className="size-4" />
+              </Button>
             )}
           </div>
         </div>
-        <p className="text-xs text-stone-400 leading-snug">
+        <p className="text-xs leading-snug text-muted-foreground">
           Paste links, messages, or notes — Wayfarer will organize them on the canvas.
         </p>
       </div>
 
-      {/* Input area */}
-      <div className="px-3 py-3" style={{ borderBottom: '1px solid #f5f3ef' }}>
+      <div className="border-b border-border/60 px-3 py-3">
         <div className="relative">
-          <textarea
-            className="w-full text-xs rounded-xl resize-none outline-none text-stone-700 placeholder-stone-300 p-3 pr-10"
-            style={{
-              backgroundColor: '#f5f3ef',
-              border: '1.5px solid #e7e3dc',
-              minHeight: '76px',
-              fontFamily: 'inherit',
-              lineHeight: '1.5',
-            }}
+          <Textarea
+            className="min-h-[76px] resize-none border-border bg-muted/50 pr-10 text-xs text-foreground placeholder:text-muted-foreground/70"
             placeholder={`Try: "${sampleInputs[placeholder]}"`}
             value={inputVal}
-            onChange={e => setInputVal(e.target.value)}
+            onChange={(e) => setInputVal(e.target.value)}
             onFocus={cyclePlaceholder}
-            onKeyDown={e => { if (e.key === 'Enter' && e.metaKey) handleSend(); }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && e.metaKey) handleSend();
+            }}
           />
-          <button
+          <Button
             onClick={handleSend}
             disabled={!inputVal.trim() || isProcessing}
+            size="icon-sm"
+            className="absolute right-2.5 bottom-2.5"
             aria-label="Submit inbox item"
-            className="absolute bottom-2.5 right-2.5 w-7 h-7 rounded-lg flex items-center justify-center transition-all"
-            style={{
-              backgroundColor: inputVal.trim() ? '#92400e' : '#e7e3dc',
-              color: inputVal.trim() ? 'white' : '#a8a29e',
-            }}
           >
             {isProcessing ? (
-              <div className="w-3 h-3 rounded-full border-2 border-white border-t-transparent animate-spin" />
+              <div className="size-3 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
             ) : (
-              <Send size={12} />
+              <Send className="size-3" />
             )}
-          </button>
+          </Button>
         </div>
         {isProcessing && (
-          <div className="flex items-center gap-1.5 mt-2 text-xs" style={{ color: '#92400e' }}>
-            <Sparkles size={11} />
+          <div className="mt-2 flex items-center gap-1.5 text-xs text-primary">
+            <Sparkles className="size-3" />
             <span>Extracting details and placing on canvas…</span>
           </div>
         )}
       </div>
 
-      {/* Items list */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin px-3 py-2">
-
-        {/* Unprocessed */}
+      <div className="scrollbar-thin flex-1 overflow-y-auto px-3 py-2">
         {unprocessed.length > 0 && (
           <div className="mb-4">
-            <div className="flex items-center gap-2 mb-2 px-1">
-              <span className="text-xs font-semibold text-stone-400 uppercase tracking-wider">To organize</span>
-              <span className="text-xs rounded-full px-1.5 py-0.5 font-medium"
-                style={{ backgroundColor: '#fee2e2', color: '#b91c1c' }}>
-                {unprocessed.length}
+            <div className="mb-2 flex items-center gap-2 px-1">
+              <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                To organize
               </span>
+              <Badge variant="destructive" className="h-5 px-1.5 text-[10px]">
+                {unprocessed.length}
+              </Badge>
             </div>
             <div className="space-y-2">
-              {unprocessed.map(item => (
+              {unprocessed.map((item) => (
                 <InboxItemCard key={item.id} item={item} onProcess={onProcessItem} />
               ))}
             </div>
           </div>
         )}
 
-        {/* Processed */}
         {processed.length > 0 && (
           <div>
-            <div className="flex items-center gap-2 mb-2 px-1">
-              <span className="text-xs font-semibold text-stone-400 uppercase tracking-wider">On canvas</span>
-              <span className="text-xs rounded-full px-1.5 py-0.5 font-medium"
-                style={{ backgroundColor: '#d1fae5', color: '#065f46' }}>
-                {processed.length}
+            <div className="mb-2 flex items-center gap-2 px-1">
+              <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                On canvas
               </span>
+              <Badge className="h-5 border-emerald-200 bg-emerald-50 px-1.5 text-[10px] text-emerald-800">
+                {processed.length}
+              </Badge>
             </div>
             <div className="space-y-2">
-              {processed.map(item => (
+              {processed.map((item) => (
                 <InboxItemCard key={item.id} item={item} onProcess={onProcessItem} dimmed />
               ))}
             </div>
@@ -171,25 +181,26 @@ export default function InboxPanel({ items, onProcessItem, onAddItem, onOpenAddM
         )}
       </div>
 
-      {/* Footer */}
-      <div className="px-4 py-3 flex items-center justify-between"
-        style={{ borderTop: '1px solid #e7e3dc', backgroundColor: '#faf9f7' }}>
-        <span className="text-xs text-stone-400">{items.length} items total</span>
-        <button
+      <div className="flex items-center justify-between border-t border-border bg-muted/30 px-4 py-3">
+        <span className="text-xs text-muted-foreground">{items.length} items total</span>
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={onOpenAddManual}
-          className="flex items-center gap-1 text-xs font-medium transition-colors hover:text-stone-700 cursor-pointer"
-          style={{ color: '#92400e' }}
+          className="h-auto gap-1 px-0 text-xs font-medium text-primary hover:bg-transparent hover:text-primary/80"
         >
-          <Plus size={12} />
+          <Plus className="size-3" />
           Add manually
-        </button>
+        </Button>
       </div>
     </div>
   );
 }
 
 function InboxItemCard({
-  item, onProcess, dimmed
+  item,
+  onProcess,
+  dimmed,
 }: {
   item: InboxItem;
   onProcess: (id: string) => void;
@@ -199,65 +210,73 @@ function InboxItemCard({
   const icon = sourceIcons[item.type] || sourceIcons.note;
 
   return (
-    <div
-      className="rounded-xl p-3 transition-all duration-200 group"
-      style={{
-        backgroundColor: dimmed ? '#faf9f7' : '#fefcf8',
-        border: `1px solid ${dimmed ? '#f0ece6' : '#e7e3dc'}`,
-        opacity: dimmed ? 0.75 : 1,
-      }}
+    <Card
+      className={cn(
+        "gap-0 py-0 shadow-none ring-0 transition-all duration-200",
+        dimmed ? "border-border/60 bg-muted/30 opacity-75" : "border-border bg-card",
+      )}
     >
-      {/* Source row */}
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-1.5">
-          {item.avatar ? (
-            <span className="text-sm">{item.avatar}</span>
+      <CardContent className="p-3 [--card-spacing:--spacing(3)]">
+        <div className="group">
+          <div className="mb-2 flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              {item.avatar ? (
+                <span className="text-sm">{item.avatar}</span>
+              ) : (
+                <div
+                  className="flex size-5 shrink-0 items-center justify-center rounded"
+                  style={{
+                    backgroundColor: colors.bg,
+                    color: colors.icon,
+                    border: `1px solid ${colors.border}`,
+                  }}
+                >
+                  {icon}
+                </div>
+              )}
+              <span className="max-w-[120px] truncate text-xs font-medium text-foreground/80">
+                {item.source}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-muted-foreground/60">{item.timestamp}</span>
+              {!dimmed ? (
+                <button
+                  onClick={() => onProcess(item.id)}
+                  className="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-emerald-500"
+                  title="Mark as organized"
+                >
+                  <Circle size={14} />
+                </button>
+              ) : (
+                <CheckCircle2 size={14} className="text-emerald-400" />
+              )}
+            </div>
+          </div>
+
+          <p className="line-clamp-3 text-xs leading-relaxed text-muted-foreground">
+            {item.content}
+          </p>
+
+          {!dimmed ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onProcess(item.id)}
+              className="mt-2.5 h-auto gap-1 px-0 text-xs font-medium text-primary opacity-0 transition-all group-hover:opacity-100 hover:bg-transparent hover:text-primary/80"
+            >
+              <Sparkles className="size-2.5" />
+              Place on canvas
+              <ChevronRight className="size-2.5" />
+            </Button>
           ) : (
-            <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: colors.bg, color: colors.icon, border: `1px solid ${colors.border}` }}>
-              {icon}
+            <div className="mt-2 flex items-center gap-1 text-xs text-emerald-600">
+              <CheckCircle2 className="size-2.5" />
+              <span>Added to canvas</span>
             </div>
           )}
-          <span className="text-xs font-medium text-stone-600 truncate max-w-[120px]">{item.source}</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs text-stone-300">{item.timestamp}</span>
-          {!dimmed ? (
-            <button
-              onClick={() => onProcess(item.id)}
-              className="opacity-0 group-hover:opacity-100 transition-opacity text-stone-400 hover:text-emerald-500"
-              title="Mark as organized"
-            >
-              <Circle size={14} />
-            </button>
-          ) : (
-            <CheckCircle2 size={14} className="text-emerald-400" />
-          )}
-        </div>
-      </div>
-
-      {/* Content */}
-      <p className="text-xs text-stone-600 leading-relaxed line-clamp-3">{item.content}</p>
-
-      {/* Action */}
-      {!dimmed && (
-        <button
-          onClick={() => onProcess(item.id)}
-          className="mt-2.5 flex items-center gap-1 text-xs font-medium opacity-0 group-hover:opacity-100 transition-all"
-          style={{ color: '#92400e' }}
-        >
-          <Sparkles size={10} />
-          Place on canvas
-          <ChevronRight size={10} />
-        </button>
-      )}
-
-      {dimmed && (
-        <div className="mt-2 flex items-center gap-1 text-xs" style={{ color: '#059669' }}>
-          <CheckCircle2 size={10} />
-          <span>Added to canvas</span>
-        </div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 }
