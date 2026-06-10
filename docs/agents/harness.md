@@ -49,6 +49,49 @@ Only put a rule in the entry file when it is global, non-negotiable, and frequen
 - Isolation: use branches and avoid rewriting unrelated dirty files.
 - Durability: persist cross-session knowledge in repo files, not chat.
 
+## Session Continuity
+
+Use this routine for long-running work, interrupted work, or work that another
+agent may need to resume.
+
+### Clock In
+
+1. Read `AGENTS.md`.
+2. Read `PROGRESS.md` for current baseline, open follow-ups, and verification
+   state.
+3. Read `CONTEXT.md` and relevant ADRs before making product, domain, or
+   architecture choices.
+4. For issue work, read the issue body, parent PRD or parent issue, blockers,
+   and `docs/agents/implementation-workflow.md`.
+5. Run the smallest command that confirms the repo is usable before changing
+   code. Prefer `make test` for behavior-only work and `make check` for runtime,
+   build, or UI work.
+
+### Clock Out
+
+Before ending a long task or handing it to another session:
+
+1. Record completed work, remaining work, and blockers in the issue, PR, or a
+   handoff document.
+2. Record verification with exact commands and results. If verification was not
+   run, record why.
+3. Update `PROGRESS.md` only when the project baseline, roadmap, verification
+   baseline, or harness expectations changed.
+4. Update `CONTEXT.md` when durable domain language changes.
+5. Add or update an ADR when a durable architecture decision is made, including
+   rejected alternatives when they matter.
+
+### State Placement
+
+- Task-local state belongs in GitHub issues, PR descriptions, PR comments,
+  commits, or temporary handoff files.
+- Durable project state belongs in tracked repo docs such as `PROGRESS.md`,
+  `CONTEXT.md`, `docs/adr/`, `docs/architecture/`, and `docs/design/`.
+- Do not use chat history as the only source for decisions, verification
+  results, accepted tradeoffs, or next actions.
+- Keep rebuild cost low: a fresh agent should be able to reach an executable
+  state from repo files in a few minutes.
+
 ## Maintenance
 
 - When code moves, update `docs/architecture/codebase-map.md` in the same task.

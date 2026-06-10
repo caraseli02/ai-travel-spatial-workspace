@@ -1,148 +1,117 @@
 import { Check, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 const plans = [
   {
     name: "Explorer",
-    price: "Free",
-    period: "",
-    desc: "Perfect for solo travelers with one upcoming trip.",
+    price: "$0",
+    period: "/ forever",
+    desc: "For your very first trip.",
     features: [
-      "1 active trip canvas",
-      "Up to 50 cards",
-      "AI inbox processing (20/mo)",
-      "Export to PDF",
-      "Mobile view",
+      "1 active trip",
+      "Spatial canvas",
+      "AI inbox — 10 items / mo",
+      "Local-device storage",
     ],
-    cta: "Get started free",
+    cta: "Get started",
     highlighted: false,
     badge: null,
   },
   {
     name: "Wanderer",
     price: "$9",
-    period: "/mo",
-    desc: "For frequent travelers who plan multiple trips at once.",
+    period: "/ per month",
+    desc: "For the always-planning.",
     features: [
-      "Unlimited trip canvases",
-      "Unlimited cards",
-      "AI inbox (unlimited)",
-      "Collaborative planning (3 people)",
-      "Export to PDF & Notion",
-      "Priority support",
+      "Unlimited trips",
+      "Unlimited AI inbox",
+      "Connections & day planning",
+      "Cloud sync across devices",
+      "Export to PDF",
     ],
-    cta: "Start 14-day trial",
+    cta: "Start free trial",
     highlighted: true,
     badge: "Most popular",
   },
   {
     name: "Nomad",
-    price: "$24",
-    period: "/mo",
-    desc: "For travel agencies and power users managing group trips.",
+    price: "$19",
+    period: "/ per month",
+    desc: "For trips with friends.",
     features: [
       "Everything in Wanderer",
-      "Unlimited collaborators",
-      "Custom branding",
-      "API access",
-      "Dedicated onboarding",
-      "SLA guarantee",
+      "Real-time collaboration",
+      "Shared trip canvas",
+      "Priority AI processing",
+      "Concierge support",
     ],
-    cta: "Contact us",
+    cta: "Go Nomad",
     highlighted: false,
     badge: null,
   },
-];
+] as const;
 
 export default function PricingSection() {
   return (
-    <section className="py-20 px-6 md:px-12">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-14">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+    <section id="pricing" className="bg-muted px-4 py-16 md:px-12 md:py-24">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-12 text-center md:mb-14">
+          <p className="mb-3 text-xs font-semibold tracking-widest text-primary uppercase">
             Pricing
           </p>
-          <h2 className="font-serif text-4xl text-foreground mb-4">Simple, honest pricing.</h2>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            No per-seat pricing tricks. No surprise paywalls.
-            <br />
-            Pay for what you need.
+          <h2 className="mb-4 font-serif text-3xl text-foreground md:text-[42px] md:leading-tight">
+            Start free. Upgrade when wanderlust strikes.
+          </h2>
+          <p className="mx-auto max-w-lg text-muted-foreground">
+            No credit card to begin. Your first trip is always free.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 items-stretch">
+        <div className="grid items-stretch gap-6 md:grid-cols-3">
           {plans.map((plan) => (
-            <div key={plan.name} className={cn("relative", plan.highlighted && "dark")}>
+            <div key={plan.name} className="relative">
               <Card
                 className={cn(
-                  "h-full",
-                  plan.highlighted && "border-2 border-primary bg-background text-foreground",
+                  "h-full gap-5 rounded-[18px] py-8",
+                  plan.highlighted && "border-2 border-primary shadow-[0_18px_40px_rgba(234,88,12,0.15)]",
                 )}
               >
-                {plan.badge && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                    <Badge className="gap-1">
-                      <Sparkles className="size-3" />
-                      {plan.badge}
-                    </Badge>
+                <CardHeader className="gap-5 px-8 pb-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <CardTitle className="text-lg">{plan.name}</CardTitle>
+                    {plan.badge && (
+                      <Badge className="gap-1 text-[11px]">
+                        <Sparkles className="size-3" />
+                        {plan.badge}
+                      </Badge>
+                    )}
                   </div>
-                )}
-
-                <CardHeader className="pb-0">
-                  <CardTitle className={cn("text-lg", plan.highlighted && "text-amber-100")}>
-                    {plan.name}
-                  </CardTitle>
-                  <CardDescription className={cn(plan.highlighted && "text-muted-foreground")}>
-                    {plan.desc}
-                  </CardDescription>
-                  <div className="flex items-baseline gap-1 pt-2">
-                    <span
-                      className={cn(
-                        "text-4xl font-bold",
-                        plan.highlighted ? "text-foreground" : "text-foreground",
-                      )}
-                    >
-                      {plan.price}
-                    </span>
-                    <span className="text-sm text-muted-foreground">{plan.period}</span>
+                  <div className="flex items-end gap-1.5">
+                    <span className="font-serif text-5xl font-semibold">{plan.price}</span>
+                    <span className="pb-2 text-sm text-muted-foreground">{plan.period}</span>
                   </div>
+                  <p className="text-sm text-muted-foreground">{plan.desc}</p>
+                  <div className="h-px bg-border" />
                 </CardHeader>
 
-                <CardContent className="flex-1">
-                  <ul className="space-y-2.5">
+                <CardContent className="flex-1 px-8">
+                  <ul className="space-y-3">
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex items-start gap-2.5 text-sm">
-                        <Check
-                          size={14}
-                          className={cn(
-                            "mt-0.5 shrink-0",
-                            plan.highlighted ? "text-primary" : "text-emerald-500",
-                          )}
-                        />
-                        <span
-                          className={cn(plan.highlighted ? "text-stone-300" : "text-stone-600")}
-                        >
-                          {feature}
-                        </span>
+                        <Check size={16} className="mt-0.5 shrink-0 text-primary" />
+                        <span>{feature}</span>
                       </li>
                     ))}
                   </ul>
                 </CardContent>
 
-                <CardFooter className="border-t-0 bg-transparent">
+                <CardFooter className="border-t-0 bg-transparent px-8">
                   <Button
-                    variant={plan.highlighted ? "default" : "secondary"}
-                    className={cn("w-full", !plan.highlighted && "border border-border")}
+                    variant={plan.highlighted ? "default" : "outline"}
+                    className="w-full"
                   >
                     {plan.cta}
                   </Button>

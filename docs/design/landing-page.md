@@ -1,63 +1,83 @@
 # Landing Page — design reference
 
-Marketing surface at route `/`. Introduces Wayfarer, demonstrates the inbox → canvas flow with a live typing animation, and routes travelers into the Demo Trip via **Try demo** / **Start planning free** CTAs.
+Marketing surface at route `/`. Introduces Wayfarer with a prompt-style hero, product window (Spatial Canvas preview), feature blocks for Trip List and AI Inbox, and routes travelers into the Demo Trip via **Start planning** / **Try the demo trip** CTAs.
 
 ## Design source
 
 | Artifact | Location |
 |----------|----------|
-| Pencil design | `pencil-shadcn.pen` → **Desktop** `scbFm` · **Mobile** `LWbNo` ([README.md](README.md)) |
+| Pencil design | `pencil-shadcn.pen` → **Desktop v2** `elmGx` · **Mobile** `LWbNo` ([README.md](README.md)) |
 | Theme tokens | `src/index.css` — Stone base + Orange accent, aligned with the Pencil file |
 | Layout patterns | **A** header + content, marketing sections ([patterns.md](patterns.md)) |
 | shadcn config | `components.json` — style `radix-nova`, base color `stone`, icons `lucide` |
 | Implementation | `src/components/LandingPage.tsx`, `src/components/PricingSection.tsx` |
 
-Migration was done in vertical slices (PRs #10–#18): bootstrap shadcn → pricing → nav/hero → canvas tabs → testimonials/before-after → how-it-works/features → live chat preview.
+**Canonical:** Desktop v2 (`elmGx` / `nNgwc`) and Mobile (`LWbNo` / `qJIYB`). Legacy v1 desktop frame `scbFm` is archived — do not extend.
 
 ## Pencil screens
 
-### Desktop — `Wayfarer / Desktop / Landing` (`scbFm`)
+### Desktop v2 — `Wayfarer / Desktop / Landing 2` (`elmGx`)
 
-| Frame | Node ID | Size | Purpose |
-|-------|---------|------|---------|
-| **Landing — Default** | `s6fLZ` | 1440 × fit | Full marketing page — all sections |
+Layla-inspired redesign that leads with actual product surfaces (Trip Canvas + Trip List) instead of marketing illustration. Reuses domain components and shadcn primitives. Single state frame **Landing — Default** (`nNgwc`).
+
+| Section | Node ID | Notes |
+|---------|---------|-------|
+| Nav | `B5yiQE` | Brand mark + links + Sign in / Start planning |
+| Hero | `Q9LGRQ` | Serif headline, prompt-style CTA, framed Trip Canvas product window (`KpRBX`) |
+| Trust strip | `XN5G4` | Destination chips |
+| How it works | `dLWnk` | Capture → Organize → See it spatially (3 cards) |
+| Feature · Spatial Canvas | `QXGGW` | Text + mini canvas cluster |
+| Feature · Trip List hub | `uE5IT` | **Dark** band, 3 varied `GK0nB` trip cards + filter pills |
+| Feature · AI Inbox | `YVHwW` | Inbox mock (prompt + auto-sorted items) + text |
+| Pricing | `J5vsVD` | Explorer / Wanderer (popular) / Nomad |
+| Testimonials | `ziFcR` | 3 quote cards |
+| CTA | `h4buV` | Warm gradient panel (`nMtUb`) |
+| Footer | `oAIjW` | Dark, brand + link columns |
 
 ### Mobile — `Wayfarer / Mobile / Landing` (`LWbNo`)
 
 | Frame | Node ID | Size | Purpose |
 |-------|---------|------|---------|
-| **Landing — Default (390px)** | `qJIYB` | 390 × fit | Status bar; hamburger nav; stacked hero + live chat preview; single-column sections (canvas, pricing, testimonials, CTA) |
+| **Landing — Default (390px)** | `qJIYB` | 390 × fit | v2 mobile layout — stacked hero, 2×3 trust chips, vertical canvas cards, 2×2 filter pills, AI Inbox copy before mock, stacked footer |
+
+### Legacy (v1) — `Wayfarer / Desktop / Landing` (`scbFm`)
+
+| Frame | Node ID | Notes |
+|-------|---------|-------|
+| **Landing — Default** | `s6fLZ` | v1 — live chat hero, photo strip, before/after, features grid. **Do not extend.** |
 
 ## Page sections (top to bottom)
 
 | # | Section | Purpose | Key shadcn / tokens |
 |---|---------|---------|---------------------|
-| 1 | **Nav** | Logo, anchor links, Sign in, Try demo | `Button` (default, ghost) |
-| 2 | **Hero** | Headline, CTAs, live inbox → canvas animation | `Badge`, `Button`, `Card` (chat panel) |
-| 3 | **Canvas showcase** | Full-width spatial moodboard preview | `Tabs`, `TabsList`, `TabsTrigger`, `Button` |
-| 4 | **Photo strip** | Kyoto destination imagery | Plain markup + `rounded-2xl` |
-| 5 | **How it works** | Three-step capture → organize → canvas flow | `Card`, `CardContent` (borderless) |
-| 6 | **Before / after** | Pain vs. solution comparison | `Card`, `CardHeader`, `CardTitle`, `CardContent` |
-| 7 | **Features** | Copy + 2×3 capability grid | `Card`, `CardContent` |
+| 1 | **Nav** | Logo, anchor links, Sign in, Start planning | `Button` (default, ghost) |
+| 2 | **Hero** | Eyebrow, serif headline, prompt CTA, social proof, product window | `Badge`, `Button`, `Card` |
+| 3 | **Trust strip** | Destination chips (2×3 wrap on mobile) | Plain markup + `rounded-full` borders |
+| 4 | **How it works** | Capture → AI organize → See spatially | `Card`, `CardContent` |
+| 5 | **Feature · Spatial Canvas** | Copy + bullets + mini canvas visual | `Button`, domain card mocks |
+| 6 | **Feature · Trip List** | Dark band, filter pills, preview trip cards | `Card`, `Badge` |
+| 7 | **Feature · AI Inbox** | Inbox mock + copy (mobile: text before mock) | `Card`, `Badge`, `Button` |
 | 8 | **Pricing** | Explorer / Wanderer / Nomad tiers | `Card`, `Badge`, `Button` — see `PricingSection.tsx` |
-| 9 | **Testimonials** | Three social-proof quotes | `Card`, `CardContent` |
-| 10 | **CTA** | Final conversion block | `Button` — section uses `dark` class for inverted surface |
-| 11 | **Footer** | Legal / social links | Token-based text colors |
+| 9 | **Testimonials** | Mara L., Daniel & Priya, Tomás R. | `Card`, `CardContent` |
+| 10 | **CTA** | Orange gradient panel, dual buttons | `Button` |
+| 11 | **Footer** | Brand, link columns, copyright, social | Token-based text colors |
 
-## Hero animation (`LiveChatPreview`)
+## Mobile-responsive patterns
 
-Sub-component at the bottom of `LandingPage.tsx`. State machine driven by `msgIdx`, `charIdx`, `typedText`, `showCanvas`:
-
-1. Types through four `chatMessages` (three user pastes + one AI reply).
-2. On completion, fades out the chat panel and reveals a mini canvas with polaroid cards.
-3. Uses `messageBubbleClass()` for user (`bg-muted`) vs AI (`bg-amber-100`) bubbles.
-4. Mini canvas reuses domain visuals: `MiniCard`, `StickyMini`, `canvas-bg`, `ink-line` SVG connections.
-
-CTA target: `navigate(\`/trips/${DEMO_TRIP_ID}\`)` — opens the pre-loaded Demo Trip.
+| Pattern | Mobile treatment |
+|---------|------------------|
+| Prompt CTA | Stacked: input row + **full-width** primary button |
+| Trust chips | 2×3 wrapped grid |
+| Canvas previews | **Vertical stack** of domain cards — no absolute overlapping layout |
+| Trip filters | 2×2 equal-width pill grid |
+| Feature sections | Single column; copy before visual on AI Inbox |
+| Footer | Stacked link groups |
+| Section padding | ~`px-4` / `py-10` mobile; scale up at `md:` |
+| Typography | Headlines ~26–32px mobile; body 15–16px |
 
 ## Custom CSS utilities (landing-specific)
 
-Defined in `src/index.css` `@layer utilities` and below:
+Defined in `src/index.css` `@layer utilities`:
 
 | Class | Role |
 |-------|------|
@@ -65,44 +85,38 @@ Defined in `src/index.css` `@layer utilities` and below:
 | `polaroid-shadow` / `polaroid-shadow-hover` | Card elevation on canvas items |
 | `sticky-shadow` | Sticky-note cards |
 | `ink-line` | Dashed SVG connection lines |
-| `cursor-blink` | Typing indicator in hero chat |
-| `canvas-item` | Hover lift on showcase cards |
-| `font-serif` | Lora — section headings (`font-serif` on `h1`/`h2`) |
+| `font-serif` | Lora — section headings |
 
 ## Domain color accents
 
-Day and category colors are intentional departures from the neutral token palette:
+Day and category colors mirror Trip Workspace semantics:
 
-- **Day 1** — amber (`border-amber-200`, `bg-amber-100`, `text-primary`)
+- **Day 1** — amber
 - **Day 2** — orange
 - **Day 3** — emerald
 - **Stay / tips** — rose, amber sticky notes
-
-These mirror Trip Workspace day semantics and should stay consistent when the workspace UI migrates to shadcn.
 
 ## Assets
 
 | Path | Used in |
 |------|---------|
-| `/images/ryokan.jpg` | Hero mini canvas, showcase, photo strip |
-| `/images/fushimi-inari.jpg` | Showcase, photo strip, hero |
-| `/images/arashiyama.jpg` | Showcase, photo strip, hero |
-| `/images/nishiki-market.jpg` | Photo strip |
-| `/images/gion.jpg` | Photo strip |
-| `/images/kinkakuji.jpg` | Photo strip |
+| `/images/ryokan.jpg` | Hero product window, spatial canvas feature |
+| `/images/fushimi-inari.jpg` | Hero, spatial canvas, Kyoto trip card |
+| `/images/arashiyama.jpg` | Hero, Iceland trip card preview |
+| `/images/nishiki-market.jpg` | Hero product window article card |
+| `/images/gion.jpg` | Lisbon trip card preview |
 
 ## shadcn components in use
 
 | Component | File | Variants used on landing |
 |-----------|------|--------------------------|
-| `Button` | `src/components/ui/button.tsx` | `default`, `outline`, `ghost`, `secondary`; sizes `default`, `lg`, `icon-sm` |
-| `Card` | `src/components/ui/card.tsx` | Standard + borderless (`border-none shadow-none`) for how-it-works |
-| `Badge` | `src/components/ui/badge.tsx` | `outline` (hero badge), `default` (pricing highlight) |
-| `Tabs` | `src/components/ui/tabs.tsx` | Canvas day filter pills with per-day `className` overrides |
+| `Button` | `src/components/ui/button.tsx` | `default`, `outline`, `ghost`; sizes `default`, `lg`, `icon` |
+| `Card` | `src/components/ui/card.tsx` | Standard + feature / testimonial cards |
+| `Badge` | `src/components/ui/badge.tsx` | `outline` (hero, inbox), `default`, `secondary` |
+
+CTA target: `navigate(\`/trips/${DEMO_TRIP_ID}\`)` — opens the pre-loaded Demo Trip.
 
 ## Out of scope (current implementation)
 
-- Nav anchor links (`#`) are placeholders — no scroll-to-section behavior yet.
-- Sign in, walkthrough video, early access, and pricing CTAs are non-functional UI.
-- Photo strip is static (no marquee animation despite CSS keyframes existing).
+- Nav anchor links scroll to section IDs but Sign in and pricing CTAs remain placeholder UI.
 - Trip Workspace UI has not been migrated to shadcn — see ADR-0003.
