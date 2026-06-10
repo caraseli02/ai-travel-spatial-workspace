@@ -26,10 +26,12 @@ Wayfarer is a React/Vite prototype for an AI-native travel workspace. It helps a
 - How to run and verify it: `Makefile` and `package.json`
 - Current progress and open harness state: `PROGRESS.md`
 - Harness maintenance rules: `docs/agents/harness.md`
+- How to work ready issues: `docs/agents/implementation-workflow.md`
 
 ## Topic Docs
 
 - Issue tracker: GitHub Issues for `caraseli02/ai-travel-spatial-workspace`; see `docs/agents/issue-tracker.md`.
+- Implementation workflow: use `docs/agents/implementation-workflow.md` for issues labeled `ready-for-agent`.
 - Triage labels: canonical mattpocock/skills labels; see `docs/agents/triage-labels.md`.
 - Domain docs: single-context layout; see `docs/agents/domain.md`.
 - Product design: for Pencil designs and shadcn/ui migration, load `.agents/skills/pencil-wayfarer/SKILL.md`, then `docs/design/README.md`, surface docs (`landing-page.md`, `trip-list.md`, `trip-canvas.md`), and `docs/adr/0003-shadcn-ui-foundation.md`.

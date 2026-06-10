@@ -174,7 +174,7 @@ export default function TripListPage() {
   return (
     <div className="dark flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground selection:bg-primary/30">
       <header className="z-20 h-16 shrink-0 border-b border-border bg-background">
-        <div className="mx-auto flex h-full w-full max-w-[1344px] items-center justify-between px-12">
+        <div className="mx-auto flex h-full w-full max-w-[1344px] items-center justify-between px-4 sm:px-12">
           <button
             onClick={() => navigate("/")}
             className="flex cursor-pointer items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
@@ -340,7 +340,7 @@ export default function TripListPage() {
 
         <div className="relative flex flex-1 flex-col overflow-hidden bg-background">
           <div className="shrink-0 border-b border-border bg-background">
-            <div className="mx-auto flex w-full max-w-[1344px] items-center gap-2.5 overflow-x-auto px-12 py-4">
+            <div className="mx-auto flex w-full max-w-[1344px] items-center gap-2.5 overflow-x-auto px-4 py-4 sm:px-12">
               <Button variant="outline" size="icon" className="shrink-0" aria-hidden>
                 <Filter className="size-4 text-muted-foreground" />
               </Button>
@@ -385,12 +385,12 @@ export default function TripListPage() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto bg-background pt-8 pb-[160px]">
-            <div className="mx-auto w-full max-w-[1344px] px-12">
+          <div className="flex-1 overflow-y-auto bg-background pt-4 pb-[148px] sm:pt-8 sm:pb-[160px]">
+            <div className="mx-auto w-full max-w-[1344px] px-4 sm:px-12">
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <motion.div layout onClick={() => setShowNewTripModal(true)}>
                   <Card
-                    className="group h-full min-h-[420px] cursor-pointer rounded-2xl border-2 border-dashed border-border/60 bg-white/[0.01] py-0 shadow-none ring-0 transition-all duration-300 hover:border-primary/40 hover:bg-muted/30"
+                    className="group h-full min-h-[154px] cursor-pointer rounded-2xl border-2 border-dashed border-border/60 bg-white/[0.01] py-0 shadow-none ring-0 transition-all duration-300 hover:border-primary/40 hover:bg-muted/30 sm:min-h-[420px]"
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => {
@@ -400,7 +400,7 @@ export default function TripListPage() {
                       }
                     }}
                   >
-                    <CardContent className="flex h-full min-h-[420px] flex-col items-center justify-center gap-4 p-6 text-center [--card-spacing:--spacing(4)]">
+                    <CardContent className="flex h-full min-h-[154px] flex-col items-center justify-center gap-4 p-6 text-center [--card-spacing:--spacing(4)] sm:min-h-[420px]">
                       <Button
                         variant="outline"
                         size="icon"
@@ -529,9 +529,9 @@ export default function TripListPage() {
             </div>
           </div>
 
-          <div className="absolute right-0 bottom-0 left-0 z-40 px-12 pb-6">
-            <div className="mx-auto flex w-full max-w-[672px] flex-col items-center gap-3">
-              <div className="scrollbar-none flex w-full flex-nowrap items-center justify-center gap-2 overflow-x-auto pb-1">
+          <div className="absolute right-0 bottom-0 left-0 z-40 px-4 pb-4 sm:px-12 sm:pb-6">
+            <div className="mx-auto flex w-full max-w-[760px] flex-col items-center gap-3">
+              <div className="scrollbar-none flex w-full flex-nowrap items-center justify-start gap-2 overflow-x-auto pb-1">
                 {suggestions.map((suggestion, i) => (
                   <button
                     key={i}
@@ -540,7 +540,7 @@ export default function TripListPage() {
                   >
                     <Badge
                       variant="outline"
-                      className="cursor-pointer px-4 py-2 text-[11px] font-medium whitespace-nowrap shadow-sm transition-all hover:bg-muted hover:text-foreground active:scale-[0.98]"
+                      className="cursor-pointer px-3 py-1.5 text-[10px] font-medium whitespace-nowrap shadow-sm transition-all hover:bg-muted hover:text-foreground active:scale-[0.98]"
                     >
                       {suggestion}
                     </Badge>
@@ -551,7 +551,7 @@ export default function TripListPage() {
               <form
                 onSubmit={handlePromptSubmit}
                 className={cn(
-                  "flex w-full items-center gap-2 rounded-2xl border bg-card py-1 pr-1 pl-2 transition-all duration-200",
+                  "flex w-full max-w-[672px] items-center gap-2 rounded-2xl border bg-card py-1 pr-1 pl-2 transition-all duration-200",
                   promptFocused ? "border-primary/50" : "border-border",
                 )}
               >
