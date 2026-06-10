@@ -348,7 +348,7 @@ export default function LandingPage() {
                   size="lg"
                   className="group h-auto px-6 py-3.5 hover:shadow-lg"
                 >
-                  Explore the demo
+                  Start planning free
                   <ArrowRight
                     size={16}
                     className="transition-transform group-hover:translate-x-0.5"

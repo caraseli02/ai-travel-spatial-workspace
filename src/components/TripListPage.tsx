@@ -385,7 +385,7 @@ export default function TripListPage() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto bg-background pt-4 pb-[148px] sm:pt-8 sm:pb-[160px]">
+          <div className="flex-1 overflow-y-auto bg-background pt-4 pb-[188px] sm:pt-8 sm:pb-[160px]">
             <div className="mx-auto w-full max-w-[1344px] px-4 sm:px-12">
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <motion.div layout onClick={() => setShowNewTripModal(true)}>

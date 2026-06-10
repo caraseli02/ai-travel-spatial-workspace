@@ -1,6 +1,6 @@
 # Landing Page — design reference
 
-Marketing surface at route `/`. Introduces Wayfarer, demonstrates the inbox → canvas flow with a live typing animation, and routes travelers into the Demo Trip via **Try demo** / **Explore the demo** CTAs.
+Marketing surface at route `/`. Introduces Wayfarer, demonstrates the inbox → canvas flow with a live typing animation, and routes travelers into the Demo Trip via **Try demo** / **Start planning free** CTAs.
 
 ## Design source
 

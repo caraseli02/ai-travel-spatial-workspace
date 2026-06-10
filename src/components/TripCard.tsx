@@ -25,18 +25,18 @@ interface TripCardProps {
 }
 
 const statusConfig = {
-  upcoming: { color: "text-[#34d399]", label: "Upcoming" },
+  upcoming: { color: "text-emerald-400", label: "Upcoming" },
   ongoing: { color: "text-amber-400", label: "Ongoing" },
-  completed: { color: "text-[#a8a29e]", label: "Completed" },
-  planning: { color: "text-[#38bdf8]", label: "Planning" },
+  completed: { color: "text-muted-foreground", label: "Completed" },
+  planning: { color: "text-sky-400", label: "Planning" },
 } as const;
 
 const tripCardClassName =
-  "relative flex h-full min-h-[360px] flex-col justify-between gap-0 overflow-hidden rounded-2xl border border-white/10 bg-[#1c1917] py-0 shadow-sm ring-0 sm:min-h-[420px]";
+  "relative flex h-full min-h-[360px] flex-col justify-between gap-0 overflow-hidden rounded-2xl border border-white/10 bg-card py-0 shadow-sm ring-0 sm:min-h-[420px]";
 
-const metaClassName = "text-[13px] font-medium text-[#a8a29e]";
+const metaClassName = "text-[13px] font-medium text-muted-foreground";
 const activityChipClassName =
-  "max-w-[110px] truncate rounded-2xl border border-white/10 bg-transparent px-2 py-0.5 text-[10px] font-medium text-[#a8a29e]";
+  "max-w-[110px] truncate rounded-2xl border border-white/10 bg-transparent px-2 py-0.5 text-[10px] font-medium text-muted-foreground";
 
 export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripCardProps) {
   const [showConfirm, setShowConfirm] = useState(false);
@@ -129,16 +129,17 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
               className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1c1917] from-0% via-transparent via-60% to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-card from-0% via-transparent via-60% to-transparent" />
 
-            <span
+            <Badge
+              variant="secondary"
               className={cn(
-                "absolute top-3 left-3 rounded-2xl bg-[#292524] px-2 py-0.5 text-xs font-semibold",
+                "absolute top-3 left-3 rounded-2xl bg-secondary px-2 py-0.5 text-xs font-semibold",
                 config.color,
               )}
             >
               {config.label}
-            </span>
+            </Badge>
 
             {isNew && (
               <motion.div
@@ -201,7 +202,7 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
                   )}
                 </>
               ) : (
-                <span className="text-[10px] font-medium text-[#a8a29e] italic">
+                <span className="text-[10px] font-medium text-muted-foreground italic">
                   Workspace is empty
                 </span>
               )}
@@ -225,8 +226,8 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
 
         <CardFooter className="border-0 bg-transparent p-4 pt-0 [--card-spacing:--spacing(4)]">
           <Button
-            variant="ghost"
-            className="h-9 w-full rounded-md border border-white/10 bg-[#0c0a09] text-sm font-medium text-zinc-50 shadow-[0_1px_3.5px_rgba(0,0,0,0.05)] hover:bg-[#0c0a09]/90 hover:text-zinc-50"
+            variant="outline"
+            className="h-9 w-full rounded-md border-white/10 bg-background text-sm font-medium text-foreground shadow-sm hover:bg-background/90"
             onClick={(e) => {
               e.stopPropagation();
               onOpen();

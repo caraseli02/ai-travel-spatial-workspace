@@ -157,5 +157,5 @@ Before marking a desktop screen done:
 - [ ] Theme axes set on screen frame
 - [ ] Token variables used — no stray hex on chrome
 - [ ] All interactive states documented in surface doc
-- [ ] `get_screenshot` verified
+- [x] `get_screenshot` verified (2026-06-10 — post shadcn workspace migration)
 - [ ] Node ID + name updated in surface doc
