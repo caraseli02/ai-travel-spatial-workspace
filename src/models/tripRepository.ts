@@ -27,11 +27,23 @@ function safeSetItem(key: string, value: string): void {
 function readAll(): Trip[] {
   try {
     const raw = safeGetItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const trips = raw ? JSON.parse(raw) : [];
+    return Array.isArray(trips) ? trips.map(normalizeTrip) : [];
   } catch (err) {
     console.warn("Failed to parse trips from localStorage:", err);
     return [];
   }
+}
+
+function normalizeTrip(trip: Trip): Trip {
+  return {
+    ...trip,
+    cards: Array.isArray(trip.cards) ? trip.cards : [],
+    connections: Array.isArray(trip.connections) ? trip.connections : [],
+    inboxItems: Array.isArray(trip.inboxItems) ? trip.inboxItems : [],
+    days: Array.isArray(trip.days) ? trip.days : [],
+    dayLabels: Array.isArray(trip.dayLabels) ? trip.dayLabels : [],
+  };
 }
 
 /** Write all trips to localStorage. */
