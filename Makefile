@@ -1,6 +1,6 @@
 NPM ?= npm
 
-.PHONY: setup dev test build check status
+.PHONY: setup dev test build lint typecheck check status
 
 setup:
 	$(NPM) ci
@@ -14,7 +14,13 @@ test:
 build:
 	$(NPM) run build
 
-check: test build
+lint:
+	$(NPM) run lint
+
+typecheck:
+	$(NPM) run typecheck
+
+check: test build lint typecheck
 
 status:
 	git status --short

@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 ```
 
-Add missing components: `vp dlx shadcn@latest add <name>`
+Add missing components: `npx shadcn@latest add <name>`
 
 ## Semantic tokens over hardcoded colors
 

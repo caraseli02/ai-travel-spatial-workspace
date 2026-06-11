@@ -7,7 +7,15 @@ Wayfarer is a React/Vite prototype for an AI-native travel workspace. It helps a
 - Install dependencies: `make setup`
 - Run locally: `make dev`
 - Run tests: `make test`
-- Full verification: `make check`
+- Lint: `make lint`
+- Typecheck: `make typecheck`
+- Full verification: `make check` (test, build, lint, typecheck)
+
+## Work Rules
+
+- WIP=1: one active issue per session; finish verification before picking the next.
+- Do not refactor outside issue scope (see agent brief **Out of scope**).
+- Done means every acceptance criterion has a recorded verification command and result.
 
 ## Hard Constraints
 
@@ -17,7 +25,7 @@ Wayfarer is a React/Vite prototype for an AI-native travel workspace. It helps a
 - Keep this file short and routing-oriented. Put topic-specific instructions in focused docs.
 - Preserve localStorage-first persistence behind the Trip Repository interface.
 - Preserve `react-router-dom` routes: `/`, `/trips`, and `/trips/:tripId`.
-- New interactive UI should compose shadcn primitives from `src/components/ui/` before custom markup.
+- New interactive UI should compose shadcn primitives from `src/components/ui/` before custom markup (source: `docs/adr/0003-shadcn-ui-foundation.md`).
 
 ## Fresh Session Map
 
@@ -26,6 +34,8 @@ Wayfarer is a React/Vite prototype for an AI-native travel workspace. It helps a
 - How to run and verify it: `Makefile` and `package.json`
 - Current progress and open harness state: `PROGRESS.md`
 - Harness maintenance rules: `docs/agents/harness.md`
+- Startup readiness: `docs/agents/startup-readiness.md`
+- Session handoff lifecycle: `docs/agents/harness.md` (`/handoff` → OS temp; absorb into issue or `PROGRESS.md`)
 - How to work ready issues: `docs/agents/implementation-workflow.md`
 
 ## Topic Docs

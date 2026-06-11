@@ -28,3 +28,7 @@ Thumbs.db
 *.sln
 *.sw?
 landing_page.png
+
+# Ephemeral session handoff scratch (see docs/agents/handoffs/README.md)
+docs/agents/handoffs/*.md
+!docs/agents/handoffs/README.md

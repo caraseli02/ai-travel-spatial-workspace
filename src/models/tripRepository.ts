@@ -1,5 +1,4 @@
 import type { Trip } from "./trip";
-import { DEMO_TRIP_ID } from "./trip";
 import { createDemoTrip, createParisFixtureTrip } from "../data/tripData";
 
 const STORAGE_KEY = "wayfarer_trips";

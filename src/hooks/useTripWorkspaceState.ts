@@ -1,8 +1,7 @@
 import { useReducer, useCallback } from 'react';
 import {
   tripWorkspaceReducer,
-  type TripWorkspaceState,
-  type TripWorkspaceAction
+  type TripWorkspaceState
 } from '../models/tripWorkspaceModel';
 import type { CanvasCard } from '../models/trip';
 

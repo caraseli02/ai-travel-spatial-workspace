@@ -8,6 +8,11 @@ Use this workflow when an agent is asked to implement a GitHub issue labeled
 A fresh implementation agent should be able to pick one issue, complete it in a
 branch, verify it, and open a PR without relying on chat history.
 
+This workflow is the Wayfarer glue between the static harness (`AGENTS.md`,
+`docs/agents/harness.md`) and Matt Pocock skills (`triage`, `to-issues`, `tdd`,
+`diagnose`). Epics decompose via `/to-issues`; each child issue is one scope
+unit.
+
 ## Issue Readiness
 
 An issue is ready for agent work when it has:
@@ -20,17 +25,27 @@ An issue is ready for agent work when it has:
 
 Do not start a blocked issue until every blocker is merged, not merely opened.
 
+## Session Rules
+
+- WIP=1: one active `ready-for-agent` issue per session.
+- Finish verification for the current issue before starting another.
+- Do not refactor outside the agent brief **Out of scope** section.
+- Done means every acceptance criterion has a recorded verification command and
+  pass/fail result in the PR.
+
 ## Working an Issue
 
-1. Read the issue body, parent PRD, and blocking issues.
-2. Read `CONTEXT.md`, relevant ADRs, and `docs/architecture/codebase-map.md`.
+1. Read the issue body, agent brief, parent PRD, and blocking issues.
+2. Read `CONTEXT.md`, `docs/agents/domain.md`, relevant ADRs, and
+   `docs/architecture/codebase-map.md`.
 3. Create a branch named `codex/issue-<number>-short-title`.
 4. Implement only the issue scope.
 5. Add or update tests for the acceptance criteria.
 6. Run verification:
    - `make test` for behavior-only changes.
    - `make check` for runtime, build, or UI changes.
-7. Open a PR that links the issue and lists acceptance criteria status.
+7. Open a PR that links the issue, lists acceptance criteria status, and records
+   the exact verification commands run.
 
 ## Branches
 
@@ -59,8 +74,12 @@ Use this structure:
 
 ## Verification
 
-- `make test`
-- `make check`
+Record exact commands and results, for example:
+
+- `make test` — pass
+- `make check` — pass (test, build, lint, typecheck)
+
+Per-criterion checks from the agent brief should appear here when provided.
 
 ## Linked Issue
 

@@ -27,6 +27,8 @@ Describe **what** the system should do, not **how** to implement it. The agent w
 
 The agent needs to know when it's done. Every agent brief must have concrete, testable acceptance criteria. Each criterion should be independently verifiable.
 
+When possible, pair each criterion with an executable verification command (`make test`, `make check`, a focused test file pattern, or a manual route check with URL).
+
 - **Good:** "Running `gh issue list --label needs-triage` returns issues that have been through initial classification"
 - **Bad:** "Triage should work correctly"
 
@@ -56,9 +58,9 @@ Be specific about edge cases and error conditions.
 - Config shape — any new configuration options needed
 
 **Acceptance criteria:**
-- [ ] Specific, testable criterion 1
-- [ ] Specific, testable criterion 2
-- [ ] Specific, testable criterion 3
+- [ ] Specific, testable criterion 1 — **Verification:** `make test -- <pattern>` or manual check
+- [ ] Specific, testable criterion 2 — **Verification:** `make check`
+- [ ] Specific, testable criterion 3 — **Verification:** describe observable check
 
 **Out of scope:**
 - Thing that should NOT be changed or addressed in this issue
