@@ -1,22 +1,29 @@
-# Handoffs
+# Session Handoffs (optional local scratch)
 
-Cross-session handoff documents for work that is not fully captured by a GitHub issue or PR.
+This directory is **not** the default output of `/handoff`. The Matt Pocock `handoff` skill writes to the OS temporary directory on purpose — handoffs are session bridges, not durable documentation.
 
-## Naming
+## Default: `/handoff` → OS temp
 
-`YYYY-MM-DD-<short-slug>.md`
+Handoffs compress chat context for the **next** session only. They should not be committed. Before clock-out, absorb anything that must survive into durable repo artifacts:
 
-Example: `2026-06-11-harness-l1-l7.md`
+| What to preserve | Where |
+| --- | --- |
+| Task contract, scope, acceptance criteria | GitHub issue + agent brief |
+| Verification commands and results | PR description |
+| Project pulse (WIP, next steps, blockers) | `PROGRESS.md` Operational Snapshot |
+| Architecture decisions | `docs/adr/` |
+| Domain language | `CONTEXT.md` |
 
-## When to write here
+After absorption, discard the temp handoff. Do not copy it into this folder unless you have a specific reason.
 
-- Multi-session work without a single `ready-for-agent` issue
-- Interrupted sessions where context would be lost before clock-out
-- `/handoff` skill output (repo-persisted, not OS temp)
+## Optional: local files here (gitignored)
 
-## When not to write here
+`docs/agents/handoffs/*.md` is gitignored. You may write a **local-only** scratch note during a long epic when neither an issue nor `PROGRESS.md` is enough — for example, mid-exploration before triage creates issues.
 
-- Single-issue AFK work — use the issue, agent brief, branch, and PR instead
-- Durable architecture decisions — use `docs/adr/`
-- Domain vocabulary — use `CONTEXT.md`
-- Project baseline — use `PROGRESS.md` Operational Snapshot
+Lifecycle:
+
+1. Create only when needed; reference issues/ADRs instead of duplicating them.
+2. Delete when the work moves to an issue, PR, or `PROGRESS.md` update.
+3. Never commit handoff files — stale handoffs mislead agents (knowledge decay).
+
+See `docs/agents/harness.md` → **Session handoff lifecycle**.

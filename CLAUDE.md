@@ -35,7 +35,7 @@ Wayfarer is a React/Vite prototype for an AI-native travel workspace. It helps a
 - Current progress and open harness state: `PROGRESS.md`
 - Harness maintenance rules: `docs/agents/harness.md`
 - Startup readiness: `docs/agents/startup-readiness.md`
-- Cross-session handoffs: `docs/agents/handoffs/`
+- Session handoff lifecycle: `docs/agents/harness.md` (`/handoff` → OS temp; absorb into issue or `PROGRESS.md`)
 - How to work ready issues: `docs/agents/implementation-workflow.md`
 
 ## Topic Docs

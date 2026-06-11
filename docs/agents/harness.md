@@ -48,7 +48,7 @@ Target rebuild cost: under three minutes from clock-in to verified executable st
 - `CONTEXT.md`: domain vocabulary, prototype assumptions, and examples that shape product behavior.
 - `docs/adr/`: durable architecture decisions with considered options and consequences.
 - `docs/architecture/`: current structural maps and cross-module explanations.
-- `docs/agents/`: agent process, issue tracker, triage, harness, startup readiness, handoffs.
+- `docs/agents/`: agent process, issue tracker, triage, harness, startup readiness.
 - `docs/design/`: product design system and surface-specific design guidance.
 - Nested `AGENTS.md`: local instructions that should be read only when working in that subtree.
 
@@ -83,10 +83,22 @@ Fix the harness layer that failed. Do not upgrade the model first.
 
 Use this routine for long-running work, interrupted work, or work that another agent may need to resume.
 
+### Session Handoff Lifecycle
+
+The Matt Pocock `/handoff` skill writes to the **OS temp directory**, not the repo. That is intentional: handoffs are ephemeral session bridges, not system-of-record docs. Committing them causes knowledge decay — old pickup notes look authoritative but go stale.
+
+Before clock-out:
+
+1. Run `/handoff` if the next session needs a chat compaction (user pastes or re-attaches the file).
+2. **Absorb** durable facts into the right layer: issue/agent brief, PR, `PROGRESS.md` Operational Snapshot, ADR, or `CONTEXT.md`.
+3. **Discard** the temp handoff after the next session starts — do not leave handoff content as the only record.
+
+Optional local scratch: `docs/agents/handoffs/*.md` is gitignored for rare mid-epic notes. Delete when work moves to an issue or `PROGRESS.md`. See `docs/agents/handoffs/README.md`.
+
 ### Mixed Strategy
 
 - **Single `ready-for-agent` issue**: one session or multiple sessions tied to the issue/PR; issue + agent brief are the handoff.
-- **Epic or exploratory work**: update `PROGRESS.md` Operational Snapshot every clock-out; use `docs/agents/handoffs/` when the issue tracker is not enough.
+- **Epic or exploratory work**: update `PROGRESS.md` Operational Snapshot every clock-out; create GitHub issues via `/to-issues` when scope stabilizes.
 - **Context pressure**: if a session is approaching context limits, clock out early with verification recorded rather than rushing an unverified finish.
 
 ### Clock In
@@ -101,7 +113,7 @@ Use this routine for long-running work, interrupted work, or work that another a
 
 Before ending a long task or handing it to another session:
 
-1. Record completed work, remaining work, and blockers in the issue, PR, or `docs/agents/handoffs/`.
+1. Record completed work, remaining work, and blockers in the issue, PR, or `PROGRESS.md` Operational Snapshot.
 2. Record verification with exact commands and results. If verification was not run, record why.
 3. Update `PROGRESS.md` Operational Snapshot for multi-session or non-issue work; update harness baseline sections when roadmap or verification expectations change.
 4. Update `CONTEXT.md` when durable domain language changes.
@@ -109,7 +121,8 @@ Before ending a long task or handing it to another session:
 
 ### State Placement
 
-- Task-local state belongs in GitHub issues, PR descriptions, PR comments, commits, or `docs/agents/handoffs/`.
+- Task-local state belongs in GitHub issues, PR descriptions, PR comments, and commits.
+- Ephemeral session bridges belong in `/handoff` temp files or gitignored `docs/agents/handoffs/*.md` — absorb and delete, do not commit.
 - Durable project state belongs in tracked repo docs such as `PROGRESS.md`, `CONTEXT.md`, `docs/adr/`, `docs/architecture/`, and `docs/design/`.
 - Do not use chat history as the only source for decisions, verification results, accepted tradeoffs, or next actions.
 - Keep rebuild cost low: a fresh agent should be able to reach an executable state from repo files in a few minutes.

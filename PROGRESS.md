@@ -8,15 +8,15 @@ This file is the durable handoff point for current project state. Update it when
 
 Update this section at clock-out for multi-session or non-issue work. For a single `ready-for-agent` issue, the GitHub issue and PR are enough.
 
-- Latest commit: uncommitted harness L1–L7 work (run `git rev-parse --short HEAD` after commit)
+- Latest commit: `774a1d5` (harness L1–L7; handoff skill reverted to Matt Pocock default)
 - Test status: 69/69 passing (`make test`)
 - Full check: pass on 2026-06-11 (`make check` — test, build, lint, typecheck)
 - Active WIP: NONE
 - In progress: none
 - Known issues: oxlint warnings remain in test files only (non-blocking)
 - Next steps:
-  1. Resume feature work from GitHub Issues (`ready-for-agent`)
-  2. Run Fresh Session Test after committing harness changes
+  1. Merge PR #35 (harness L1–L7)
+  2. Resume feature work from GitHub Issues (`ready-for-agent`)
 
 ## Current State
 
@@ -33,7 +33,7 @@ Update this section at clock-out for multi-session or non-issue work. For a sing
 - `docs/agents/startup-readiness.md` defines initialization acceptance.
 - `Makefile` standardizes setup, development, test, build, and full verification commands.
 - `src/AGENTS.md` gives source-area routing near implementation files.
-- Handoffs for cross-session work: `docs/agents/handoffs/`.
+- Session handoffs: `/handoff` → OS temp (Matt Pocock default); durable state in issues and `PROGRESS.md`.
 - Last harness audit: 2026-06-11 (Lectures 1–7 gap closure).
 
 ## Verification Baseline
