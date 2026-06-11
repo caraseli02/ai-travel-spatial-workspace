@@ -32,14 +32,6 @@ export function filterTripsByStatus(
 }
 
 export function generateTripFromMessage(message: string): Trip {
-  const destinations = [
-    'Paris', 'Tokyo', 'London', 'New York', 'Rome', 'Barcelona',
-    'Dubai', 'Sydney', 'Cairo', 'Rio de Janeiro', 'Bangkok',
-    'Istanbul', 'Amsterdam', 'Singapore', 'Machu Picchu',
-    'Maldives', 'Swiss Alps', 'Petra', 'Taj Mahal', 'Grand Canyon',
-    'Bali', 'Iceland', 'Kyoto'
-  ];
-
   const destinationMap: Record<string, { full: string, country: string, emoji: string, image: string }> = {
     'paris': {
       full: 'Paris, France',

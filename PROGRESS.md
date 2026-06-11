@@ -1,8 +1,22 @@
 # Progress
 
-Last updated: 2026-06-10
+Last updated: 2026-06-11
 
 This file is the durable handoff point for current project state. Update it when work changes the roadmap, verification baseline, or harness expectations.
+
+## Operational Snapshot
+
+Update this section at clock-out for multi-session or non-issue work. For a single `ready-for-agent` issue, the GitHub issue and PR are enough.
+
+- Latest commit: uncommitted harness L1–L7 work (run `git rev-parse --short HEAD` after commit)
+- Test status: 69/69 passing (`make test`)
+- Full check: pass on 2026-06-11 (`make check` — test, build, lint, typecheck)
+- Active WIP: NONE
+- In progress: none
+- Known issues: oxlint warnings remain in test files only (non-blocking)
+- Next steps:
+  1. Resume feature work from GitHub Issues (`ready-for-agent`)
+  2. Run Fresh Session Test after committing harness changes
 
 ## Current State
 
@@ -14,22 +28,27 @@ This file is the durable handoff point for current project state. Update it when
 
 ## Harness State
 
-- `AGENTS.md` and `CLAUDE.md` are short routing entry files.
-- `docs/agents/harness.md` records harness rules, fresh-session checks, and documentation placement.
+- `AGENTS.md` and `CLAUDE.md` are short routing entry files with Work Rules (WIP=1).
+- `docs/agents/harness.md` records harness rules, fresh-session checks, L1–L7 references, and Matt Pocock skill integration.
+- `docs/agents/startup-readiness.md` defines initialization acceptance.
 - `Makefile` standardizes setup, development, test, build, and full verification commands.
 - `src/AGENTS.md` gives source-area routing near implementation files.
+- Handoffs for cross-session work: `docs/agents/handoffs/`.
+- Last harness audit: 2026-06-11 (Lectures 1–7 gap closure).
 
 ## Verification Baseline
 
 - Standard test command: `make test`
 - Standard build command: `make build`
-- Full consistency check: `make check`
-- Last verified on 2026-06-10: `make check` passed (Trip Workspace shadcn migration + design parity fixes).
+- Lint: `make lint`
+- Typecheck: `make typecheck` (`tsconfig.check.json` excludes `*.test.ts`)
+- Full consistency check: `make check` (test, build, lint, typecheck)
+- Last verified on 2026-06-11: `make check` passed.
 
 When verification cannot be run, record the reason in the final task handoff rather than editing this file for transient failures.
 
 ## Open Follow-Ups
 
-- Add a lint/typecheck command only if the project adopts one in `package.json`.
 - Keep `docs/architecture/codebase-map.md` updated when source organization changes.
 - Convert recurring historical notes into tests or ADRs instead of adding more entry-file rules.
+- Optionally tighten test-file types so `tsconfig.json` can typecheck tests without exclusion.

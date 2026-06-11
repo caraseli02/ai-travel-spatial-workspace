@@ -13,6 +13,6 @@ The Landing Page was designed first in Pencil (`pencil-shadcn.pen`) and then imp
 ## Consequences
 
 - **Theme tokens are the source of truth.** Layout and typography use semantic classes (`bg-background`, `text-muted-foreground`, `border-border`, `text-primary`) defined in `src/index.css`. Hardcoded stone/amber classes are reserved for domain-specific accents (day colors, canvas cards) — not for generic UI chrome.
-- **New interactive UI should compose shadcn primitives** from `src/components/ui/` before writing custom markup. Add components via the shadcn CLI (`vp dlx shadcn@latest add <component>`) when a primitive is missing.
+- **New interactive UI should compose shadcn primitives** from `src/components/ui/` before writing custom markup. Add components via the shadcn CLI (`npx shadcn@latest add <component>`) when a primitive is missing.
 - **Landing Page is fully migrated; Trip Workspace is not.** `LandingPage.tsx` and `PricingSection.tsx` use shadcn. The Trip Workspace still uses legacy patterns — future workspace UI work should migrate incrementally, not introduce a third style.
 - **Lock-in is moderate.** Components are owned source files, not an npm black box. Swapping away later means replacing `src/components/ui/` and token definitions, not rewriting every import site at once.

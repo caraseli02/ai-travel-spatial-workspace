@@ -259,7 +259,6 @@ function TripWorkspacePresenter({
     connections: activeConnections,
     selectedCard,
     showCreateModal,
-    createModalCoords,
     showAddDayModal,
     showOverflow,
     items,
