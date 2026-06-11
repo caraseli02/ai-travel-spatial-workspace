@@ -6,7 +6,7 @@ Primary app surface at route `/trips`. Dark-themed hub for browsing, filtering, 
 
 | Artifact | Location |
 |----------|----------|
-| Pencil design | `pencil-shadcn.pen` (local Pencil file; not committed) |
+| Pencil design | `pencil-shadcn.pen` |
 | Theme tokens | `src/index.css` — Stone base + Orange accent (`.dark`); Pencil also defines `wf-dark-*` variables |
 | shadcn config | `components.json` — style `radix-nova`, base color `stone`, icons `lucide` |
 | Implementation | `src/components/TripListPage.tsx`, `src/components/TripCard.tsx` |
@@ -114,7 +114,7 @@ Fixed to bottom of viewport (max-width ~672px centered):
 
 ## Dark theme tokens (`wf-dark-*`)
 
-Defined in `pencil-shadcn.pen` variables; align with implementation hardcodes during shadcn migration:
+Defined in `pencil-shadcn.pen` variables as dark-surface aliases. Code uses `.dark` shadcn semantic tokens for generic UI chrome:
 
 | Token | Value | Usage |
 |-------|-------|-------|
@@ -165,6 +165,6 @@ Counts come from `computeStatusCounts()` in `src/utils/tripListHelpers.ts`.
 - Filter bar uses custom pill buttons with shadcn `Badge` counts — not shadcn `Tabs`.
 - Responsive breakpoints (`@container` grid) simplified to 3-column desktop in Pencil.
 
-## shadcn migration status (2026-06-10)
+## shadcn baseline
 
-Trip List and `TripCard` use semantic dark-theme tokens (`bg-card`, `text-muted-foreground`, `bg-background`) via the page-level `.dark` wrapper. Hardcoded `#1c1917` / `#a8a29e` hex values were removed in favor of shadcn tokens aligned to Pencil ref `GK0nB`.
+Trip List and `TripCard` use semantic dark-theme tokens (`bg-card`, `text-muted-foreground`, `bg-background`) via the page-level `.dark` wrapper, aligned to Pencil ref `GK0nB`.

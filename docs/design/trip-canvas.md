@@ -6,7 +6,7 @@ Main planning surface at route `/trips/:tripId`. Light-themed spatial workspace 
 
 | Artifact | Location |
 |----------|----------|
-| Pencil design | `pencil-shadcn.pen` (local Pencil file; not committed) |
+| Pencil design | `pencil-shadcn.pen` |
 | Theme tokens | `src/index.css` — Stone base + Orange accent (light workspace); Pencil `wf-*` variables |
 | shadcn config | `components.json` — style `radix-nova`, base color `stone`, icons `lucide` |
 | Implementation | `src/components/TripWorkspace.tsx`, `src/components/CanvasCards.tsx`, `src/components/InboxPanel.tsx`, `src/components/CardDetailPanel.tsx` |
@@ -158,7 +158,7 @@ Day label pills use domain colors from `dayGroups` (amber, orange, emerald, rose
 
 ## Light workspace tokens
 
-Pencil uses `$wf-*` variables (see [foundations.md](foundations.md)). Code still has hardcoded hex — migrate to semantic tokens:
+Pencil uses `$wf-*` variables (see [foundations.md](foundations.md)). Code uses shadcn semantic tokens for generic chrome and canvas-specific utility colors for the spatial surface:
 
 | Pencil variable | Value | Usage |
 |-----------------|-------|-------|
@@ -172,21 +172,24 @@ Pencil uses `$wf-*` variables (see [foundations.md](foundations.md)). Code still
 
 Domain day/tag accents (amber, orange, emerald, rose) match `CanvasCards.tsx` `tagColorMap` and sticky palettes.
 
-## shadcn components in scope (future migration)
+## shadcn baseline
 
-| Component | File | Variants likely needed on workspace |
+Trip Workspace is part of the shared shadcn/ui foundation established in ADR-0003. The main workspace shell, inbox, canvas cards, dialogs, and Card Detail Panel compose shadcn primitives and shared tokens, while domain-specific canvas accents remain intentionally tied to day colors, card types, and travel material semantics.
+
+## shadcn components in use
+
+| Component | File | Workspace use |
 |-----------|------|-------------------------------------|
-| `Button` | `src/components/ui/button.tsx` | `default`, `ghost`, `outline` |
-| `Badge` | `src/components/ui/badge.tsx` | Status, day tags, inbox counts |
-| `Card` | `src/components/ui/card.tsx` | Inbox items, canvas cards |
-| `Dialog` | `src/components/ui/dialog.tsx` | Create card, add day modals |
-| `Input` / `Textarea` | `src/components/ui/input.tsx` | Inbox, AI prompt, detail edit mode |
-| `Tabs` | `src/components/ui/tabs.tsx` | Day filter pills (candidate) |
-| `Sheet` | *(to add)* | Card detail panel drawer |
+| `Button` | `src/components/ui/button.tsx` | Header actions, toolbar controls, prompt actions, dialog actions |
+| `Badge` | `src/components/ui/badge.tsx` | Status, day tags, inbox counts, card metadata |
+| `Card` | `src/components/ui/card.tsx` | Inbox items, canvas cards, prompt surfaces |
+| `Dialog` | `src/components/ui/dialog.tsx` | Create card and add day modals |
+| `Input` / `Textarea` | `src/components/ui/input.tsx`, `src/components/ui/textarea.tsx` | Inbox capture, AI prompt, detail edit mode |
+| `Select` | `src/components/ui/select.tsx` | Card type and day association controls |
+| `Sheet` | `src/components/ui/sheet.tsx` | Card Detail Panel drawer behavior |
 
 ## Out of scope (current implementation)
 
-- Trip Workspace UI still uses hardcoded light colors — not yet on shadcn semantic tokens; see ADR-0003.
 - Card detail **edit mode** and delete-confirm pulse not drawn as separate Pencil states.
 - Mobile overflow popover (share/export/travelers) not drawn — header shows ··· only.
 - Canvas pan/zoom physics and drag interactions are code-only (`useSpatialViewport`).

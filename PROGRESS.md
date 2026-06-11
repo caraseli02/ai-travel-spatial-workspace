@@ -8,7 +8,7 @@ This file is the durable handoff point for current project state. Update it when
 
 Update this section at clock-out for multi-session or non-issue work. For a single `ready-for-agent` issue, the GitHub issue and PR are enough.
 
-- Latest commit: `d4ae427` (PR #35 merged — harness L1–L7; handoff stays OS temp)
+- Latest commit: `479aee0` (PROGRESS snapshot after PR #35 merge)
 - Test status: 69/69 passing (`make test`)
 - Full check: pass on 2026-06-11 (`make check` — test, build, lint, typecheck)
 - Active WIP: NONE
@@ -23,7 +23,10 @@ Update this section at clock-out for multi-session or non-issue work. For a sing
 - The main product surfaces are Landing Page, Trip List, and Trip Workspace.
 - Domain vocabulary is tracked in `CONTEXT.md`.
 - Architecture decisions are tracked in `docs/adr/`.
-- Design migration guidance lives in `docs/design/`.
+- Design implementation guidance lives in `docs/design/`.
+- Pencil (`pencil-shadcn.pen`) is the versioned design source.
+- shadcn/ui is the shared implementation foundation across Landing Page, Trip List, and Trip Workspace.
+- Landing v2 is the canonical Landing Page direction; legacy Landing v1 frames are archival.
 
 ## Harness State
 
@@ -51,3 +54,4 @@ When verification cannot be run, record the reason in the final task handoff rat
 - Keep `docs/architecture/codebase-map.md` updated when source organization changes.
 - Convert recurring historical notes into tests or ADRs instead of adding more entry-file rules.
 - Optionally tighten test-file types so `tsconfig.json` can typecheck tests without exclusion.
+- Continue the GitHub roadmap around Trip Material memory and agent planning: #23 and #24 are PRDs; #26-#30 remain ready-for-agent follow-up issues after #25 was completed.

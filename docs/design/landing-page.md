@@ -119,4 +119,3 @@ CTA target: `navigate(\`/trips/${DEMO_TRIP_ID}\`)` — opens the pre-loaded Demo
 ## Out of scope (current implementation)
 
 - Nav anchor links scroll to section IDs but Sign in and pricing CTAs remain placeholder UI.
-- Trip Workspace UI has not been migrated to shadcn — see ADR-0003.

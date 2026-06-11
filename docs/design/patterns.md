@@ -129,6 +129,8 @@ Common: `globe`, `plane`, `compass`, `clock`, `circle-check`, `chevron-left`, `s
 
 ## Theme per surface
 
+The mixed visual direction is intentional for the current prototype: Trip List is the dark planning hub, while Trip Canvas stays light for map-like spatial work. Do not normalize these surfaces to one mode unless a dedicated theme-toggle pass changes the design baseline.
+
 | Surface | Pencil theme axes | Page fill |
 |---------|-------------------|-----------|
 | Landing | Stone + Orange + Light | `$5:--background` |
@@ -157,5 +159,5 @@ Before marking a desktop screen done:
 - [ ] Theme axes set on screen frame
 - [ ] Token variables used — no stray hex on chrome
 - [ ] All interactive states documented in surface doc
-- [x] `get_screenshot` verified (2026-06-10 — post shadcn workspace migration)
+- [x] `get_screenshot` verified against the shadcn workspace baseline
 - [ ] Node ID + name updated in surface doc

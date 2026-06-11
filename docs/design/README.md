@@ -1,6 +1,10 @@
 # Design documentation index
 
-Wayfarer UI is designed in Pencil (`pencil-shadcn.pen`, local — not committed) and implemented with shadcn/ui (Radix Nova, Stone + Orange).
+Wayfarer UI is designed in Pencil (`pencil-shadcn.pen`) and implemented with shadcn/ui (Radix Nova, Stone + Orange).
+
+## Current baseline
+
+Pencil is the versioned design source and shadcn/ui is the shared implementation foundation across the Landing Page, Trip List, and Trip Workspace. Landing v2 is the canonical Landing Page direction; legacy Landing v1 frames are archival and should not be extended.
 
 ## Start here
 
@@ -60,7 +64,7 @@ Each screen page has:
 
 | Doc | Route | Desktop frame | Mobile frame |
 |-----|-------|---------------|--------------|
-| [landing-page.md](landing-page.md) | `/` | `scbFm` | `LWbNo` |
+| [landing-page.md](landing-page.md) | `/` | `elmGx` | `LWbNo` |
 | [trip-list.md](trip-list.md) | `/trips` | `i8BjSi` | `uqZ1a` |
 | [trip-canvas.md](trip-canvas.md) | `/trips/:tripId` | `lngHk` | `rsL1N` |
 

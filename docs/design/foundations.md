@@ -34,10 +34,10 @@ Light tokens: `:root` in `src/index.css`. Dark tokens: `.dark` class (Trip List)
 | Namespace | Where used | Examples |
 |-----------|------------|----------|
 | `$5:--*` | shadcn import theme | `$5:--background`, `$5:--primary`, `$5:--border` |
-| `$wf-*` | Wayfarer workspace (light) | `$wf-page`, `$wf-surface`, `$wf-canvas`, `$wf-border-warm` |
-| `wf-dark-*` | Trip List dark surface | `wf-dark-bg`, `wf-dark-surface`, `wf-dark-border` |
+| `$wf-*` | Pencil aliases for Wayfarer workspace light surfaces | `$wf-page`, `$wf-surface`, `$wf-canvas`, `$wf-border-warm` |
+| `wf-dark-*` | Pencil aliases for Trip List dark surfaces | `wf-dark-bg`, `wf-dark-surface`, `wf-dark-border` |
 
-### Workspace paper tokens (`wf-*` — Pencil + migration target)
+### Workspace paper tokens (`wf-*` — Pencil aliases)
 
 | Variable | Value | Usage |
 |----------|-------|-------|
@@ -53,11 +53,13 @@ Pencil theme axes: `5:Base` (Stone), `5:Accent` (Orange), `5:Mode` (Light / Dark
 
 ## Theme surfaces
 
+The current prototype intentionally mixes surface modes: Landing and Trip Workspace use light Stone/Orange foundations, while Trip List uses a dark Stone/Orange hub. Treat this as the current design baseline and preserve it until full light/dark theme toggle support is designed.
+
 | Surface | Pencil theme | Code approach |
 |---------|--------------|---------------|
 | Landing | Light | `:root` semantic tokens |
-| Trip List | Dark | `.dark` on root + `wf-dark-*` during migration |
-| Trip Canvas | Light workspace | `wf-*` + warm paper hex (migrating to semantic) |
+| Trip List | Dark | `.dark` semantic tokens |
+| Trip Canvas | Light workspace | `:root` semantic tokens + canvas-specific utilities |
 
 ### Dark trip list (`wf-dark-*`)
 
