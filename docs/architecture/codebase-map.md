@@ -34,11 +34,11 @@ flowchart TD
 
 `src/App.tsx` is a three-screen router powered by `react-router-dom`. It coordinates screen switches and addressable URL routes:
 
-- `/` renders `LandingPage` (marketing and live chat mockup).
+- `/` renders `LandingPage` (Landing v2 marketing surface with product-window previews).
 - `/trips` renders `TripListPage` (trip grid, prompt bar for trip creation, and deleting/adding trips).
 - `/trips/:tripId` renders `TripWorkspace` (planning workspace for a single trip).
 
-`src/components/LandingPage.tsx` is a product/demo entry point. It animates sample Trip Material and navigates into the Demo Trip workspace via `onEnterDemo`.
+`src/components/LandingPage.tsx` is a product/demo entry point. It presents the Spatial Canvas, Trip List, and AI Inbox concepts with shadcn-based preview sections, then navigates into the Demo Trip workspace via `onEnterDemo`.
 
 `src/components/TripListPage.tsx` lists all active Trips. It provides a prompt bar that detects traveler intents to create a new trip or parse pasted links directly into a newly created trip's inbox.
 

@@ -90,7 +90,7 @@ Complete one surface fully (all states + doc update) before starting the next.
 
 ### Phase 3 — Landing (`Wayfarer / Mobile / Landing` · `LWbNo`)
 
-**Reference desktop:** `scbFm` (`s6fLZ`) · **Doc:** `docs/design/landing-page.md`
+**Reference desktop:** `elmGx` (`nNgwc`) · **Doc:** `docs/design/landing-page.md`
 
 | State | Placeholder ID | Action |
 |-------|----------------|--------|
