@@ -110,8 +110,8 @@ export function buildProcessedCanvasCard({
   now?: () => number;
   random?: () => number;
 }) {
-  const processedItem = { ...item, processed: true };
   const newCardId = `c_spawn_${now()}`;
+  const processedItem = { ...item, processed: true, resultingCardId: newCardId };
   const associatedDay = activeDay || 2;
   const dayCfg = dayLabels.find(label => label.day === associatedDay) || dayLabels[0];
   const scatterX = Math.floor(random() * 80) - 40;
@@ -213,12 +213,25 @@ export function buildProcessedCanvasCard({
     };
   }
 
+  newCard = {
+    ...newCard,
+    promotedFromInboxId: item.id,
+  };
+
   const siblingCard = cards.find(card => card.day === associatedDay && card.id !== newCardId);
   const connection = siblingCard
     ? { from: siblingCard.id, to: newCardId, label: 'dynamic-link' }
     : undefined;
 
   return { processedItem, newCard, connection };
+}
+
+function mergeCanvasCardUpdate(existingCard: CanvasCard, updatedCard: CanvasCard): CanvasCard {
+  return {
+    ...existingCard,
+    ...updatedCard,
+    promotedFromInboxId: updatedCard.promotedFromInboxId ?? existingCard.promotedFromInboxId,
+  };
 }
 
 export function applyAiPromptToTripWorkspace({
@@ -517,11 +530,17 @@ export function tripWorkspaceReducer(
       };
     }
     case 'UPDATE_CARD': {
+      const existingCard = state.cards.find(c => c.id === action.card.id);
+      const nextCard = existingCard ? mergeCanvasCardUpdate(existingCard, action.card) : action.card;
       const nextSelectedCard =
-        state.selectedCard?.id === action.card.id ? action.card : state.selectedCard;
+        state.selectedCard?.id === action.card.id
+          ? state.selectedCard.promotedFromInboxId && !nextCard.promotedFromInboxId
+            ? { ...nextCard, promotedFromInboxId: state.selectedCard.promotedFromInboxId }
+            : nextCard
+          : state.selectedCard;
       return {
         ...state,
-        cards: state.cards.map(c => c.id === action.card.id ? action.card : c),
+        cards: state.cards.map(c => c.id === action.card.id ? nextCard : c),
         selectedCard: nextSelectedCard,
       };
     }
@@ -608,4 +627,3 @@ export function tripWorkspaceReducer(
       return state;
   }
 }
-

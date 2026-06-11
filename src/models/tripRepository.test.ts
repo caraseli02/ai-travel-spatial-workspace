@@ -148,6 +148,7 @@ describe('localTripRepository', () => {
         title: 'Test Card',
         subtitle: 'Test subtitle',
         width: 200,
+        promotedFromInboxId: 'i_test_1',
       },
     ];
     trip.inboxItems = [
@@ -157,7 +158,8 @@ describe('localTripRepository', () => {
         source: 'Test',
         content: 'Test content',
         timestamp: 'Just now',
-        processed: false,
+        processed: true,
+        resultingCardId: 'c_test_1',
       },
     ];
     trip.connections = [{ from: 'c1', to: 'c2', label: 'test-link' }];
@@ -168,9 +170,76 @@ describe('localTripRepository', () => {
 
     expect(loaded!.cards).toHaveLength(1);
     expect(loaded!.cards[0].title).toBe('Test Card');
+    expect(loaded!.cards[0].promotedFromInboxId).toBe('i_test_1');
     expect(loaded!.inboxItems).toHaveLength(1);
     expect(loaded!.inboxItems[0].content).toBe('Test content');
+    expect(loaded!.inboxItems[0].resultingCardId).toBe('c_test_1');
     expect(loaded!.connections).toHaveLength(1);
     expect(loaded!.days).toHaveLength(1);
+  });
+
+  it('loads older saved trips without provenance fields and allows editing them', () => {
+    const oldTrip: Trip = {
+      ...createEmptyTrip('Older Trip', 'Lisbon, Portugal', '🇵🇹'),
+      cards: [
+        {
+          id: 'c_old_1',
+          type: 'sticky',
+          x: 10,
+          y: 20,
+          rotation: 0,
+          title: 'Old saved card',
+        },
+      ],
+      inboxItems: [
+        {
+          id: 'i_old_1',
+          type: 'note',
+          source: 'Old note',
+          content: 'Older Trip Material',
+          timestamp: 'Last week',
+          processed: true,
+        },
+      ],
+    };
+    store.wayfarer_trips = JSON.stringify([oldTrip]);
+    store.wayfarer_demo_seeded = 'true';
+
+    const loaded = localTripRepository.load(oldTrip.id);
+    expect(loaded).not.toBeNull();
+    expect(loaded!.cards[0].promotedFromInboxId).toBeUndefined();
+    expect(loaded!.inboxItems[0].resultingCardId).toBeUndefined();
+
+    localTripRepository.save({
+      ...loaded!,
+      cards: [{ ...loaded!.cards[0], title: 'Edited old saved card' }],
+    });
+
+    const edited = localTripRepository.load(oldTrip.id);
+    expect(edited!.cards[0].title).toBe('Edited old saved card');
+    expect(edited!.inboxItems[0].content).toBe('Older Trip Material');
+  });
+
+  it('defaults missing workspace collections from older localStorage payloads', () => {
+    const partialOldTrip = {
+      id: 'old-partial',
+      name: 'Partial Trip',
+      destination: 'Porto, Portugal',
+      emoji: '🇵🇹',
+      createdAt: '2025-01-01T00:00:00.000Z',
+      updatedAt: '2025-01-01T00:00:00.000Z',
+    };
+    store.wayfarer_trips = JSON.stringify([partialOldTrip]);
+    store.wayfarer_demo_seeded = 'true';
+
+    const loaded = localTripRepository.load('old-partial');
+    expect(loaded).toMatchObject({
+      id: 'old-partial',
+      cards: [],
+      connections: [],
+      inboxItems: [],
+      days: [],
+      dayLabels: [],
+    });
   });
 });

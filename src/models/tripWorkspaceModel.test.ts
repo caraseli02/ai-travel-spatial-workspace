@@ -44,9 +44,11 @@ describe('Trip Workspace model', () => {
     });
 
     expect(result.processedItem.processed).toBe(true);
+    expect(result.processedItem.resultingCardId).toBe('c_spawn_1774200000000');
     expect(result.newCard).toMatchObject({
       id: 'c_spawn_1774200000000',
       type: 'article',
+      promotedFromInboxId: 'i7',
       x: 218,
       y: 285,
       rotation: 0,
@@ -197,11 +199,42 @@ describe('Trip Workspace model', () => {
       const newState = tripWorkspaceReducer(state, { type: 'PROCESS_INBOX_ITEM', id: 'i7' });
 
       expect(newState.items[0].processed).toBe(true);
+      expect(newState.items[0].resultingCardId).toBe(newState.cards[0].id);
       expect(newState.cards).toHaveLength(1);
       expect(newState.cards[0]).toMatchObject({
         type: 'article',
+        promotedFromInboxId: 'i7',
         title: 'Mizai Restaurant',
         tag: 'Day 4 · Fine Dining',
+      });
+    });
+
+    it('preserves source relationship when updating a promoted Canvas Card', () => {
+      const promotedCard = {
+        id: 'c1',
+        type: 'sticky' as const,
+        x: 100,
+        y: 100,
+        day: 1,
+        title: 'Original Title',
+        promotedFromInboxId: 'i1',
+      };
+      const state = {
+        ...createInitialState(),
+        cards: [promotedCard],
+        selectedCard: promotedCard,
+      };
+
+      const editedCard = { ...promotedCard, title: 'Updated Title', promotedFromInboxId: undefined };
+      const nextState = tripWorkspaceReducer(state, { type: 'UPDATE_CARD', card: editedCard });
+
+      expect(nextState.cards[0]).toMatchObject({
+        title: 'Updated Title',
+        promotedFromInboxId: 'i1',
+      });
+      expect(nextState.selectedCard).toMatchObject({
+        title: 'Updated Title',
+        promotedFromInboxId: 'i1',
       });
     });
 

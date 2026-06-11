@@ -5,6 +5,7 @@ export interface InboxItem {
   content: string;
   timestamp: string;
   processed: boolean;
+  resultingCardId?: string;
   avatar?: string;
 }
 
@@ -25,6 +26,7 @@ export interface CanvasCard {
   price?: string;
   rating?: number;
   width?: number;
+  promotedFromInboxId?: string;
 }
 
 export interface Connection {
