@@ -8,15 +8,14 @@ This file is the durable handoff point for current project state. Update it when
 
 Update this section at clock-out for multi-session or non-issue work. For a single `ready-for-agent` issue, the GitHub issue and PR are enough.
 
-- Latest commit: `774a1d5` (harness L1–L7; handoff skill reverted to Matt Pocock default)
+- Latest commit: `d4ae427` (PR #35 merged — harness L1–L7; handoff stays OS temp)
 - Test status: 69/69 passing (`make test`)
 - Full check: pass on 2026-06-11 (`make check` — test, build, lint, typecheck)
 - Active WIP: NONE
 - In progress: none
 - Known issues: oxlint warnings remain in test files only (non-blocking)
 - Next steps:
-  1. Merge PR #35 (harness L1–L7)
-  2. Resume feature work from GitHub Issues (`ready-for-agent`)
+  1. Resume feature work from GitHub Issues (`ready-for-agent`)
 
 ## Current State
 
