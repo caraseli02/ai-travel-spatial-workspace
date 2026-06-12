@@ -5,6 +5,8 @@ export interface InboxItem {
   content: string;
   timestamp: string;
   processed: boolean;
+  sourceUrl?: string;
+  rawContent?: string;
   resultingCardId?: string;
   avatar?: string;
 }
