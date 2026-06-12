@@ -9,6 +9,7 @@ export const inboxItems: InboxItem[] = [
       "You HAVE to go to Fushimi Inari at 5am before the crowds! And try the tofu kaiseki at Junsei near Nanzenji 🍜",
     timestamp: "2 hours ago",
     processed: true,
+    resultingCardId: "c5",
     avatar: "🇯🇵",
   },
   {
@@ -18,6 +19,7 @@ export const inboxItems: InboxItem[] = [
     content: "SFO → KIX · Dec 14 · 12h 40m · $743 · JAL JL69 · Nonstop",
     timestamp: "3 hours ago",
     processed: true,
+    resultingCardId: "c1",
   },
   {
     id: "i3",
@@ -26,6 +28,7 @@ export const inboxItems: InboxItem[] = [
     content: "Hiiragiya Ryokan · Nakagyo Ward · Dec 14–21 · ¥45,000/night · Free cancellation",
     timestamp: "3 hours ago",
     processed: true,
+    resultingCardId: "c2",
   },
   {
     id: "i4",
@@ -81,6 +84,7 @@ export const canvasCards: CanvasCard[] = [
     details: ["Window seat 32A confirmed", "Meal: Japanese", "$743 total"],
     price: "$743",
     width: 280,
+    promotedFromInboxId: "i2",
   },
   {
     id: "c2",
@@ -102,6 +106,7 @@ export const canvasCards: CanvasCard[] = [
     rating: 4.9,
     image: "/images/ryokan.jpg",
     width: 260,
+    promotedFromInboxId: "i3",
   },
   {
     id: "c3",
@@ -142,6 +147,7 @@ export const canvasCards: CanvasCard[] = [
     color: "#fce7f3",
     day: 2,
     width: 195,
+    promotedFromInboxId: "i1",
   },
   {
     id: "c6",

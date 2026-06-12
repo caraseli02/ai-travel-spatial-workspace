@@ -35,9 +35,11 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import type { CardSourceMemory } from "../models/tripMaterialMemory";
 
 interface CardDetailPanelProps {
   card: CanvasCard | null;
+  sourceMemory?: CardSourceMemory;
   onClose: () => void;
   onUpdateCard?: (updated: CanvasCard) => void;
   onDeleteCard?: (id: string) => void;
@@ -82,6 +84,7 @@ const stickyColorPresets = [
 
 export default function CardDetailPanel({
   card,
+  sourceMemory,
   onClose,
   onUpdateCard,
   onDeleteCard,
@@ -445,6 +448,8 @@ export default function CardDetailPanel({
                 </div>
               )}
 
+              {sourceMemory && <TripMaterialMemoryBlock sourceMemory={sourceMemory} />}
+
               {card.type === "flight" && (
                 <div className="rounded-xl border border-border bg-muted/50 p-3">
                   <div className="flex items-center justify-between text-foreground">
@@ -507,12 +512,65 @@ export default function CardDetailPanel({
             </Button>
           </div>
 
-          <Button className="w-full text-xs font-bold">
-            <ExternalLink className="size-3" />
-            Open original link
-          </Button>
+          {sourceMemory?.kind === "source-backed" && sourceMemory.sourceUrl && (
+            <Button asChild className="w-full text-xs font-bold">
+              <a href={sourceMemory.sourceUrl} target="_blank" rel="noreferrer">
+                <ExternalLink className="size-3" />
+                Open original link
+              </a>
+            </Button>
+          )}
         </div>
       </SheetContent>
     </Sheet>
+  );
+}
+
+function TripMaterialMemoryBlock({ sourceMemory }: { sourceMemory: CardSourceMemory }) {
+  if (sourceMemory.kind === "manual") {
+    return (
+      <div className="rounded-lg border border-border bg-muted/40 p-3">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <p className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+            Trip Material Memory
+          </p>
+          <Badge variant="secondary" className="text-[10px]">
+            Manual
+          </Badge>
+        </div>
+        <p className="text-xs font-semibold text-foreground">{sourceMemory.title}</p>
+        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+          {sourceMemory.description}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-lg border border-emerald-200 bg-emerald-50/70 p-3">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <p className="text-[10px] font-bold tracking-wider text-emerald-900 uppercase">
+          Trip Material Memory
+        </p>
+        <Badge className="border-emerald-200 bg-white text-[10px] text-emerald-800">
+          Source-backed
+        </Badge>
+      </div>
+      <p className="text-xs font-semibold text-foreground">{sourceMemory.sourceLabel}</p>
+      <p className="mt-1 line-clamp-4 text-xs leading-relaxed text-muted-foreground">
+        {sourceMemory.rawContent}
+      </p>
+      {sourceMemory.sourceUrl && (
+        <a
+          href={sourceMemory.sourceUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-2 inline-flex max-w-full items-center gap-1 text-xs font-semibold text-primary hover:underline"
+        >
+          <ExternalLink className="size-3 shrink-0" />
+          <span className="truncate">{sourceMemory.sourceUrl}</span>
+        </a>
+      )}
+    </div>
   );
 }

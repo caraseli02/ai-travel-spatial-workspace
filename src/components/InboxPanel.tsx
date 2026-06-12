@@ -13,15 +13,17 @@ import {
   Circle,
   X,
 } from "lucide-react";
-import type { InboxItem } from "../models/trip";
+import type { CanvasCard, InboxItem } from "../models/trip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { resolveInboxItemDisplayState } from "../models/tripMaterialMemory";
 
 interface InboxPanelProps {
   items: InboxItem[];
+  cards?: CanvasCard[];
   onProcessItem: (id: string) => void;
   onAddItem: (content: string) => void;
   onOpenAddManual?: () => void;
@@ -52,6 +54,7 @@ const sampleInputs = [
 
 export default function InboxPanel({
   items,
+  cards = [],
   onProcessItem,
   onAddItem,
   onOpenAddManual,
@@ -156,7 +159,12 @@ export default function InboxPanel({
             </div>
             <div className="space-y-2">
               {unprocessed.map((item) => (
-                <InboxItemCard key={item.id} item={item} onProcess={onProcessItem} />
+                <InboxItemCard
+                  key={item.id}
+                  item={item}
+                  cards={cards}
+                  onProcess={onProcessItem}
+                />
               ))}
             </div>
           </div>
@@ -166,7 +174,7 @@ export default function InboxPanel({
           <div>
             <div className="mb-2 flex items-center gap-2 px-1">
               <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-                On canvas
+                Organized
               </span>
               <Badge className="h-5 border-emerald-200 bg-emerald-50 px-1.5 text-[10px] text-emerald-800">
                 {processed.length}
@@ -174,7 +182,13 @@ export default function InboxPanel({
             </div>
             <div className="space-y-2">
               {processed.map((item) => (
-                <InboxItemCard key={item.id} item={item} onProcess={onProcessItem} dimmed />
+                <InboxItemCard
+                  key={item.id}
+                  item={item}
+                  cards={cards}
+                  onProcess={onProcessItem}
+                  dimmed
+                />
               ))}
             </div>
           </div>
@@ -199,15 +213,18 @@ export default function InboxPanel({
 
 function InboxItemCard({
   item,
+  cards,
   onProcess,
   dimmed,
 }: {
   item: InboxItem;
+  cards: CanvasCard[];
   onProcess: (id: string) => void;
   dimmed?: boolean;
 }) {
   const colors = sourceColors[item.type] || sourceColors.note;
   const icon = sourceIcons[item.type] || sourceIcons.note;
+  const displayState = resolveInboxItemDisplayState(item, cards);
 
   return (
     <Card
@@ -259,20 +276,44 @@ function InboxItemCard({
           </p>
 
           {!dimmed ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onProcess(item.id)}
-              className="mt-2.5 h-auto gap-1 px-0 text-xs font-medium text-primary opacity-0 transition-all group-hover:opacity-100 hover:bg-transparent hover:text-primary/80"
-            >
-              <Sparkles className="size-2.5" />
-              Place on canvas
-              <ChevronRight className="size-2.5" />
-            </Button>
+            <div className="mt-2.5 flex items-center justify-between gap-2">
+              <span className="text-xs font-medium text-muted-foreground">
+                {displayState.label}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onProcess(item.id)}
+                className="h-auto gap-1 px-0 text-xs font-medium text-primary opacity-0 transition-all group-hover:opacity-100 hover:bg-transparent hover:text-primary/80"
+              >
+                <Sparkles className="size-2.5" />
+                Place on canvas
+                <ChevronRight className="size-2.5" />
+              </Button>
+            </div>
           ) : (
-            <div className="mt-2 flex items-center gap-1 text-xs text-emerald-600">
-              <CheckCircle2 className="size-2.5" />
-              <span>Added to canvas</span>
+            <div
+              className={cn(
+                "mt-2 flex items-start gap-1 text-xs",
+                displayState.kind === "previously-organized"
+                  ? "text-muted-foreground"
+                  : "text-emerald-600",
+              )}
+            >
+              <CheckCircle2 className="mt-0.5 size-2.5 shrink-0" />
+              <div className="min-w-0">
+                <span className="font-medium">{displayState.label}</span>
+                {displayState.kind === "linked-card" && (
+                  <span className="block truncate text-[11px] text-muted-foreground">
+                    {displayState.cardTitle}
+                  </span>
+                )}
+                {displayState.kind === "previously-organized" && (
+                  <span className="block text-[11px] leading-snug">
+                    {displayState.description}
+                  </span>
+                )}
+              </div>
             </div>
           )}
         </div>

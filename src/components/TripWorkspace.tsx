@@ -29,6 +29,7 @@ import {
   getCardCenter,
   isCardType,
 } from "../models/tripWorkspaceModel";
+import { resolveCardSourceMemory } from "../models/tripMaterialMemory";
 import type { CardType, TripWorkspaceState } from "../models/tripWorkspaceModel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -354,6 +355,9 @@ function TripWorkspacePresenter({
   const filteredCards = activeDay
     ? cards.filter(c => c.day === activeDay || c.day === 0)
     : cards;
+  const selectedCardSourceMemory = selectedCard
+    ? resolveCardSourceMemory(selectedCard, items)
+    : undefined;
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
@@ -607,6 +611,7 @@ function TripWorkspacePresenter({
             <div className="h-full w-full md:w-[280px]">
               <InboxPanel
                 items={items}
+                cards={cards}
                 onProcessItem={(id) => {
                   handleProcessItem(id);
                   if (isMobile) {
@@ -828,6 +833,7 @@ function TripWorkspacePresenter({
           {/* Card detail panel */}
           <CardDetailPanel
             card={selectedCard}
+            sourceMemory={selectedCardSourceMemory}
             onClose={() => setSelectedCard(null)}
             onUpdateCard={handleUpdateCard}
             onDeleteCard={handleDeleteCard}
