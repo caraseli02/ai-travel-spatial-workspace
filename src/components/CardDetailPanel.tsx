@@ -291,22 +291,25 @@ export default function CardDetailPanel({
                   </Label>
                   <div className="mt-1 flex items-center gap-2">
                     {stickyColorPresets.map((preset) => (
-                      <button
+                      <Button
                         key={preset.hex}
                         type="button"
+                        variant="ghost"
+                        size="icon-xs"
                         onClick={() => handleFieldChange({ color: preset.hex })}
-                        className="relative size-6 rounded-full border transition-all"
+                        className="relative size-6 rounded-full border p-0 hover:bg-transparent"
                         style={{
                           backgroundColor: preset.hex,
                           borderColor: card.color === preset.hex ? "var(--primary)" : "var(--border)",
                           transform: card.color === preset.hex ? "scale(1.15)" : "none",
                         }}
+                        aria-label={`Set sticky color to ${preset.name}`}
                         title={preset.name}
                       >
                         {card.color === preset.hex && (
                           <Check size={10} className="absolute inset-0 m-auto text-amber-800" />
                         )}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 </div>

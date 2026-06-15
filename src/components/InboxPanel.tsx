@@ -258,13 +258,16 @@ function InboxItemCard({
             <div className="flex items-center gap-1.5">
               <span className="text-xs text-muted-foreground/60">{item.timestamp}</span>
               {!dimmed ? (
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
                   onClick={() => onProcess(item.id)}
-                  className="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-emerald-500"
+                  className="size-5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-transparent hover:text-emerald-500"
+                  aria-label="Mark as organized"
                   title="Mark as organized"
                 >
                   <Circle size={14} />
-                </button>
+                </Button>
               ) : (
                 <CheckCircle2 size={14} className="text-emerald-400" />
               )}

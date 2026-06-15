@@ -2,6 +2,7 @@ import React from "react";
 import { Star, Plane, MapPin, Wifi } from "lucide-react";
 import type { CanvasCard } from "../models/trip";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 
 const tagColorMap: Record<string, { bg: string; text: string; border: string }> = {
   amber:   { bg: '#fef3c7', text: '#92400e', border: '#fde68a' },
@@ -61,7 +62,7 @@ export function PolaroidCard({
         transition: isDragging ? 'none' : 'transform 0.2s ease, box-shadow 0.2s ease',
       }}
     >
-      <div
+      <Card
         className={`rounded-lg bg-card transition-all duration-200 ${
           isDragging ? "shadow-2xl ring-2 ring-amber-500/20" : "polaroid-shadow group-hover:polaroid-shadow-hover"
         }`}
@@ -82,7 +83,7 @@ export function PolaroidCard({
             <p className="mt-0.5 text-xs leading-snug text-muted-foreground">{card.subtitle}</p>
           )}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
@@ -120,7 +121,7 @@ export function StickyCard({
         transition: isDragging ? 'none' : 'transform 0.2s ease, box-shadow 0.2s ease',
       }}
     >
-      <div className={`rounded-lg transition-all duration-200 relative overflow-hidden ${
+      <Card className={`relative overflow-hidden rounded-lg py-0 transition-all duration-200 ring-0 ${
         isDragging ? 'shadow-2xl ring-2 ring-amber-500/20' : 'sticky-shadow group-hover:shadow-lg'
       }`}
         style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}`, padding: '14px' }}>
@@ -133,7 +134,7 @@ export function StickyCard({
         {card.subtitle && (
           <p className="text-xs leading-relaxed text-muted-foreground">{card.subtitle}</p>
         )}
-      </div>
+      </Card>
     </div>
   );
 }
@@ -162,8 +163,8 @@ export function ArticleCard({
         transition: isDragging ? 'none' : 'transform 0.2s ease, box-shadow 0.2s ease',
       }}
     >
-      <div
-        className={`overflow-hidden rounded-xl border border-border bg-card transition-all duration-200 ${
+      <Card
+        className={`overflow-hidden rounded-xl border border-border bg-card py-0 transition-all duration-200 ring-0 ${
           isDragging ? "shadow-2xl ring-2 ring-amber-500/20" : "polaroid-shadow group-hover:polaroid-shadow-hover"
         }`}
       >
@@ -190,7 +191,7 @@ export function ArticleCard({
             </ul>
           )}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
@@ -219,8 +220,8 @@ export function FlightCard({
         transition: isDragging ? 'none' : 'transform 0.2s ease, box-shadow 0.2s ease',
       }}
     >
-      <div
-        className={`rounded-xl border border-border bg-card transition-all duration-200 ${
+      <Card
+        className={`rounded-xl border border-border bg-card py-0 transition-all duration-200 ring-0 ${
           isDragging ? "shadow-2xl ring-2 ring-amber-500/20" : "polaroid-shadow group-hover:polaroid-shadow-hover"
         }`}
       >
@@ -270,7 +271,7 @@ export function FlightCard({
             </div>
           )}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
@@ -299,8 +300,8 @@ export function HotelCard({
         transition: isDragging ? 'none' : 'transform 0.2s ease, box-shadow 0.2s ease',
       }}
     >
-      <div
-        className={`overflow-hidden rounded-xl border border-border bg-card transition-all duration-200 ${
+      <Card
+        className={`overflow-hidden rounded-xl border border-border bg-card py-0 transition-all duration-200 ring-0 ${
           isDragging ? "shadow-2xl ring-2 ring-amber-500/20" : "polaroid-shadow group-hover:polaroid-shadow-hover"
         }`}
       >
@@ -331,7 +332,7 @@ export function HotelCard({
             </ul>
           )}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
@@ -360,8 +361,8 @@ export function NoteCard({
         transition: isDragging ? 'none' : 'transform 0.2s ease, box-shadow 0.2s ease',
       }}
     >
-      <div
-        className={`rounded-xl border border-border bg-card p-3.5 transition-all duration-200 ${
+      <Card
+        className={`rounded-xl border border-border bg-card p-3.5 transition-all duration-200 ring-0 ${
           isDragging ? "shadow-2xl ring-2 ring-amber-500/20" : "polaroid-shadow group-hover:polaroid-shadow-hover"
         }`}
       >
@@ -371,7 +372,7 @@ export function NoteCard({
         </div>
         <p className="mb-1 text-sm font-semibold text-foreground">{card.title}</p>
         <p className="text-xs leading-relaxed text-muted-foreground">{card.subtitle}</p>
-      </div>
+      </Card>
     </div>
   );
 }
