@@ -514,7 +514,7 @@ export default function CardDetailPanel({
 
           {sourceMemory?.kind === "source-backed" && sourceMemory.sourceUrl && (
             <Button asChild className="w-full text-xs font-bold">
-              <a href={sourceMemory.sourceUrl} target="_blank" rel="noreferrer">
+              <a href={sourceMemory.sourceUrl} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="size-3" />
                 Open original link
               </a>
@@ -564,7 +564,7 @@ function TripMaterialMemoryBlock({ sourceMemory }: { sourceMemory: CardSourceMem
         <a
           href={sourceMemory.sourceUrl}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           className="mt-2 inline-flex max-w-full items-center gap-1 text-xs font-semibold text-primary hover:underline"
         >
           <ExternalLink className="size-3 shrink-0" />
