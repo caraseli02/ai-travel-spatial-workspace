@@ -14,6 +14,9 @@ Source lectures ([Learn Harness Engineering](https://walkinglabs.github.io/learn
 - [L05 — Long-running task continuity](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-05-why-long-running-tasks-lose-continuity/)
 - [L06 — Initialization as its own phase](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-06-why-initialization-needs-its-own-phase/)
 - [L07 — Overreach and under-finish](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-07-why-agents-overreach-and-under-finish/)
+- [L08 — Feature lists as harness primitives](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-08-why-feature-lists-are-harness-primitives/)
+- [L09 — Prevent premature completion declarations](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-09-why-agents-declare-victory-too-early/)
+- [L10 — Full pipeline verification](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-10-why-end-to-end-testing-changes-results/)
 
 ## Two-Layer Harness
 
@@ -25,6 +28,16 @@ Source lectures ([Learn Harness Engineering](https://walkinglabs.github.io/learn
 Skill configuration: `docs/agents/issue-tracker.md`, `triage-labels.md`, `domain.md`.
 
 Epics decompose via `/to-issues` into GitHub Issues — issues are the scope surface, not `feature_list.json`.
+
+## Scope Surface
+
+GitHub Issues are this repo's feature-list primitive. A `ready-for-agent` issue should provide the same triple a feature list would:
+
+- Behavior: the "What to build" section describes observable user or system behavior.
+- Verification: acceptance criteria and agent brief checks describe what evidence counts.
+- State: labels, blockers, linked PRs, and issue/PR comments record whether the work is ready, active, blocked, or complete.
+
+Pass-state gating is manual for now: do not treat an issue or acceptance criterion as complete until the PR records exact verification commands and results. If this becomes unreliable, add a script or CI check before adding more prose rules.
 
 ## Fresh Session Test
 
@@ -71,6 +84,18 @@ When an agent fails, classify the failure before adding new rules:
 5. **State** — cross-session drift, missing handoff, stale `PROGRESS.md`.
 
 Fix the harness layer that failed. Do not upgrade the model first.
+
+## Completion Validation
+
+Completion is external evidence, not agent confidence. Use this hierarchy:
+
+1. Static layer: `make lint`, `make typecheck`, and `make build` where relevant.
+2. Runtime behavior layer: `make test`, focused tests, and application startup checks.
+3. Full-flow layer: browser or end-to-end verification for cross-component UI, routing, persistence, or interaction changes.
+
+`make check` is the standard consistency command, but it is not enough by itself for visible UI or runtime workflow changes. Until a dedicated E2E harness exists, record a browser verification note with the route, flow exercised, and result. Example: `make dev` + browser check of `/trips/:tripId` card edit persistence — pass.
+
+Do not refactor or polish adjacent code until the core behavior has passed the required validation layer. When a repeated review comment exposes a defect class, promote it into a test, lint rule, or focused check with an error message that says what failed and how to fix it.
 
 ## State Management
 

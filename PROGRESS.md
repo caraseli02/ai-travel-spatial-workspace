@@ -1,6 +1,6 @@
 # Progress
 
-Last updated: 2026-06-11
+Last updated: 2026-06-15
 
 This file is the durable handoff point for current project state. Update it when work changes the roadmap, verification baseline, or harness expectations.
 
@@ -15,7 +15,8 @@ Update this section at clock-out for multi-session or non-issue work. For a sing
 - In progress: none
 - Known issues: oxlint warnings remain in test files only (non-blocking)
 - Next steps:
-  1. Resume feature work from GitHub Issues (`ready-for-agent`)
+  1. Finish the shadcn refactor work.
+  2. Move to #28, "Introduce mock agent planner with typed outcomes."
 
 ## Current State
 
@@ -31,12 +32,12 @@ Update this section at clock-out for multi-session or non-issue work. For a sing
 ## Harness State
 
 - `AGENTS.md` and `CLAUDE.md` are short routing entry files with Work Rules (WIP=1).
-- `docs/agents/harness.md` records harness rules, fresh-session checks, L1–L7 references, and Matt Pocock skill integration.
+- `docs/agents/harness.md` records harness rules, fresh-session checks, L1–L10 references, GitHub Issues as the scope surface, completion validation, and Matt Pocock skill integration.
 - `docs/agents/startup-readiness.md` defines initialization acceptance.
 - `Makefile` standardizes setup, development, test, build, and full verification commands.
 - `src/AGENTS.md` gives source-area routing near implementation files.
 - Session handoffs: `/handoff` → OS temp (Matt Pocock default); durable state in issues and `PROGRESS.md`.
-- Last harness audit: 2026-06-11 (Lectures 1–7 gap closure).
+- Last harness audit: 2026-06-15 (Lectures 8–10 gap closure).
 
 ## Verification Baseline
 
@@ -45,6 +46,7 @@ Update this section at clock-out for multi-session or non-issue work. For a sing
 - Lint: `make lint`
 - Typecheck: `make typecheck` (`tsconfig.check.json` excludes `*.test.ts`)
 - Full consistency check: `make check` (test, build, lint, typecheck)
+- UI/runtime flow evidence: for visible UI, routing, localStorage persistence, or cross-component changes, record a browser/full-flow check in addition to `make check`.
 - Last verified on 2026-06-11: `make check` passed.
 
 When verification cannot be run, record the reason in the final task handoff rather than editing this file for transient failures.
@@ -54,4 +56,4 @@ When verification cannot be run, record the reason in the final task handoff rat
 - Keep `docs/architecture/codebase-map.md` updated when source organization changes.
 - Convert recurring historical notes into tests or ADRs instead of adding more entry-file rules.
 - Optionally tighten test-file types so `tsconfig.json` can typecheck tests without exclusion.
-- Continue the GitHub roadmap around Trip Material memory and agent planning: #23 and #24 are PRDs; #26-#30 remain ready-for-agent follow-up issues after #25 was completed.
+- Continue the GitHub roadmap around Trip Material memory and agent planning: #23 and #24 are PRDs; #28 and #30 are unblocked `ready-for-agent` follow-up issues; #29 remains blocked by #28.
