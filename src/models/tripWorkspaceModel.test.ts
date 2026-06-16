@@ -4,6 +4,7 @@ import {
   applyAiPromptToTripWorkspace,
   buildInboxItem,
   buildProcessedCanvasCard,
+  deleteCanvasCardFromWorkspace,
   dayLabelConfig,
   getCardCenter,
   canConnectCards,
@@ -11,6 +12,7 @@ import {
   tripWorkspaceReducer,
   type TripWorkspaceState,
 } from './tripWorkspaceModel';
+import { resolveInboxItemDisplayState } from './tripMaterialMemory';
 
 const zeroRandom = () => 0.5;
 const fixedNow = () => 1_774_200_000_000;
@@ -96,6 +98,64 @@ describe('Trip Workspace model', () => {
   it('computes connection endpoints from Canvas Card dimensions', () => {
     expect(getCardCenter({ ...canvasCards[0], width: 300 })).toEqual({ x: 180, y: 162 });
     expect(getCardCenter(canvasCards[4])).toEqual({ x: 372.5, y: 350 });
+  });
+
+  it('deletes a source-backed Canvas Card without deleting its source Inbox Item memory', () => {
+    const sourceItem = {
+      id: 'i_source',
+      type: 'link' as const,
+      source: 'Web Parser',
+      content: 'https://example.com/tea-house',
+      timestamp: 'Just now',
+      processed: true,
+      resultingCardId: 'c_source',
+    };
+    const sourceBackedCard = {
+      id: 'c_source',
+      type: 'article' as const,
+      x: 100,
+      y: 100,
+      rotation: 0,
+      title: 'Tea house guide',
+      promotedFromInboxId: 'i_source',
+    };
+    const remainingCard = {
+      id: 'c_remaining',
+      type: 'sticky' as const,
+      x: 300,
+      y: 100,
+      rotation: 0,
+      title: 'Book dinner',
+    };
+    const state: TripWorkspaceState = {
+      activeDay: null,
+      days: [],
+      dayLabels: [],
+      cards: [sourceBackedCard, remainingCard],
+      connections: [
+        { from: 'c_source', to: 'c_remaining', label: 'related' },
+        { from: 'c_remaining', to: 'c_other', label: 'keep' },
+      ],
+      items: [sourceItem],
+      selectedCard: sourceBackedCard,
+      isAiThinking: false,
+      showCreateModal: false,
+      createModalCoords: null,
+      showAddDayModal: false,
+      showOverflow: false,
+    };
+
+    const nextState = deleteCanvasCardFromWorkspace(state, 'c_source');
+
+    expect(nextState.cards).toEqual([remainingCard]);
+    expect(nextState.connections).toEqual([{ from: 'c_remaining', to: 'c_other', label: 'keep' }]);
+    expect(nextState.items).toEqual([sourceItem]);
+    expect(nextState.selectedCard).toBeNull();
+    expect(resolveInboxItemDisplayState(nextState.items[0], nextState.cards)).toEqual({
+      kind: 'previously-organized',
+      label: 'Previously organized',
+      description: 'The linked Canvas Card is no longer on the Spatial Canvas.',
+    });
   });
 
   describe('Connection validation and creation', () => {
