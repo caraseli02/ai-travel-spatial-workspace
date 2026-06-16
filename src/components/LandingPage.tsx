@@ -595,19 +595,21 @@ function TripListFeature({ onEnterDemo }: { onEnterDemo: () => void }) {
 
         <div className="mb-10 grid grid-cols-2 gap-2 md:flex md:flex-wrap md:justify-center md:gap-2">
           {tripFilters.map((filter) => (
-            <button
+            <Button
               key={filter.label}
               type="button"
+              variant="outline"
+              size="sm"
               className={cn(
-                "flex items-center justify-center gap-1.5 rounded-full border px-3.5 py-2 text-[13px] font-medium transition-colors",
+                "h-auto justify-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-medium",
                 filter.active
-                  ? "border-white/15 bg-white/10 text-stone-50"
-                  : "border-white/5 bg-white/5 text-stone-400",
+                  ? "border-white/15 bg-white/10 text-stone-50 hover:bg-white/10 hover:text-stone-50"
+                  : "border-white/5 bg-white/5 text-stone-400 hover:bg-white/10 hover:text-stone-50",
               )}
             >
               <filter.icon className="size-3.5" />
               {filter.label}
-            </button>
+            </Button>
           ))}
         </div>
 

@@ -32,6 +32,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 const EMOJI_PRESETS = [
@@ -175,16 +176,18 @@ export default function TripListPage() {
     <div className="dark flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground selection:bg-primary/30">
       <header className="z-20 h-16 shrink-0 border-b border-border bg-background">
         <div className="mx-auto flex h-full w-full max-w-[1344px] items-center justify-between px-4 sm:px-12">
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => navigate("/")}
-            className="flex cursor-pointer items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
+            className="h-auto gap-2 px-0 text-muted-foreground hover:bg-transparent hover:text-foreground"
           >
             <ChevronLeft className="size-4" />
             <div className="flex size-7 items-center justify-center rounded-[6px] bg-primary">
               <Compass className="size-[15px] text-primary-foreground" strokeWidth={2.5} />
             </div>
             <span className="text-[15px] font-semibold tracking-[-0.3px]">Wayfarer</span>
-          </button>
+          </Button>
 
           <div className="flex items-center gap-3">
             <Button
@@ -345,43 +348,43 @@ export default function TripListPage() {
                 <Filter className="size-4 text-muted-foreground" />
               </Button>
 
-              <div className="flex items-center gap-2">
-                {tabConfig.map((tab) => {
-                  const active = selectedFilter === tab.key;
-                  const TabIcon = tab.icon;
-                  return (
-                    <button
-                      key={tab.key}
-                      onClick={() => setSelectedFilter(tab.key)}
-                      className={cn(
-                        "group flex cursor-pointer items-center gap-2 rounded-full border py-1 pr-1 pl-2 text-xs whitespace-nowrap transition-all",
-                        active
-                          ? "border-border bg-accent font-semibold text-foreground"
-                          : "border-transparent bg-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-                      )}
-                    >
-                      <TabIcon
-                        className={cn(
-                          "size-3.5",
-                          active
-                            ? "text-primary"
-                            : "text-muted-foreground group-hover:text-foreground",
-                        )}
-                      />
-                      <span>{tab.label}</span>
-                      <Badge
-                        variant="secondary"
-                        className={cn(
-                          "h-5 min-w-5 justify-center px-1.5 text-[10px]",
-                          !active && "bg-transparent text-muted-foreground",
-                        )}
+              <Tabs
+                value={selectedFilter}
+                onValueChange={(value) => setSelectedFilter(value as typeof selectedFilter)}
+              >
+                <TabsList className="gap-2 bg-transparent p-0">
+                  {tabConfig.map((tab) => {
+                    const active = selectedFilter === tab.key;
+                    const TabIcon = tab.icon;
+                    return (
+                      <TabsTrigger
+                        key={tab.key}
+                        value={tab.key}
+                        className="group h-8 flex-none gap-2 rounded-full border border-transparent bg-transparent py-1 pr-1 pl-2 text-xs data-active:border-border data-active:bg-accent data-active:text-foreground data-active:shadow-none"
                       >
-                        {tab.count}
-                      </Badge>
-                    </button>
-                  );
-                })}
-              </div>
+                        <TabIcon
+                          className={cn(
+                            "size-3.5",
+                            active
+                              ? "text-primary"
+                              : "text-muted-foreground group-hover:text-foreground",
+                          )}
+                        />
+                        <span>{tab.label}</span>
+                        <Badge
+                          variant="secondary"
+                          className={cn(
+                            "h-5 min-w-5 justify-center px-1.5 text-[10px]",
+                            !active && "bg-transparent text-muted-foreground",
+                          )}
+                        >
+                          {tab.count}
+                        </Badge>
+                      </TabsTrigger>
+                    );
+                  })}
+                </TabsList>
+              </Tabs>
             </div>
           </div>
 
@@ -533,18 +536,16 @@ export default function TripListPage() {
             <div className="mx-auto flex w-full max-w-[760px] flex-col items-center gap-3">
               <div className="scrollbar-none flex w-full flex-nowrap items-center justify-start gap-2 overflow-x-auto pb-1">
                 {suggestions.map((suggestion, i) => (
-                  <button
+                  <Button
                     key={i}
                     type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={() => handlePromptSubmit(undefined, suggestion)}
+                    className="h-auto rounded-full px-3 py-1.5 text-[10px] font-medium whitespace-nowrap shadow-sm active:scale-[0.98]"
                   >
-                    <Badge
-                      variant="outline"
-                      className="cursor-pointer px-3 py-1.5 text-[10px] font-medium whitespace-nowrap shadow-sm transition-all hover:bg-muted hover:text-foreground active:scale-[0.98]"
-                    >
-                      {suggestion}
-                    </Badge>
-                  </button>
+                    {suggestion}
+                  </Button>
                 ))}
               </div>
 
@@ -656,17 +657,19 @@ function NewTripDialog({
             <Label className="text-xs text-muted-foreground">Icon</Label>
             <div className="scrollbar-none flex max-h-[80px] flex-wrap gap-1.5 overflow-y-auto pr-1">
               {EMOJI_PRESETS.map((e, i) => (
-                <button
+                <Button
                   key={i}
                   type="button"
+                  variant={emoji === e ? "secondary" : "ghost"}
+                  size="icon"
                   onClick={() => setEmoji(e)}
                   className={cn(
-                    "flex size-8 cursor-pointer items-center justify-center rounded-lg text-sm transition-all",
-                    emoji === e ? "scale-110 bg-primary/20 ring-2 ring-primary" : "hover:bg-muted",
+                    "size-8 text-sm",
+                    emoji === e && "scale-110 bg-primary/20 ring-2 ring-primary",
                   )}
                 >
                   {e}
-                </button>
+                </Button>
               ))}
             </div>
           </div>

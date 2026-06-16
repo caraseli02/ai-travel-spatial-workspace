@@ -676,12 +676,15 @@ function TripWorkspacePresenter({
             <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2.5 px-4 py-2 rounded-full border shadow-xl bg-amber-50 border-amber-300 text-amber-900 animate-pulse text-xs font-semibold select-none">
               <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
               <span>Link Mode: Click another card on the canvas to connect them</span>
-              <button
+              <Button
+                variant="ghost"
+                size="icon-xs"
                 onClick={linkingSession.cancel}
-                className="hover:bg-amber-100 rounded-full p-0.5 text-amber-700 transition-colors cursor-pointer ml-1"
+                className="ml-1 text-amber-700 hover:bg-amber-100 hover:text-amber-800"
+                aria-label="Cancel link mode"
               >
                 <X size={12} />
-              </button>
+              </Button>
             </div>
           )}
 
@@ -813,18 +816,18 @@ function TripWorkspacePresenter({
               })}
 
               {/* Add card button */}
-              <div
+              <Button
+                type="button"
+                variant="ghost"
                 onClick={() => handleOpenCreateModal(900, 680)}
-                className="absolute flex items-center gap-1.5 cursor-pointer group hover:scale-105 active:scale-95 transition-all select-none"
+                className="absolute h-auto gap-1.5 bg-transparent p-0 text-muted-foreground/40 hover:scale-105 hover:bg-transparent hover:text-muted-foreground active:scale-95"
                 style={{ left: 880, top: 640 }}
               >
-                <div className="flex size-9 items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/30 transition-all group-hover:border-muted-foreground/50">
-                  <Plus size={16} className="text-muted-foreground/40 transition-colors group-hover:text-muted-foreground" />
+                <div className="flex size-9 items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/30 transition-all group-hover/button:border-muted-foreground/50">
+                  <Plus size={16} />
                 </div>
-                <span className="text-xs text-muted-foreground/40 transition-colors group-hover:text-muted-foreground">
-                  Add card
-                </span>
-              </div>
+                <span className="text-xs">Add card</span>
+              </Button>
             </div>
           </div>
 

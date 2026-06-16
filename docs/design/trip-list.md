@@ -153,16 +153,16 @@ Counts come from `computeStatusCounts()` in `src/utils/tripListHelpers.ts`.
 | Component | File | Variants used on trip list |
 |-----------|------|---------------------------|
 | `Button` | `src/components/ui/button.tsx` | `default`, `ghost`, `outline` |
-| `Badge` | `src/components/ui/badge.tsx` | `outline` (suggestion chips, status could migrate) |
+| `Badge` | `src/components/ui/badge.tsx` | Status and count badges |
 | `Card` | `src/components/ui/card.tsx` | Trip cards, empty states, New Trip dashed card |
 | `Dialog` | `src/components/ui/dialog.tsx` | New Trip modal |
 | `Input` | `src/components/ui/input.tsx` | Prompt bar, modal fields |
+| `Tabs` | `src/components/ui/tabs.tsx` | Status filter bar |
 
 ## Out of scope (current implementation)
 
 - Delete confirmation overlay on `TripCard` not drawn in Pencil (interaction state).
 - Chat sidebar uses simulated AI delay; no real backend.
-- Filter bar uses custom pill buttons with shadcn `Badge` counts — not shadcn `Tabs`.
 - Responsive breakpoints (`@container` grid) simplified to 3-column desktop in Pencil.
 
 ## shadcn baseline
