@@ -446,6 +446,25 @@ export function connectCards(
   };
 }
 
+export function deleteCanvasCardFromWorkspace(
+  state: TripWorkspaceState,
+  cardId: string,
+): TripWorkspaceState {
+  const nextCards = state.cards.filter(card => card.id !== cardId);
+  const nextConnections = state.connections.filter(
+    connection => connection.from !== cardId && connection.to !== cardId,
+  );
+  const nextSelectedCard =
+    state.selectedCard?.id === cardId ? null : state.selectedCard;
+
+  return {
+    ...state,
+    cards: nextCards,
+    connections: nextConnections,
+    selectedCard: nextSelectedCard,
+  };
+}
+
 export type TripWorkspaceAction =
   | { type: 'ADD_INBOX_ITEM'; content: string }
   | { type: 'PROCESS_INBOX_ITEM'; id: string }
@@ -500,19 +519,7 @@ export function tripWorkspaceReducer(
       };
     }
     case 'DELETE_CARD': {
-      const nextCards = state.cards.filter(c => c.id !== action.id);
-      const nextConnections = state.connections.filter(
-        conn => conn.from !== action.id && conn.to !== action.id
-      );
-      const nextSelectedCard =
-        state.selectedCard?.id === action.id ? null : state.selectedCard;
-
-      return {
-        ...state,
-        cards: nextCards,
-        connections: nextConnections,
-        selectedCard: nextSelectedCard,
-      };
+      return deleteCanvasCardFromWorkspace(state, action.id);
     }
     case 'ADD_CONNECTION': {
       return connectCards(state, action.fromId, action.toId);
