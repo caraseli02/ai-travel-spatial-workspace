@@ -172,7 +172,7 @@ function findCitationSupport(
   const citations: AgentPlannerCitation[] = [];
 
   for (const item of context.inboxItems) {
-    if (sharesAnyTerm(queryTerms, `${item.content} ${item.rawContent}`)) {
+    if (sharesAnyTerm(queryTerms, `${item.content} ${item.rawContent ?? ''}`)) {
       citations.push({
         ref: item.citationRef,
         kind: 'inbox-item',

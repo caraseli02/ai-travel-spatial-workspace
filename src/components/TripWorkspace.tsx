@@ -820,7 +820,7 @@ function TripWorkspacePresenter({
                 type="button"
                 variant="ghost"
                 onClick={() => handleOpenCreateModal(900, 680)}
-                className="absolute h-auto gap-1.5 bg-transparent p-0 text-muted-foreground/40 hover:scale-105 hover:bg-transparent hover:text-muted-foreground active:scale-95"
+                className="group/button absolute h-auto gap-1.5 bg-transparent p-0 text-muted-foreground/40 hover:scale-105 hover:bg-transparent hover:text-muted-foreground active:scale-95"
                 style={{ left: 880, top: 640 }}
               >
                 <div className="flex size-9 items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/30 transition-all group-hover/button:border-muted-foreground/50">

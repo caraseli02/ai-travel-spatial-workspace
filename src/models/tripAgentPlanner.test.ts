@@ -143,6 +143,8 @@ describe('mock agent planner', () => {
           type: 'link' as const,
           source: 'Eater Japan',
           content: 'Nakamura-ro is a classic dinner near Yasaka Shrine',
+          rawContent: 'https://example.com/nakamura-ro Nakamura-ro is a classic dinner near Yasaka Shrine',
+          sourceUrl: 'https://example.com/nakamura-ro',
           timestamp: 'Today',
           processed: false,
         },

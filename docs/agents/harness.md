@@ -48,7 +48,7 @@ A fresh agent session should answer these questions using only repo files:
 | What is this system? | `CONTEXT.md` |
 | How is it organized? | `docs/architecture/codebase-map.md`, `src/AGENTS.md` |
 | How do I run it? | `Makefile`, `package.json`, `docs/agents/startup-readiness.md` |
-| How do I verify it? | `make check` (test, build, lint, typecheck) |
+| How do I verify it? | `make check` for static/runtime consistency; add browser or E2E verification for visible UI, routing, persistence, or multi-component interaction changes |
 | What's the current progress? | `PROGRESS.md` Operational Snapshot + linked issue |
 
 If an answer requires chat history or memory, add the missing knowledge to the smallest relevant file.

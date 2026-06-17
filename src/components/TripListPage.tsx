@@ -360,7 +360,7 @@ export default function TripListPage() {
                       <TabsTrigger
                         key={tab.key}
                         value={tab.key}
-                        className="group h-8 flex-none gap-2 rounded-full border border-transparent bg-transparent py-1 pr-1 pl-2 text-xs data-active:border-border data-active:bg-accent data-active:text-foreground data-active:shadow-none"
+                        className="group h-8 flex-none gap-2 rounded-full border border-transparent bg-transparent py-1 pr-1 pl-2 text-xs data-[state=active]:border-border data-[state=active]:bg-accent data-[state=active]:text-foreground data-[state=active]:shadow-none"
                       >
                         <TabIcon
                           className={cn(
