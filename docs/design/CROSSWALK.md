@@ -65,7 +65,8 @@ Disable unused slots on instances: `Update(instance+"/5:CgJv7", { enabled: false
 | `ZQPee` | Wayfarer / New Trip Card | `TripListPage.tsx` |
 | `l6uTL` | Wayfarer / Trip List Header | `TripListPage.tsx` |
 | `ZPaim` | Wayfarer / Trip List Filter Bar | `TripListPage.tsx` |
-| `YK92H` | Wayfarer / Trip List Prompt Bar | `TripListPage.tsx` |
+| `YK92H` | Wayfarer / Trip List Prompt Bar | `TripListPage.tsx` (desktop) |
+| `p4INn` | Wayfarer / Trip List Prompt Bar / Mobile | `TripListPage.tsx` (mobile) |
 | `zVsPD` | Wayfarer / Workspace Header | `TripWorkspace.tsx` |
 | `YeJCA` | Wayfarer / Workspace Header Mobile | `TripWorkspace.tsx` |
 | `tS1mE` | Wayfarer / Inbox Panel | `InboxPanel.tsx` |

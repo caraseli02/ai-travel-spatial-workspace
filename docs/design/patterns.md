@@ -1,6 +1,6 @@
 # Wayfarer composition patterns
 
-Shared layout and component patterns for Pencil screens and React implementation. Derived from Pencil **Design System** guide + Wayfarer surfaces. See [foundations.md](foundations.md) for tokens and [CROSSWALK.md](../../.agents/skills/pencil-wayfarer/CROSSWALK.md) for ref IDs.
+Shared layout and component patterns for Pencil screens and React implementation. Derived from Pencil **Design System** guide + Wayfarer surfaces. See [foundations.md](foundations.md) for tokens and [CROSSWALK.md](CROSSWALK.md) for ref IDs.
 
 ## Screen layout patterns
 

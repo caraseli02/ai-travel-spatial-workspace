@@ -18,6 +18,9 @@ A fresh agent session should reach an executable state from repo files alone in 
 | Tests | `make test` |
 | Lint | `make lint` |
 | Typecheck | `make typecheck` |
+| E2E smoke | `make e2e` |
+| Environment check | `make doctor` |
+| Fresh-session check | `make fresh-session-test` |
 | Full verification | `make check` |
 
 ## Initialization Acceptance Checklist
@@ -25,8 +28,11 @@ A fresh agent session should reach an executable state from repo files alone in 
 Run on a clean clone with no chat context:
 
 - [ ] `make setup` succeeds
+- [ ] `make doctor` reports the expected runtime and dependency state
 - [ ] `make test` passes
-- [ ] `make check` passes (test, build, lint, typecheck)
+- [ ] `make e2e` passes
+- [ ] `make fresh-session-test` passes
+- [ ] `make check` passes (test, build, strict lint, typecheck, E2E, fresh-session test)
 - [ ] A fresh session can answer run, verify, and progress questions from repo files alone
 - [ ] Active work is visible in `PROGRESS.md` Operational Snapshot or a `ready-for-agent` issue
 

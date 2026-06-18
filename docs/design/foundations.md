@@ -91,7 +91,7 @@ Do not use these for generic nav, buttons, or standard cards.
 
 ## Primitive crosswalk (summary)
 
-Full table: `.agents/skills/pencil-wayfarer/CROSSWALK.md`
+Full table: [CROSSWALK.md](CROSSWALK.md)
 
 | Pencil | shadcn | Typical use |
 |--------|--------|-------------|
@@ -111,11 +111,12 @@ Each layer is a **separate top-level frame** — not one scrolling page.
 | Frame | ID | Layer | Contents |
 |-------|-----|-------|----------|
 | `Wayfarer / DS / 01 Foundations` | `wlrYF` | L0 | Token swatches |
-| `Wayfarer / DS / 02 Brand` | `TDnCG` | L1 | Brand mark variants |
-| `Wayfarer / DS / 03 shadcn Primitives` | `T3K9M3` | L1 | Button, badge, card, tab catalog |
-| `Wayfarer / DS / 04 Patterns` | `sin7M` | L1½ | Layout patterns A–E |
-| `Wayfarer / DS / 05 Components · Trip List` | `x76EWb` | L2 | Chrome · Cards |
-| `Wayfarer / DS / 06 Components · Trip Canvas` | `g967C` | L2 | Chrome · Inbox · Canvas Cards · Panels |
+| `Wayfarer / DS / 02 Primitives` | `T3K9M3` | L1 | shadcn Button, badge, card, tab catalog |
+| `Wayfarer / DS / 03 Patterns` | `sin7M` | L1½ | Layout patterns A–E |
+| `Wayfarer / DS / 04 Components / Shared` | `TDnCG` | L2 | Brand mark variants |
+| `Wayfarer / DS / 05 Components / Trip List` | `x76EWb` | L2 | Chrome · Cards |
+| `Wayfarer / DS / 06 Components / Trip Canvas` | `g967C` | L2 | Chrome · Inbox · Canvas Cards · Schedule · Map · Panels · Map Route catalog |
+| `Wayfarer / DS / 07 Components / Landing` | `ApHdO` | L2 | Landing-specific reusables (populate as v2 stabilizes) |
 
 Layout patterns: [patterns.md](patterns.md) · File map: [README.md](README.md)
 
