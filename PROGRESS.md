@@ -9,9 +9,9 @@ This file is the durable handoff point for current project state. Update it when
 Update this section at clock-out for multi-session or non-issue work. For a single `ready-for-agent` issue, the GitHub issue and PR are enough.
 
 - Latest commit: `479aee0` (PROGRESS snapshot after PR #35 merge)
-- Test status: 78/78 passing (`make test`, 2026-06-18)
+- Test status: 85/85 passing (`make test`, 2026-06-18)
 - E2E status: 3/3 passing (`make e2e`, 2026-06-18)
-- Full check: pass on 2026-06-18 (`make check` — test, build, strict lint, typecheck, E2E, fresh-session test)
+- Full check: pass on 2026-06-18 after merging `origin/main` (`make check` — test, build, strict lint, typecheck, E2E, fresh-session test)
 - Active WIP: harness-readiness closure on `codex/update-harness-trip-canvas-design`
 - In progress: none; harness-readiness closure implementation is verified and ready for review.
 - Known issues: local shell is currently Node `v25.8.1`, while the repo baseline is Node 22 LTS; `npm ci` passes but reports an engine warning until the local runtime is switched. npm audit reports 4 dependency findings after adding Playwright (2 low, 2 high); no fix applied yet because it may require broader dependency changes.
@@ -53,7 +53,7 @@ Update this section at clock-out for multi-session or non-issue work. For a sing
 - Fresh-session check: `make fresh-session-test`
 - Full consistency check: `make check` (test, build, strict lint, typecheck, E2E, fresh-session test)
 - UI/runtime flow evidence: for visible UI, routing, localStorage persistence, or cross-component changes beyond smoke coverage, record a browser/full-flow check in addition to `make check`.
-- Last verified on 2026-06-18: `npm ci` passed with a Node-version warning on local Node 25; `make doctor`, `make fresh-session-test`, and `make check` passed.
+- Last verified on 2026-06-18 after merging `origin/main`: `make check` passed with 85 unit tests, build, strict lint, typecheck, 3 E2E tests, and fresh-session test.
 
 When verification cannot be run, record the reason in the final task handoff rather than editing this file for transient failures.
 
