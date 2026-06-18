@@ -63,7 +63,7 @@ export function PolaroidCard({
       }}
     >
       <Card
-        className={`rounded-lg bg-card transition-all duration-200 ${
+        className={`rounded-lg bg-card transition-all duration-200 ring-0 ${
           isDragging ? "shadow-2xl ring-2 ring-amber-500/20" : "polaroid-shadow group-hover:polaroid-shadow-hover"
         }`}
         style={{ padding: "10px 10px 14px 10px" }}
