@@ -6,11 +6,11 @@ Copy everything below the line into a new chat when ready to draw mobile screens
 
 ## Task
 
-Design **all Wayfarer mobile screens (390 × 844)** in `pencil-shadcn.pen`. Desktop is done — mobile lives in **separate top-level frames only**. Do not modify `Wayfarer / Desktop / *` frames except as visual reference.
+Design **all Wayfarer mobile screens (390 × 844)** in `pencil-shadcn.pen`. Desktop is done — mobile lives in **separate top-level frames only**. Do not modify `Wayfarer / Screens / Desktop / *` frames except as visual reference.
 
 ## Mandatory setup (do first)
 
-1. Load `.agents/skills/pencil-wayfarer/SKILL.md`
+1. Load `.agents/skills/pencil-design/SKILL.md`
 2. Read `docs/design/README.md`, `docs/design/patterns.md`, `docs/design/foundations.md`
 3. Pencil MCP:
    - `get_editor_state({ include_schema: true })`
@@ -21,8 +21,8 @@ Design **all Wayfarer mobile screens (390 × 844)** in `pencil-shadcn.pen`. Desk
 
 ## File rules (non-negotiable)
 
-- **Only** edit frames under `Wayfarer / Mobile / *`
-- Each mobile page: **Cover** (already exists) + **Screens** stack (80px gap)
+- **Only** edit frames under `Wayfarer / Screens / Mobile / *`
+- Each mobile page: **00 Cover** + **20 States** stack (80px gap)
 - Screen frames: **390px wide**, `fit_content(844)` height unless content is shorter
 - Compose from **L2 domain refs** in `DS / 05–06` — never raw shadcn in screens
 - Use tokens: `$5:--*` (shadcn), `$wf-*` / `$wf-dark-*` (Wayfarer) — no hardcoded hex on chrome
@@ -53,7 +53,7 @@ Design **all Wayfarer mobile screens (390 × 844)** in `pencil-shadcn.pen`. Desk
 
 Complete one surface fully (all states + doc update) before starting the next.
 
-### Phase 1 — Trip Canvas (`Wayfarer / Mobile / Trip Canvas` · `rsL1N`)
+### Phase 1 — Trip Canvas (`Wayfarer / Screens / Mobile / Trip Canvas` · `rsL1N`)
 
 **Reference desktop:** `lngHk` · **Domain components:** `g967C` · **Doc:** `docs/design/trip-canvas.md`
 
@@ -70,7 +70,7 @@ Complete one surface fully (all states + doc update) before starting the next.
 - Header: `YeJCA` (two-row: trip row + day strip)
 - Keep Kyoto demo fixture from `tripData.ts` / desktop `qjIgb`
 
-### Phase 2 — Trip List (`Wayfarer / Mobile / Trip List` · `uqZ1a`)
+### Phase 2 — Trip List (`Wayfarer / Screens / Mobile / Trip List` · `uqZ1a`)
 
 **Reference desktop:** `i8BjSi` · **Domain components:** `x76EWb` · **Doc:** `docs/design/trip-list.md`
 
@@ -88,7 +88,7 @@ Complete one surface fully (all states + doc update) before starting the next.
 - Filter bar `ZPaim`: horizontal scroll for status tabs
 - Theme: Stone + Orange + **Dark** (`$wf-dark-bg`, `$wf-dark-surface`)
 
-### Phase 3 — Landing (`Wayfarer / Mobile / Landing` · `LWbNo`)
+### Phase 3 — Landing (`Wayfarer / Screens / Mobile / Landing` · `LWbNo`)
 
 **Reference desktop:** `elmGx` (`nNgwc`) · **Doc:** `docs/design/landing-page.md`
 
@@ -119,7 +119,7 @@ Before marking a state done:
 
 ## Do not
 
-- Edit `Wayfarer / Desktop / *` or `Wayfarer / DS / *` (unless adding a mobile-only domain variant — then document it)
+- Edit `Wayfarer / Screens / Desktop / *` or `Wayfarer / DS / *` (unless adding a mobile-only domain variant — then document it)
 - Put mobile frames inside desktop parents
 - Invent new layout patterns — use A–E from `patterns.md` with mobile adaptations noted above
 - Implement React code in this task — Pencil only
@@ -127,6 +127,6 @@ Before marking a state done:
 
 ## Deliverables
 
-1. All mobile states drawn in `Mobile / Landing`, `Mobile / Trip List`, `Mobile / Trip Canvas`
+1. All mobile states drawn in `Screens / Mobile / Landing`, `Trip List`, `Trip Canvas`
 2. Updated `docs/design/landing-page.md`, `trip-list.md`, `trip-canvas.md` mobile tables
 3. Brief summary: states completed, any new mobile-only components created, screenshots verified

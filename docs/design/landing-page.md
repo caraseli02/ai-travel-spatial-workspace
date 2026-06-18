@@ -16,7 +16,7 @@ Marketing surface at route `/`. Introduces Wayfarer with a prompt-style hero, pr
 
 ## Pencil screens
 
-### Desktop v2 — `Wayfarer / Desktop / Landing 2` (`elmGx`)
+### Desktop v2 — `Wayfarer / Screens / Desktop / Landing` (`elmGx`)
 
 Layla-inspired redesign that leads with actual product surfaces (Trip Canvas + Trip List) instead of marketing illustration. Reuses domain components and shadcn primitives. Single state frame **Landing — Default** (`nNgwc`).
 
@@ -34,13 +34,13 @@ Layla-inspired redesign that leads with actual product surfaces (Trip Canvas + T
 | CTA | `h4buV` | Warm gradient panel (`nMtUb`) |
 | Footer | `oAIjW` | Dark, brand + link columns |
 
-### Mobile — `Wayfarer / Mobile / Landing` (`LWbNo`)
+### Mobile — `Wayfarer / Screens / Mobile / Landing` (`LWbNo`)
 
 | Frame | Node ID | Size | Purpose |
 |-------|---------|------|---------|
 | **Landing — Default (390px)** | `qJIYB` | 390 × fit | v2 mobile layout — stacked hero, 2×3 trust chips, vertical canvas cards, 2×2 filter pills, AI Inbox copy before mock, stacked footer |
 
-### Legacy (v1) — `Wayfarer / Desktop / Landing` (`scbFm`)
+### Legacy (v1) — archived in `Wayfarer / Archive` (`scbFm` under `nykUa`)
 
 | Frame | Node ID | Notes |
 |-------|---------|-------|

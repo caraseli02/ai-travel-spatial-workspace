@@ -2,78 +2,89 @@
 
 Wayfarer UI is designed in Pencil (`pencil-shadcn.pen`) and implemented with shadcn/ui (Radix Nova, Stone + Orange).
 
+## Pencil skill
+
+Load **`.agents/skills/pencil-design/SKILL.md`** for all Pencil MCP work (6 rules: DS refs, tokens, layout, screenshots, assets, `frontend-design`).
+
+Wayfarer file structure, canvas grid, surfaces, and crosswalk live in **this index** + surface docs below — not separate skills.
+
 ## Current baseline
 
-Pencil is the versioned design source and shadcn/ui is the shared implementation foundation across the Landing Page, Trip List, and Trip Workspace. Landing v2 is the canonical Landing Page direction; legacy Landing v1 frames are archival and should not be extended.
+Pencil is the versioned design source. Landing v2 is canonical; legacy Landing v1 lives in **Archive**.
 
 ## Start here
 
 | Task | Read |
 |------|------|
-| Any Pencil or design work | `.agents/skills/pencil-wayfarer/SKILL.md` |
-| File map (open in Pencil first) | **Wayfarer / Index** frame (`d3HbiR`) |
-| Tokens, themes, crosswalk | [foundations.md](foundations.md) |
-| Screen layout patterns (A–E) | [patterns.md](patterns.md) |
-| Implement React from design | `.cursor/rules/shadcn-ui.mdc` + Pencil **Code** guide |
+| Pencil MCP workflow | `.agents/skills/pencil-design/SKILL.md` |
+| File map (open in Pencil first) | **Wayfarer / Index** (`d3HbiR`) |
+| Structure / grid / Dump | Canvas grid + file structure (below) |
+| Surfaces + node IDs | Surface docs table (below) |
+| Component ref IDs | [CROSSWALK.md](CROSSWALK.md) |
+| Tokens, themes | [foundations.md](foundations.md) |
+| Layout patterns A–E | [patterns.md](patterns.md) |
+| Implement React | `.cursor/rules/shadcn-ui.mdc` |
+
+## Canvas grid
+
+Open **Wayfarer / Index** for the live map. Fixed layout:
+
+```
+Row A   Index                          (0, 0)
+Row B   DS / 01–07                     (0, 529↓) vertical column
+Row C   Screens / Desktop / *          (1320→4720, 0)
+Row D   Screens / Mobile / *           (1320→4720, 12800)
+Row E   Archive                        (-1700, 0)
+Row E   Dump                           (-1700, 8000)
+```
 
 ## Pencil file structure
 
-The file uses **separate top-level frames** — like Figma pages. Desktop and mobile never share a parent.
-
 ```
-Wayfarer / Index                    ← start here (file map)
+Wayfarer / Index
 
-── Design system (one frame per layer) ──
+── Design system ──
 Wayfarer / DS / 01 Foundations
-Wayfarer / DS / 02 Brand
-Wayfarer / DS / 03 shadcn Primitives
-Wayfarer / DS / 04 Patterns
-Wayfarer / DS / 05 Components · Trip List    ← Chrome | Cards groups
-Wayfarer / DS / 06 Components · Trip Canvas ← Chrome | Inbox | Canvas Cards | Panels
+Wayfarer / DS / 02 Primitives
+Wayfarer / DS / 03 Patterns
+Wayfarer / DS / 04 Components / Shared
+Wayfarer / DS / 05 Components / Trip List
+Wayfarer / DS / 06 Components / Trip Canvas
+Wayfarer / DS / 07 Components / Landing
 
-── Desktop screens (1440px) ──
-Wayfarer / Desktop / Landing
-Wayfarer / Desktop / Trip List
-Wayfarer / Desktop / Trip Canvas
+── Handoff screens ──
+Wayfarer / Screens / Desktop / Landing | Trip List | Trip Canvas — Done | Trip Canvas — Next
+Wayfarer / Screens / Mobile / Landing | Trip List | Trip Canvas — Done | Trip Canvas — Next
 
-── Mobile screens (390px) ──
-Wayfarer / Mobile / Landing
-Wayfarer / Mobile / Trip List
-Wayfarer / Mobile / Trip Canvas
+Trip Canvas handoff: **Done** (`lngHk`, `rsL1N`) = shipped in React · **Next** (`v3Oai`, `GTWXC`) = Days + Map · **Dump** (`kMh8w`) = geo grounding (P4)
 
-Wayfarer / Archive                  ← scratch only, ignore
+Wayfarer / Dump      ← experiments, never delete
+Wayfarer / Archive   ← deprecated
 ```
 
-Each screen page has:
+### Screen page anatomy
 
-1. **Cover** — surface name, route, breakpoint, theme
-2. **Screens** — vertical stack, 80px gap, state frames only
+**Cover + Screens** only. Optional **Section · *** groups inside Screens (e.g. Trip Canvas Done: Canvas | Modals; Trip Canvas Next: Days | Map).
+
+### DS page anatomy
+
+Cover/header + named component sections (Chrome, Cards, Map Route, etc.).
 
 ## Layer model
 
-| Layer | Pencil frames | Docs |
-|-------|---------------|------|
-| L0 Foundations | `DS / 01` | [foundations.md](foundations.md) |
-| L1 Brand + Primitives | `DS / 02–03` | [CROSSWALK.md](../../.agents/skills/pencil-wayfarer/CROSSWALK.md) |
-| L1½ Patterns | `DS / 04` | [patterns.md](patterns.md) |
-| L2 Domain components | `DS / 05–06` | Surface docs (component tables) |
-| L3 Desktop screens | `Desktop / *` | Per-surface Pencil screen tables |
-| L4 Mobile screens | `Mobile / *` | Per-surface mobile tables |
+| Layer | Frames | Docs |
+|-------|--------|------|
+| L0 | `DS / 01` | [foundations.md](foundations.md) |
+| L1 | `DS / 02` | [CROSSWALK.md](CROSSWALK.md) |
+| L1½ | `DS / 03` | [patterns.md](patterns.md) |
+| L2 | `DS / 04–07` | Surface docs |
+| L3 | `Screens / Desktop / *` | Surface screen tables |
+| L4 | `Screens / Mobile / *` | Surface mobile tables |
 
 ## Surface docs
 
-| Doc | Route | Desktop frame | Mobile frame |
-|-----|-------|---------------|--------------|
+| Doc | Route | Desktop | Mobile |
+|-----|-------|---------|--------|
 | [landing-page.md](landing-page.md) | `/` | `elmGx` | `LWbNo` |
 | [trip-list.md](trip-list.md) | `/trips` | `i8BjSi` | `uqZ1a` |
-| [trip-canvas.md](trip-canvas.md) | `/trips/:tripId` | `lngHk` | `rsL1N` |
-
-## Mobile backlog
-
-**Agent prompt:** [mobile-prompt.md](mobile-prompt.md) — copy into a new chat to draw all mobile screens.
-
-| Surface | Mobile states (`Mobile / *`) |
-|---------|---------------------------|
-| Landing | Default `qJIYB` |
-| Trip List | Default `CXcSq`, Chat `zjmBk`, New trip `SCroq`, Empty `YHSxu`, No matches `nhghj` |
-| Trip Canvas | Default `m3QEJS`, Inbox closed `C9cHr`, Card selected `kYixD` |
+| [trip-canvas.md](trip-canvas.md) | `/trips/:tripId` | Done `lngHk` · Next `v3Oai` | Done `rsL1N` · Next `GTWXC` |

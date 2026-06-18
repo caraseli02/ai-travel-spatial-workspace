@@ -84,8 +84,7 @@ describe('localTripRepository', () => {
 
   it('updates the updatedAt timestamp on save', () => {
     const trip = createEmptyTrip('Test Trip', 'Anywhere', '🌍');
-    const originalUpdatedAt = trip.updatedAt;
-    
+
     // Small delay to ensure different timestamp
     localTripRepository.save(trip);
     const loaded = localTripRepository.load(trip.id);

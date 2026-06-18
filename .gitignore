@@ -9,6 +9,8 @@ node_modules/
 # Production build
 dist/
 dist-ssr/
+test-results/
+playwright-report/
 
 # Local verification screenshots
 mobile_*.png
@@ -28,6 +30,8 @@ Thumbs.db
 *.sln
 *.sw?
 landing_page.png
+Screenshot *.png
+*.pen.bak
 
 # Ephemeral session handoff scratch (see docs/agents/handoffs/README.md)
 docs/agents/handoffs/*.md

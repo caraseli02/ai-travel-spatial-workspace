@@ -4,9 +4,9 @@ globs: docs/design/**
 alwaysApply: false
 ---
 
-# Pencil Wayfarer conventions
+# Pencil design conventions
 
-Load `.agents/skills/pencil-wayfarer/SKILL.md` for full workflows.
+Load `.agents/skills/pencil-design/SKILL.md` for Pencil MCP workflows. Wayfarer structure + surfaces: `docs/design/README.md`.
 
 ## File access
 
@@ -43,5 +43,5 @@ Domain components grouped with labels:
 ## Code sync
 
 - Patterns: `docs/design/patterns.md`
-- Crosswalk: `.agents/skills/pencil-wayfarer/CROSSWALK.md`
+- Crosswalk: `docs/design/CROSSWALK.md`
 - shadcn: `.cursor/rules/shadcn-ui.mdc`

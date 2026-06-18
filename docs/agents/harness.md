@@ -17,6 +17,8 @@ Source lectures ([Learn Harness Engineering](https://walkinglabs.github.io/learn
 - [L08 — Feature lists as harness primitives](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-08-why-feature-lists-are-harness-primitives/)
 - [L09 — Prevent premature completion declarations](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-09-why-agents-declare-victory-too-early/)
 - [L10 — Full pipeline verification](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-10-why-end-to-end-testing-changes-results/)
+- [L11 — Runtime observability](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-11-why-observability-belongs-inside-the-harness/)
+- [L12 — Clean session handoff](https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/)
 
 ## Two-Layer Harness
 
@@ -37,7 +39,7 @@ GitHub Issues are this repo's feature-list primitive. A `ready-for-agent` issue 
 - Verification: acceptance criteria and agent brief checks describe what evidence counts.
 - State: labels, blockers, linked PRs, and issue/PR comments record whether the work is ready, active, blocked, or complete.
 
-Pass-state gating is manual for now: do not treat an issue or acceptance criterion as complete until the PR records exact verification commands and results. If this becomes unreliable, add a script or CI check before adding more prose rules.
+Pass-state gating is enforced through PR templates, CI, and review discipline: do not treat an issue or acceptance criterion as complete until the PR records exact verification commands and results.
 
 ## Fresh Session Test
 
@@ -48,7 +50,7 @@ A fresh agent session should answer these questions using only repo files:
 | What is this system? | `CONTEXT.md` |
 | How is it organized? | `docs/architecture/codebase-map.md`, `src/AGENTS.md` |
 | How do I run it? | `Makefile`, `package.json`, `docs/agents/startup-readiness.md` |
-| How do I verify it? | `make check` (test, build, lint, typecheck) |
+| How do I verify it? | `make check` (test, build, lint, typecheck, E2E, fresh-session test) |
 | What's the current progress? | `PROGRESS.md` Operational Snapshot + linked issue |
 
 If an answer requires chat history or memory, add the missing knowledge to the smallest relevant file.
@@ -82,6 +84,7 @@ When an agent fails, classify the failure before adding new rules:
 3. **Environment** — setup broken, wrong toolchain, unreproducible commands.
 4. **Verification** — no `make check`, agent declared done without recorded commands.
 5. **State** — cross-session drift, missing handoff, stale `PROGRESS.md`.
+6. **Observability** — no runtime evidence, unclear failing path, missing quality signal.
 
 Fix the harness layer that failed. Do not upgrade the model first.
 
@@ -91,11 +94,23 @@ Completion is external evidence, not agent confidence. Use this hierarchy:
 
 1. Static layer: `make lint`, `make typecheck`, and `make build` where relevant.
 2. Runtime behavior layer: `make test`, focused tests, and application startup checks.
-3. Full-flow layer: browser or end-to-end verification for cross-component UI, routing, persistence, or interaction changes.
+3. Full-flow layer: `make e2e` and focused browser verification for cross-component UI, routing, persistence, or interaction changes.
 
-`make check` is the standard consistency command, but it is not enough by itself for visible UI or runtime workflow changes. Until a dedicated E2E harness exists, record a browser verification note with the route, flow exercised, and result. Example: `make dev` + browser check of `/trips/:tripId` card edit persistence — pass.
+`make check` is the standard consistency command and includes the smoke E2E suite. For visible UI or runtime workflow changes beyond the smoke coverage, record the route, flow exercised, and result in the PR. Example: `make dev` + browser check of `/trips/:tripId` card edit persistence — pass.
 
 Do not refactor or polish adjacent code until the core behavior has passed the required validation layer. When a repeated review comment exposes a defect class, promote it into a test, lint rule, or focused check with an error message that says what failed and how to fix it.
+
+## Harness Audit Matrix
+
+| Recommendation | Current implementation | Gap policy | Enforcement |
+| --- | --- | --- | --- |
+| Instructions | Root entries route to focused docs; source rules live in `src/AGENTS.md`. | Keep entry files under 200 lines. | Review + `make fresh-session-test` |
+| Tools | Commands are standardized in `Makefile`. | Add commands before adding prose-only rules. | `make doctor`, CI |
+| Environment | Node 22 baseline in `.nvmrc`; dependencies locked. | Run `npm ci` when dependency state changes. | `make setup`, CI |
+| State | `PROGRESS.md`, issues, PRs, ADRs, and `CONTEXT.md` hold durable state. | No durable decision may live only in chat. | Clock-out checklist |
+| Feedback | Unit tests, strict lint, typecheck, build, Playwright smoke tests. | Add focused tests when smoke coverage is too broad. | `make check`, CI |
+| Observability | E2E traces on failure; `docs/agents/quality.md` records health. | Recurring failures become checks or quality entries. | PR template + quality review |
+| Clean state | Completion requires passing checks, progress record, no stale artifacts. | Temporary screenshots/backups are ignored or deleted. | PR template + `.gitignore` |
 
 ## State Management
 
@@ -144,6 +159,16 @@ Before ending a long task or handing it to another session:
 4. Update `CONTEXT.md` when durable domain language changes.
 5. Add or update an ADR when a durable architecture decision is made, including rejected alternatives when they matter.
 
+### Clean-State Checklist
+
+A session is not complete until all relevant items are true:
+
+- [ ] `make check` passes, or every skipped command has a recorded reason.
+- [ ] Issue, PR, or `PROGRESS.md` records completed work, remaining work, and blockers.
+- [ ] No stale screenshots, backup files, debug logs, `console.log`, `debugger`, or unresolved TODO markers remain in the tracked work.
+- [ ] Startup path remains available from repo files: `make setup`, `make doctor`, `make dev`, and `make check`.
+- [ ] New durable decisions are recorded in `CONTEXT.md`, `docs/adr/`, `docs/architecture/`, or `docs/agents/quality.md`.
+
 ### State Placement
 
 - Task-local state belongs in GitHub issues, PR descriptions, PR comments, and commits.
@@ -159,3 +184,4 @@ Before ending a long task or handing it to another session:
 - When a decision becomes durable, add or update an ADR instead of adding a loose instruction.
 - When a repeated mistake is found, prefer a test, code check, or focused topic doc over a new entry-file rule.
 - Run the Fresh Session Test after harness changes.
+- Update `docs/agents/quality.md` when module health, recurring defects, or cleanup priorities change.

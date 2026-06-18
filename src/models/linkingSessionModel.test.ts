@@ -12,7 +12,7 @@ describe('Linking Session Model', () => {
   });
 
   it('cancels an active session and clears the origin card ID', () => {
-    const session = startLinkingSession('c1');
+    startLinkingSession('c1');
     const cancelled = cancelLinkingSession();
     expect(cancelled.originId).toBeNull();
   });

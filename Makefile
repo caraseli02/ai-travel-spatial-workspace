@@ -1,6 +1,6 @@
 NPM ?= npm
 
-.PHONY: setup dev test build lint typecheck check status
+.PHONY: setup dev test build lint typecheck e2e doctor fresh-session-test check status
 
 setup:
 	$(NPM) ci
@@ -20,7 +20,33 @@ lint:
 typecheck:
 	$(NPM) run typecheck
 
-check: test build lint typecheck
+e2e:
+	$(NPM) run e2e
+
+doctor:
+	@echo "node: $$(node -v)"
+	@echo "npm:  $$(npm -v)"
+	@$(NPM) ls --depth=0 >/dev/null
+	@test -s package-lock.json
+	@test -s AGENTS.md
+	@test -s PROGRESS.md
+	@test -s CONTEXT.md
+	@echo "doctor: ok"
+
+fresh-session-test:
+	@test -s AGENTS.md
+	@test -s PROGRESS.md
+	@test -s CONTEXT.md
+	@test -s docs/agents/harness.md
+	@test -s docs/agents/startup-readiness.md
+	@test -s docs/architecture/codebase-map.md
+	@grep -q "make check" AGENTS.md
+	@grep -q "make check" docs/agents/startup-readiness.md
+	@grep -q "Operational Snapshot" PROGRESS.md
+	@grep -q "ready-for-agent" docs/agents/implementation-workflow.md
+	@echo "fresh-session-test: ok"
+
+check: test build lint typecheck e2e fresh-session-test
 
 status:
 	git status --short

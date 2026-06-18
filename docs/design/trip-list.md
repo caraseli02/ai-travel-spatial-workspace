@@ -13,10 +13,11 @@ Primary app surface at route `/trips`. Dark-themed hub for browsing, filtering, 
 | Layout pattern | **C** — fixed prompt bar + **A** — header + content ([patterns.md](patterns.md)) |
 | Nav pattern | **Wayfarer / Trip List Header** (`l6uTL`) — composes Brand Mark + `Button/Ghost` + `Button/Default` |
 | Filter pattern | **Wayfarer / Trip List Filter Bar** (`ZPaim`) — `Icon Button/Outline` + `Tab Item` + `Badge/Secondary` |
-| Prompt pattern | **Wayfarer / Trip List Prompt Bar** (`YK92H`) — `Badge/Outline` chips + `Input/Default` + `Icon Button` |
+| Prompt pattern (desktop) | **Wayfarer / Trip List Prompt Bar** (`YK92H`) — horizontal `Badge/Outline` chips + `Input/Default` + `Icon Button` |
+| Prompt pattern (mobile) | **Wayfarer / Trip List Prompt Bar / Mobile** (`p4INn`) — vertical chips (2) + input row |
 | Card pattern | **Wayfarer / Trip Card** (`GK0nB`) — `Card` + `Badge` + `Button/Outline` |
 
-Desktop: **Wayfarer / Desktop / Trip List** (`i8BjSi`). Mobile: **Wayfarer / Mobile / Trip List** (`uqZ1a`). See [README.md](README.md).
+Desktop: **Wayfarer / Screens / Desktop / Trip List** (`i8BjSi`). Mobile: **Wayfarer / Screens / Mobile / Trip List** (`uqZ1a`). See [README.md](README.md).
 
 Domain components: **Wayfarer / DS / 05 Components · Trip List** (`x76EWb`) — groups **Chrome** | **Cards**.
 
@@ -36,7 +37,7 @@ Domain components: **Wayfarer / DS / 05 Components · Trip List** (`x76EWb`) —
 
 | Frame | Node ID | Purpose |
 |-------|---------|---------|
-| **Trip List — Default (390px)** | `CXcSq` | Status bar + 1-col card stack, `ZPaim` filter bar, `YK92H` prompt bar pinned bottom |
+| **Trip List — Default (390px)** | `CXcSq` | Status bar + 1-col card stack, `ZPaim` filter bar, `p4INn` mobile prompt bar pinned bottom |
 | **Trip List — Chat Open (390px)** | `zjmBk` | Default + dim overlay; chat history as bottom sheet (~54% height) |
 | **Trip List — New Trip Dialog (390px)** | `SCroq` | Default + centered `5:X6bmd` modal (358px wide) |
 | **Trip List — Empty (390px)** | `YHSxu` | `ZQPee` + `vCVf6` Plan with AI card |

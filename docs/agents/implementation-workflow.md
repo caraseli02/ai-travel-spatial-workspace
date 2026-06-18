@@ -32,8 +32,8 @@ Do not start a blocked issue until every blocker is merged, not merely opened.
 - Do not refactor outside the agent brief **Out of scope** section.
 - Done means every acceptance criterion has a recorded verification command and
   pass/fail result in the PR.
-- UI, routing, persistence, and other cross-component changes require full-flow
-  evidence, not only unit/model tests.
+- UI, routing, persistence, and other cross-component changes require `make e2e`
+  or focused browser evidence, not only unit/model tests.
 
 ## Working an Issue
 
@@ -46,7 +46,7 @@ Do not start a blocked issue until every blocker is merged, not merely opened.
 6. Run verification:
    - `make test` for behavior-only changes.
    - `make check` for runtime, build, or UI changes.
-   - Browser/full-flow verification for visible UI, routing, localStorage
+   - Focused browser/full-flow verification for visible UI, routing, localStorage
      persistence, or multi-component interactions.
 7. Open a PR that links the issue, lists acceptance criteria status, and records
    the exact verification commands run.
@@ -81,7 +81,7 @@ Use this structure:
 Record exact commands and results, for example:
 
 - `make test` — pass
-- `make check` — pass (test, build, lint, typecheck)
+- `make check` — pass (test, build, strict lint, typecheck, E2E, fresh-session test)
 - Browser check: `/trips/:tripId` card edit persists after reload — pass
 
 Per-criterion checks from the agent brief should appear here when provided.
