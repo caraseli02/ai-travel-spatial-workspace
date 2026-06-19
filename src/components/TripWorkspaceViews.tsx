@@ -456,10 +456,7 @@ function RouteActivityCard({
 }
 
 function getRouteCardRating(card: CanvasCard) {
-  if (card.type === "hotel") return "4.9 · 128 reviews · Ryokan";
-  if (card.type === "polaroid") return "4.8 · Landmark";
-  if (card.type === "article") return "4.6 · Restaurant";
-  return null;
+  return card.rating ? card.rating.toFixed(1) : null;
 }
 
 function MapControlButtons() {
@@ -508,7 +505,8 @@ function escapeHtml(value: string) {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
 }
 
 function createRouteStopMarkerIcon(

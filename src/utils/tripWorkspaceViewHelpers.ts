@@ -43,12 +43,11 @@ export function getRouteTimeSlot(index: number) {
 
 export function groupRouteCardsByTimeOfDay(cards: CanvasCard[]): RouteTimeSection[] {
   const sections = new Map<RouteTimeOfDay, CanvasCard[]>();
-  for (const card of cards) {
-    const index = cards.indexOf(card);
+  cards.forEach((card, index) => {
     const label = routeTimeOfDayLabels[index % routeTimeOfDayLabels.length];
     if (!sections.has(label)) sections.set(label, []);
     sections.get(label)?.push(card);
-  }
+  });
   return (["Morning", "Afternoon", "Evening"] as const)
     .filter((label) => sections.has(label))
     .map((label) => ({ label, cards: sections.get(label) ?? [] }));
