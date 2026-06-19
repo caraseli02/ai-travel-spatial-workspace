@@ -5,7 +5,6 @@ import {
   LayoutGrid,
   Map as MapIcon,
   Maximize2,
-  Navigation,
   Plus,
   Route,
   Star,
@@ -25,6 +24,7 @@ import {
   getRouteTimeSlot,
   groupRouteCardsByTimeOfDay,
   mapPositions,
+  spreadMapMarkerPositions,
 } from "../utils/tripWorkspaceViewHelpers";
 
 export type WorkspaceView = "canvas" | "map";
@@ -82,6 +82,7 @@ export function TripCanvasKanbanView({
   isLinkingActive,
   linkingOriginId,
   zoom,
+  isMobile = false,
   onActiveDayChange,
   onSelectCard,
   onCreateCard,
@@ -94,6 +95,7 @@ export function TripCanvasKanbanView({
   isLinkingActive: boolean;
   linkingOriginId: string | null;
   zoom: number;
+  isMobile?: boolean;
   onActiveDayChange: (day: number | null) => void;
   onSelectCard: (card: CanvasCard) => void;
   onCreateCard: () => void;
@@ -101,15 +103,32 @@ export function TripCanvasKanbanView({
 }) {
   const columns = useMemo(() => getKanbanCanvasColumns(days, cards), [cards, days]);
   const locatedCardCount = useMemo(() => getMappedCards(cards).length, [cards]);
+  const displayColumns = useMemo(() => {
+    if (isMobile && activeDay !== null) {
+      return columns.filter((column) => column.day === activeDay);
+    }
+    return columns;
+  }, [activeDay, columns, isMobile]);
 
   return (
     <div className="absolute inset-0 overflow-hidden bg-[#f5f3ef]">
-      <div className="absolute inset-x-0 bottom-28 top-[72px] overflow-x-auto overflow-y-hidden md:bottom-14 md:top-14">
+      <div
+        className={cn(
+          "absolute inset-x-0 bottom-[calc(7rem+env(safe-area-inset-bottom))] md:bottom-14 md:top-14",
+          isMobile && activeDay !== null && "top-0 overflow-x-hidden overflow-y-auto",
+          isMobile && activeDay === null && "top-0 snap-x snap-mandatory scroll-pl-4 overflow-x-auto overflow-y-hidden",
+          !isMobile && "top-14 overflow-x-auto overflow-y-hidden",
+        )}
+      >
         <div
-          className="flex h-full min-w-max origin-top-left gap-3 p-3 pb-6 transition-[zoom] md:px-10 md:py-4"
+          className={cn(
+            "flex h-full min-w-max origin-top-left gap-3 p-3 pb-6 transition-[zoom] md:px-10 md:py-4",
+            isMobile && activeDay === null && "[&>section]:snap-center",
+            isMobile && activeDay !== null && "h-auto min-h-full w-full min-w-0 flex-col",
+          )}
           style={{ zoom }}
         >
-          {columns.map((column) => {
+          {displayColumns.map((column) => {
             const isActive = activeDay === column.day;
             const isDimmed = activeDay !== null && !isActive;
             const cardLabel = column.cards.length === 1 ? "card" : "cards";
@@ -118,7 +137,10 @@ export function TripCanvasKanbanView({
               <section
                 key={column.day}
                 className={cn(
-                  "flex w-[min(85vw,280px)] shrink-0 flex-col gap-2.5 rounded-xl border border-[#e7e3dc] bg-[#fefcf8] p-2.5 transition sm:w-[255px]",
+                  "flex shrink-0 flex-col gap-2.5 rounded-xl border border-[#e7e3dc] bg-[#fefcf8] p-2.5 transition",
+                  isMobile && activeDay === null && "w-[calc(100vw-2rem)] snap-center sm:w-[255px]",
+                  isMobile && activeDay !== null && "w-full max-w-none",
+                  !isMobile && "w-[255px]",
                   isDimmed && "opacity-40",
                 )}
                 aria-label={column.label}
@@ -130,14 +152,21 @@ export function TripCanvasKanbanView({
                 >
                   <span className="flex items-start gap-1.5">
                     <span className="mt-1 size-2 shrink-0 rounded-full" style={{ backgroundColor: column.color }} />
-                    <span className="text-xs leading-snug font-semibold text-stone-800">{column.label}</span>
+                    <span className="line-clamp-2 text-xs leading-snug font-semibold text-stone-800">{column.label}</span>
                   </span>
                   <span className="text-[11px] font-medium text-stone-400">
                     {column.cards.length} {cardLabel}
                   </span>
                 </button>
 
-                <div className="scrollbar-thin flex max-h-[calc(100vh-260px)] flex-col gap-2.5 overflow-y-auto md:max-h-[696px]">
+                <div
+                  className={cn(
+                    "flex flex-col gap-2.5",
+                    isMobile && activeDay !== null
+                      ? "overflow-visible"
+                      : "scrollbar-thin max-h-[calc(100vh-260px)] overflow-y-auto md:max-h-[696px]",
+                  )}
+                >
                   {column.cards.map((card) => (
                     <div
                       key={card.id}
@@ -240,9 +269,21 @@ export function TripMapView({
   onSelectCard: (card: CanvasCard) => void;
 }) {
   const mappedCards = useMemo(() => getMappedCards(cards), [cards]);
+  const isOverview = activeDay === null;
+  const displayPositions = useMemo(
+    () => (isOverview ? spreadMapMarkerPositions(mappedCards) : null),
+    [isOverview, mappedCards],
+  );
   const routeDay = getRouteDay(activeDay);
-  const routeCards = mappedCards.filter(({ card }) => card.day === routeDay);
-  const visibleRoute = routeCards.length > 1 ? routeCards.map(({ position }) => position) : mappedCards.map(({ position }) => position);
+  const routeCards =
+    routeDay === null
+      ? mappedCards.map(({ card }) => card)
+      : mappedCards.filter(({ card }) => card.day === routeDay).map(({ card }) => card);
+  const routePositions =
+    routeDay === null
+      ? mappedCards.map(({ position }) => position)
+      : mappedCards.filter(({ card }) => card.day === routeDay).map(({ position }) => position);
+  const visibleRoute = routePositions.length > 1 ? routePositions : mappedCards.map(({ position }) => position);
 
   return (
     <div className="absolute inset-0 overflow-hidden bg-muted">
@@ -261,20 +302,21 @@ export function TripMapView({
           positions={visibleRoute.length > 0 ? visibleRoute : mappedCards.map(({ position }) => position)}
           selectedPosition={selectedCard ? mapPositions[selectedCard.id] : undefined}
         />
-        {visibleRoute.length > 1 && (
-          <Polyline positions={visibleRoute} pathOptions={{ color: "#2563eb", weight: 4, opacity: 0.72 }} />
+        {routeDay !== null && routePositions.length > 1 && (
+          <Polyline positions={routePositions} pathOptions={{ color: "#2563eb", weight: 4, opacity: 0.72 }} />
         )}
         <MapControlButtons />
         {mappedCards.map(({ card, position }) => {
           const isSelected = selectedCard?.id === card.id;
           const isDimmed = activeDay !== null && card.day !== activeDay && card.day !== 0;
-          const routeIndex = routeCards.findIndex(({ card: routeCard }) => routeCard.id === card.id);
+          const routeIndex = routeCards.findIndex((routeCard) => routeCard.id === card.id);
           const sequence = routeIndex >= 0 ? routeIndex + 1 : undefined;
+          const markerPosition = displayPositions?.get(card.id) ?? position;
           return (
             <Marker
               key={card.id}
-              position={position}
-              icon={createRouteStopMarkerIcon(card, sequence, isSelected, isDimmed)}
+              position={markerPosition}
+              icon={createRouteStopMarkerIcon(card, sequence, isSelected, isDimmed, isOverview)}
               eventHandlers={{ click: () => onSelectCard(card) }}
             >
               <Popup>
@@ -290,8 +332,9 @@ export function TripMapView({
 
       <RoutePanelShell>
         <RoutePanel
-          day={days.find((item) => item.day === routeDay)}
-          cards={routeCards.map(({ card }) => card)}
+          activeDay={activeDay}
+          day={routeDay === null ? undefined : days.find((item) => item.day === routeDay)}
+          cards={routeCards}
           onSelectCard={onSelectCard}
           selectedCard={selectedCard}
         />
@@ -313,11 +356,13 @@ function RoutePanelShell({ children }: { children: React.ReactNode }) {
 }
 
 function RoutePanel({
+  activeDay,
   day,
   cards,
   selectedCard,
   onSelectCard,
 }: {
+  activeDay: number | null;
   day?: DayGroup;
   cards: CanvasCard[];
   selectedCard: CanvasCard | null;
@@ -328,33 +373,26 @@ function RoutePanel({
     () => new Map(cards.map((card, index) => [card.id, index])),
     [cards],
   );
+  const isOverview = activeDay === null;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
-      <div className="flex shrink-0 flex-col gap-4">
-        <div className="flex items-start gap-3">
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold uppercase tracking-normal text-muted-foreground">
-              Day {day?.day ?? 2}
-            </p>
-            <h2 className="mt-1 text-xl font-semibold leading-tight text-foreground md:text-2xl">
-              {day?.label ?? "Kyoto route"}
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Optimized sequence across nearby places, with the active day pinned on the map.
-            </p>
-          </div>
-          <Button
-            size="icon"
-            className="size-11 shrink-0 rounded-xl bg-black text-white hover:bg-black/90 md:hidden"
-            aria-label="Open route in maps"
-            title="Open route"
-          >
-            <Navigation className="size-4" />
-          </Button>
+      <div className="flex shrink-0 flex-col gap-3">
+        <div className="min-w-0 flex-1 pr-2">
+          <p className="text-xs font-semibold uppercase tracking-normal text-muted-foreground">
+            {isOverview ? "All days" : `Day ${day?.day ?? activeDay}`}
+          </p>
+          <h2 className="mt-1 text-xl font-semibold leading-tight text-foreground md:text-2xl">
+            {isOverview ? "Map overview" : (day?.label ?? "Kyoto route")}
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {isOverview
+              ? "Browse every pinned place. Select a day above to focus its route."
+              : "Optimized sequence across nearby places, with the active day pinned on the map."}
+          </p>
         </div>
         <Button
-          className="hidden h-10 w-full rounded-xl bg-black px-4 text-white hover:bg-black/90 md:inline-flex"
+          className="h-10 w-full rounded-xl bg-black px-4 text-white hover:bg-black/90"
           aria-label="Open route in maps"
         >
           <Route className="size-4" />
@@ -462,7 +500,7 @@ function getRouteCardRating(card: CanvasCard) {
 function MapControlButtons() {
   const map = useMap();
   return (
-    <div className="absolute left-3 top-14 z-[500] flex flex-col rounded-xl border border-border bg-card p-1 shadow-sm">
+    <div className="absolute bottom-[calc(42vh+1rem)] left-4 z-[500] flex flex-col rounded-xl border border-border bg-card p-1 shadow-sm md:bottom-auto md:left-3 md:top-14">
       <Button variant="ghost" size="icon-sm" className="size-8" onClick={() => map.zoomIn()} aria-label="Zoom map in">
         <ZoomIn className="size-4" />
       </Button>
@@ -493,7 +531,7 @@ function MapViewportController({
       return;
     }
     if (positions.length > 1) {
-      map.fitBounds(positions as LatLngBoundsExpression, { padding: [60, 60], maxZoom: 14 });
+      map.fitBounds(positions as LatLngBoundsExpression, { padding: [72, 28], maxZoom: 14 });
     }
   }, [map, positions, selectedPosition]);
 
@@ -514,12 +552,23 @@ function createRouteStopMarkerIcon(
   sequence: number | undefined,
   selected: boolean,
   dimmed: boolean,
+  compact = false,
 ) {
   const title = escapeHtml(card.title);
   const thumb = card.image
     ? `<img src="${escapeHtml(card.image)}" alt="" class="wayfarer-route-marker__image" />`
     : `<span class="wayfarer-route-marker__fallback">${card.type === "flight" ? "✈️" : "📍"}</span>`;
   const badge = sequence ? `<span class="wayfarer-route-marker__badge">${sequence}</span>` : "";
+
+  if (compact) {
+    return L.divIcon({
+      className: "wayfarer-route-marker",
+      html: `<div class="wayfarer-route-marker__chip wayfarer-route-marker__chip--compact${selected ? " is-selected" : ""}${dimmed ? " is-dimmed" : ""}"><span class="wayfarer-route-marker__thumb">${thumb}${badge}</span></div>`,
+      iconSize: [40, 40],
+      iconAnchor: [20, 20],
+      popupAnchor: [0, -22],
+    });
+  }
 
   return L.divIcon({
     className: "wayfarer-route-marker",
