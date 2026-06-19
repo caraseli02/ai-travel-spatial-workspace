@@ -402,7 +402,7 @@ function TripWorkspacePresenter({
             size="sm"
             onClick={() => navigate("/trips")}
             aria-label="Back to trips"
-            className="h-auto shrink-0 gap-1.5 px-1 text-muted-foreground hover:text-foreground"
+            className="h-auto shrink-0 gap-1.5 px-1 text-muted-foreground hover:text-foreground max-md:size-11 max-md:px-2"
           >
             <ChevronLeft className="size-4" />
             <Compass className="size-4 text-primary" />
@@ -515,13 +515,14 @@ function TripWorkspacePresenter({
               onClick={() => toggleOverflow()}
               aria-label="More workspace actions"
               aria-expanded={showOverflow}
+              className="max-md:size-11"
             >
               <MoreHorizontal className="size-4" />
             </Button>
             {showOverflow && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => toggleOverflow(false)} />
-                <div className="absolute top-full right-0 z-50 mt-1 min-w-[160px] rounded-xl border border-border bg-card py-1.5 shadow-xl">
+                <div className="fixed inset-x-4 bottom-6 z-50 rounded-xl border border-border bg-card py-1.5 shadow-xl max-md:left-4 max-md:right-4 md:absolute md:inset-x-auto md:top-full md:right-0 md:bottom-auto md:mt-1 md:min-w-[160px]">
                   <div className="flex items-center gap-2 border-b border-border px-3 py-2">
                     <div className="-space-x-1.5 flex items-center">
                       {Array.from({ length: Math.min(deriveTripTravelers(trip), 3) }).map((_, i) => {
@@ -572,9 +573,13 @@ function TripWorkspacePresenter({
             variant={inboxOpen ? "secondary" : "ghost"}
             size="sm"
             onClick={() => setInboxOpen((o) => !o)}
-            aria-label={`${inboxOpen ? "Close" : "Open"} inbox`}
+            aria-label={`${inboxOpen ? "Close" : "Open"} inbox${
+              items.filter((i) => !i.processed).length > 0
+                ? `, ${items.filter((i) => !i.processed).length} items to organize`
+                : ""
+            }`}
             className={cn(
-              "h-auto shrink-0 gap-1 px-2.5 py-1.5 text-xs font-medium",
+              "h-auto shrink-0 gap-1 px-2.5 py-1.5 text-xs font-medium max-md:size-11",
               inboxOpen && "border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-50",
             )}
           >
@@ -589,7 +594,8 @@ function TripWorkspacePresenter({
         </div>
 
         {/* ── Row 2: Day filter strip — mobile only ── */}
-        <div className="scrollbar-none flex flex-nowrap items-center gap-1.5 overflow-x-auto px-4 pb-2.5 md:hidden">
+        <div className="relative md:hidden">
+          <div className="scrollbar-none flex flex-nowrap items-center gap-1.5 overflow-x-auto px-4 pb-2.5">
           <Button
             variant={activeDay === null ? "default" : "secondary"}
             size="sm"
@@ -625,16 +631,29 @@ function TripWorkspacePresenter({
           >
             <Plus className="size-3" />
           </Button>
+          </div>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-card to-transparent"
+          />
         </div>
 
         {trip.dates && (
-          <div className="flex items-center gap-2 border-t border-border/60 px-4 py-2 text-[11px] text-muted-foreground md:hidden">
-            <Calendar className="size-3 shrink-0" />
-            <span className="truncate">{formatRange(trip.dates.start, trip.dates.end)}</span>
-            <span className="text-border">·</span>
-            <span className="shrink-0">{getDurationNights(trip.dates.start, trip.dates.end)}</span>
-            <span className="text-border">·</span>
-            <span className="truncate">{trip.destination}</span>
+          <div className="flex items-center justify-between gap-3 border-t border-border/60 px-4 py-2 md:hidden">
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+              <Calendar className="size-3 shrink-0" />
+              <span className="truncate">{formatRange(trip.dates.start, trip.dates.end)}</span>
+              <span className="text-border">·</span>
+              <span className="shrink-0">{getDurationNights(trip.dates.start, trip.dates.end)}</span>
+              <span className="text-border">·</span>
+              <span className="truncate">{trip.destination}</span>
+            </div>
+            <WorkspaceViewSwitcher value={workspaceView} onValueChange={handleWorkspaceViewChange} />
+          </div>
+        )}
+        {!trip.dates && (
+          <div className="flex justify-end border-t border-border/60 px-4 py-2 md:hidden">
+            <WorkspaceViewSwitcher value={workspaceView} onValueChange={handleWorkspaceViewChange} />
           </div>
         )}
       </header>
@@ -645,7 +664,8 @@ function TripWorkspacePresenter({
         {/* INBOX SIDEBAR */}
         <aside
           className={cn(
-            "absolute z-30 h-full shrink-0 overflow-hidden bg-card transition-all duration-300 animate-in fade-in md:relative md:shadow-none",
+            "absolute h-full shrink-0 overflow-hidden bg-card transition-all duration-300 animate-in fade-in md:relative md:z-30 md:shadow-none",
+            isMobile && inboxOpen ? "z-[750]" : "z-30",
             inboxOpen ? "border-r border-border shadow-2xl md:shadow-none" : "border-r-0",
           )}
           style={{
@@ -665,7 +685,6 @@ function TripWorkspacePresenter({
                 }}
                 onAddItem={handleAddItem}
                 onOpenAddManual={() => handleOpenCreateModal()}
-                onClose={() => setInboxOpen(false)}
               />
             </div>
           )}
@@ -674,7 +693,8 @@ function TripWorkspacePresenter({
         {/* CANVAS AREA */}
         <main className="flex-1 relative overflow-hidden">
 
-          {/* Workspace chrome: zoom (left) · view switcher (center) · stats (right) */}
+          {/* Workspace chrome: zoom (left) · view switcher (center) · stats (right) — desktop only */}
+          {!isMobile && !(isMobile && inboxOpen) && !selectedCard && (
           <div className="absolute inset-x-3 top-3 z-[700] md:inset-x-0 md:px-3">
             <div
               className={cn(
@@ -683,7 +703,7 @@ function TripWorkspacePresenter({
               )}
             >
               {workspaceView === "canvas" ? (
-                <div className="flex shrink-0 items-center gap-1 rounded-xl border border-border bg-card px-1 py-1 shadow-sm">
+                <div className="hidden shrink-0 items-center gap-1 rounded-xl border border-border bg-card px-1 py-1 shadow-sm md:flex">
                   <ToolBtn icon={<ZoomIn size={14} />} onClick={() => handleZoom("in")} title="Zoom in" />
                   <span className="px-1 font-mono text-xs text-muted-foreground tabular-nums">
                     {Math.round(kanbanZoom * 100)}%
@@ -730,6 +750,7 @@ function TripWorkspacePresenter({
               )}
             </div>
           </div>
+          )}
 
           {/* Linking Mode Active Banner */}
           {linkingSession.isActive && (
@@ -750,7 +771,12 @@ function TripWorkspacePresenter({
 
           {/* AI prompt bar */}
           {workspaceView !== "map" && (
-            <AiPromptBar onSendQuery={handleSendQuery} isThinking={isAiThinking} dayCount={days.length} />
+            <AiPromptBar
+              onSendQuery={handleSendQuery}
+              isThinking={isAiThinking}
+              dayCount={days.length}
+              isMobile={isMobile}
+            />
           )}
 
           {/* THE CANVAS */}
@@ -763,6 +789,7 @@ function TripWorkspacePresenter({
               isLinkingActive={linkingSession.isActive}
               linkingOriginId={linkingSession.originId}
               zoom={kanbanZoom}
+              isMobile={isMobile}
               onActiveDayChange={setActiveDay}
               onSelectCard={handleCanvasCardSelect}
               onCreateCard={() => handleOpenCreateModal(900, 680)}
@@ -851,9 +878,10 @@ interface AiPromptBarProps {
   onSendQuery: (query: string) => void;
   isThinking: boolean;
   dayCount: number;
+  isMobile: boolean;
 }
 
-function AiPromptBar({ onSendQuery, isThinking, dayCount }: AiPromptBarProps) {
+function AiPromptBar({ onSendQuery, isThinking, dayCount, isMobile }: AiPromptBarProps) {
   const [value, setValue] = useState('');
   const [focused, setFocused] = useState(false);
   const nextDay = dayCount + 1;
@@ -876,7 +904,7 @@ function AiPromptBar({ onSendQuery, isThinking, dayCount }: AiPromptBarProps) {
   };
 
   return (
-    <div className="absolute bottom-6 left-1/2 z-20 w-full max-w-lg -translate-x-1/2 select-none px-4 md:bottom-14">
+    <div className="absolute bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-1/2 z-20 w-full max-w-lg -translate-x-1/2 select-none px-4 md:bottom-14">
       <form
         onSubmit={handleSubmit}
         className={cn(
@@ -895,7 +923,9 @@ function AiPromptBar({ onSendQuery, isThinking, dayCount }: AiPromptBarProps) {
             placeholder={
               isThinking
                 ? "AI is thinking..."
-                : `Ask AI: "${placeholderExample}" or "Suggest a ryokan in Arashiyama"`
+                : isMobile
+                  ? "Ask AI about this trip…"
+                  : `Ask AI: "${placeholderExample}" or "Suggest a ryokan in Arashiyama"`
             }
             value={value}
             onChange={(e) => setValue(e.target.value)}

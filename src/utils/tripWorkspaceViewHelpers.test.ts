@@ -7,6 +7,7 @@ import {
   getRouteDay,
   groupRouteCardsByTimeOfDay,
   resolveKanbanCardTag,
+  spreadMapMarkerPositions,
 } from "./tripWorkspaceViewHelpers";
 
 describe("tripWorkspaceViewHelpers", () => {
@@ -28,8 +29,8 @@ describe("tripWorkspaceViewHelpers", () => {
     expect(columns[6].cards.map((card) => card.id)).toEqual(["c13"]);
   });
 
-  it("defaults the map route panel to day 2 until a day is selected", () => {
-    expect(getRouteDay(null)).toBe(2);
+  it("keeps the map route panel aligned with the active day filter", () => {
+    expect(getRouteDay(null)).toBeNull();
     expect(getRouteDay(4)).toBe(4);
   });
 
@@ -47,6 +48,17 @@ describe("tripWorkspaceViewHelpers", () => {
     expect(resolveKanbanCardTag("Day 4")).toBeUndefined();
     expect(resolveKanbanCardTag("Logistics")).toBe("Logistics");
     expect(resolveKanbanCardTag("Dec 14–21 · 7 nights")).toBe("Dec 14–21 · 7 nights");
+  });
+
+  it("spreads overlapping map markers into a readable cluster", () => {
+    const items = getMappedCards(canvasCards);
+    const spread = spreadMapMarkerPositions(items);
+
+    expect(spread.size).toBe(items.length);
+
+    const c10 = spread.get("c10")!;
+    const c11 = spread.get("c11")!;
+    expect(Math.hypot(c10[0] - c11[0], c10[1] - c11[1])).toBeGreaterThan(0.004);
   });
 
   it("filters price lines out of flight card details", () => {

@@ -91,8 +91,53 @@ export function getMappedCards(cards: CanvasCard[]) {
     .map((card) => ({ card, position: mapPositions[card.id] }));
 }
 
+const MAP_OVERLAP_THRESHOLD = 0.012;
+
+/** Fan out markers that share nearly the same coordinates so labels remain tappable. */
+export function spreadMapMarkerPositions(
+  items: { card: CanvasCard; position: [number, number] }[],
+): Map<string, [number, number]> {
+  const displayPositions = new Map<string, [number, number]>();
+  const groups: { card: CanvasCard; position: [number, number] }[][] = [];
+
+  for (const item of items) {
+    const cluster = groups.find((group) => {
+      const [lat, lng] = group[0].position;
+      const [itemLat, itemLng] = item.position;
+      return Math.hypot(itemLat - lat, itemLng - lng) < MAP_OVERLAP_THRESHOLD;
+    });
+
+    if (cluster) {
+      cluster.push(item);
+    } else {
+      groups.push([item]);
+    }
+  }
+
+  for (const group of groups) {
+    if (group.length === 1) {
+      displayPositions.set(group[0].card.id, group[0].position);
+      continue;
+    }
+
+    const centerLat = group.reduce((sum, item) => sum + item.position[0], 0) / group.length;
+    const centerLng = group.reduce((sum, item) => sum + item.position[1], 0) / group.length;
+    const radius = 0.0035 + group.length * 0.0008;
+
+    group.forEach((item, index) => {
+      const angle = (2 * Math.PI * index) / group.length - Math.PI / 2;
+      displayPositions.set(item.card.id, [
+        centerLat + radius * Math.cos(angle),
+        centerLng + radius * Math.sin(angle),
+      ]);
+    });
+  }
+
+  return displayPositions;
+}
+
 export function getRouteDay(activeDay: number | null) {
-  return activeDay ?? 2;
+  return activeDay;
 }
 
 function sortCardsForWorkspaceViews(a: CanvasCard, b: CanvasCard) {

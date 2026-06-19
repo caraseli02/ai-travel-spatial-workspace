@@ -11,7 +11,6 @@ import {
   Send,
   CheckCircle2,
   Circle,
-  X,
 } from "lucide-react";
 import type { CanvasCard, InboxItem } from "../models/trip";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +26,6 @@ interface InboxPanelProps {
   onProcessItem: (id: string) => void;
   onAddItem: (content: string) => void;
   onOpenAddManual?: () => void;
-  onClose?: () => void;
 }
 
 const sourceIcons: Record<string, React.ReactElement> = {
@@ -58,7 +56,6 @@ export default function InboxPanel({
   onProcessItem,
   onAddItem,
   onOpenAddManual,
-  onClose,
 }: InboxPanelProps) {
   const [inputVal, setInputVal] = useState("");
   const [placeholder, setPlaceholder] = useState(0);
@@ -86,26 +83,13 @@ export default function InboxPanel({
       <div className="border-b border-border px-4 pt-4 pb-3">
         <div className="mb-1 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-foreground">Inbox</h2>
-          <div className="flex items-center gap-2">
-            <Badge
-              variant="secondary"
-              className="gap-1 border-amber-200/80 bg-amber-50 text-amber-900"
-            >
-              <Sparkles className="size-2.5" />
-              AI active
-            </Badge>
-            {onClose && (
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={onClose}
-                className="md:hidden text-muted-foreground"
-                aria-label="Close inbox"
-              >
-                <X className="size-4" />
-              </Button>
-            )}
-          </div>
+          <Badge
+            variant="secondary"
+            className="gap-1 border-amber-200/80 bg-amber-50 text-amber-900"
+          >
+            <Sparkles className="size-2.5" />
+            AI active
+          </Badge>
         </div>
         <p className="text-xs leading-snug text-muted-foreground">
           Paste links, messages, or notes — Wayfarer will organize them on the canvas.
@@ -129,7 +113,7 @@ export default function InboxPanel({
             onClick={handleSend}
             disabled={!inputVal.trim() || isProcessing}
             size="icon-sm"
-            className="absolute right-2.5 bottom-2.5"
+            className="absolute right-2.5 bottom-2.5 disabled:pointer-events-none disabled:opacity-40"
             aria-label="Submit inbox item"
           >
             {isProcessing ? (
@@ -139,7 +123,7 @@ export default function InboxPanel({
             )}
           </Button>
         </div>
-        <p id="inbox-input-hint" className="mt-1.5 text-[11px] text-muted-foreground">
+        <p id="inbox-input-hint" className="mt-1.5 text-xs font-medium text-muted-foreground">
           {inputVal.trim()
             ? "Press ⌘ Enter or tap send to add this to your inbox."
             : "Paste a link or note above to enable submit."}
@@ -201,7 +185,7 @@ export default function InboxPanel({
         )}
       </div>
 
-      <div className="flex items-center justify-between border-t border-border bg-muted/30 px-4 py-3">
+      <div className="flex items-center justify-between border-t border-border bg-muted/30 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <span className="text-xs text-muted-foreground">{items.length} items total</span>
         <Button
           variant="ghost"
@@ -266,9 +250,9 @@ function InboxItemCard({
               {!dimmed ? (
                 <Button
                   variant="ghost"
-                  size="icon-xs"
+                  size="icon-sm"
                   onClick={() => onProcess(item.id)}
-                  className="size-5 text-muted-foreground opacity-100 transition-opacity hover:bg-transparent hover:text-emerald-500 md:opacity-0 md:group-hover:opacity-100"
+                  className="size-7 shrink-0 text-muted-foreground opacity-100 transition-opacity hover:bg-transparent hover:text-emerald-500 md:opacity-0 md:group-hover:opacity-100"
                   aria-label="Mark as organized"
                   title="Mark as organized"
                 >
@@ -285,21 +269,19 @@ function InboxItemCard({
           </p>
 
           {!dimmed ? (
-            <div className="mt-2.5 flex items-center justify-between gap-2">
-              <span className="text-xs font-medium text-muted-foreground">
-                {displayState.label}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onProcess(item.id)}
-                className="h-auto gap-1 px-0 text-xs font-medium text-primary opacity-100 transition-all hover:bg-transparent hover:text-primary/80 md:opacity-0 md:group-hover:opacity-100"
-              >
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => onProcess(item.id)}
+              className="mt-2.5 h-auto w-full justify-between gap-3 px-3 py-2 text-left"
+            >
+              <span className="text-xs font-medium text-muted-foreground">{displayState.label}</span>
+              <span className="flex shrink-0 items-center gap-1 text-xs font-medium text-primary">
                 <Sparkles className="size-2.5" />
                 Place on canvas
                 <ChevronRight className="size-2.5" />
-              </Button>
-            </div>
+              </span>
+            </Button>
           ) : (
             <div
               className={cn(

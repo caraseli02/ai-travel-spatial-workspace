@@ -192,7 +192,7 @@ export default function CardDetailPanel({
       <SheetContent
         side="right"
         showCloseButton={false}
-        className="gap-0 overflow-y-auto p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-[280px]"
+        className="z-[800] gap-0 overflow-y-auto p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-[280px]"
       >
         <SheetHeader className="sticky top-0 z-10 flex-row items-center justify-between border-b border-border bg-card p-0">
           <div className="flex items-center gap-2 px-4 py-3 text-xs font-semibold text-muted-foreground">
@@ -503,8 +503,8 @@ export default function CardDetailPanel({
                 variant="outline"
                 onClick={handleDelete}
                 className={cn(
-                  "text-xs font-semibold",
-                  confirmDelete && "animate-pulse border-destructive bg-destructive text-destructive-foreground",
+                  "text-xs font-semibold border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive",
+                  confirmDelete && "animate-pulse border-destructive bg-destructive text-destructive-foreground hover:bg-destructive hover:text-destructive-foreground",
                 )}
               >
                 <Trash2 className="size-3" />

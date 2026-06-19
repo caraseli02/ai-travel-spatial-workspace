@@ -243,7 +243,7 @@ export function FlightCard({
   return (
     <CanvasCardShell card={card} embedded={embedded} isDragging={isDragging} onMouseDown={onMouseDown} defaultWidth={280}>
       <Card
-        className={`rounded-xl border border-border bg-card py-0 transition-all duration-200 ring-0 ${
+        className={`overflow-hidden rounded-xl border border-border bg-card py-0 transition-all duration-200 ring-0 ${
           isDragging ? "shadow-2xl ring-2 ring-amber-500/20" : "polaroid-shadow group-hover:polaroid-shadow-hover"
         }`}
       >
@@ -258,24 +258,24 @@ export function FlightCard({
 
         <div className="p-4">
           {/* Route */}
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-xl font-bold text-foreground">SFO</p>
+          <div className="mb-3 flex items-center justify-between">
+            <div className="min-w-0">
+              <p className="text-lg font-bold text-foreground sm:text-xl">SFO</p>
               <p className="text-xs text-muted-foreground">San Francisco</p>
             </div>
-            <div className="flex flex-1 items-center justify-center gap-1 px-3">
+            <div className="flex flex-1 items-center justify-center gap-1 px-2 sm:px-3">
               <div className="h-px flex-1 bg-border" />
-              <Plane size={14} className="text-muted-foreground/50" />
+              <Plane size={14} className="shrink-0 text-muted-foreground/50" />
               <div className="h-px flex-1 bg-border" />
             </div>
-            <div className="text-right">
-              <p className="text-xl font-bold text-foreground">KIX</p>
+            <div className="min-w-0 text-right">
+              <p className="text-lg font-bold text-foreground sm:text-xl">KIX</p>
               <p className="text-xs text-muted-foreground">Osaka/Kyoto</p>
             </div>
           </div>
 
           {/* Details */}
-          <p className="mb-2.5 text-xs text-muted-foreground">{card.subtitle}</p>
+          <p className="mb-2.5 text-xs leading-relaxed text-muted-foreground">{card.subtitle}</p>
           {displayDetails.length > 0 && (
             <div className="space-y-1">
               {displayDetails.map((d, i) => (

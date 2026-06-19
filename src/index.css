@@ -93,6 +93,29 @@
     border: 0;
   }
 
+  @media (max-width: 767px) {
+    .wayfarer-route-marker__chip {
+      max-width: min(38vw, 128px);
+    }
+
+    .wayfarer-route-marker__chip--compact {
+      max-width: none;
+      padding: 0;
+      border-radius: 999px;
+      box-shadow: 0 6px 16px rgba(12, 10, 9, 0.18);
+    }
+
+    .wayfarer-route-marker__chip--compact .wayfarer-route-marker__thumb {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+    }
+
+    .wayfarer-osm-map .leaflet-popup-content {
+      max-width: min(72vw, 240px);
+    }
+  }
+
   .wayfarer-route-marker__chip {
     display: inline-flex;
     max-width: 160px;
