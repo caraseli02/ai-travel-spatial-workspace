@@ -3,6 +3,17 @@ import { Star, Plane, MapPin, Wifi } from "lucide-react";
 import type { CanvasCard } from "../models/trip";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import {
+  filterRedundantCardDetails,
+  resolveKanbanCardTag,
+} from "../utils/tripWorkspaceViewHelpers";
+
+export interface CardRendererProps {
+  card: CanvasCard;
+  onMouseDown?: (e: React.MouseEvent) => void;
+  isDragging?: boolean;
+  embedded?: boolean;
+}
 
 const tagColorMap: Record<string, { bg: string; text: string; border: string }> = {
   amber:   { bg: '#fef3c7', text: '#92400e', border: '#fde68a' },
@@ -13,17 +24,86 @@ const tagColorMap: Record<string, { bg: string; text: string; border: string }> 
   blue:    { bg: '#dbeafe', text: '#1d4ed8', border: '#bfdbfe' },
 };
 
+function getCanvasItemStyle(
+  card: CanvasCard,
+  options: { embedded?: boolean; isDragging?: boolean; defaultWidth?: number } = {},
+): React.CSSProperties {
+  const { embedded, isDragging, defaultWidth = 220 } = options;
+  if (embedded) {
+    return {
+      position: "relative",
+      width: "100%",
+      transform: isDragging ? "scale(1.02)" : undefined,
+      zIndex: isDragging ? 50 : 1,
+    };
+  }
+
+  return {
+    position: "absolute",
+    left: card.x,
+    top: card.y,
+    width: card.width || defaultWidth,
+    transform: `rotate(${card.rotation}deg)${isDragging ? " scale(1.05)" : ""}`,
+    zIndex: isDragging ? 50 : 1,
+    transition: isDragging ? "none" : "transform 0.2s ease, box-shadow 0.2s ease",
+  };
+}
+
+function CanvasCardShell({
+  card,
+  embedded,
+  isDragging,
+  onMouseDown,
+  defaultWidth,
+  children,
+}: {
+  card: CanvasCard;
+  embedded?: boolean;
+  isDragging?: boolean;
+  onMouseDown?: (e: React.MouseEvent) => void;
+  defaultWidth?: number;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={
+        embedded
+          ? "canvas-item group w-full cursor-pointer select-none"
+          : "canvas-item group cursor-grab select-none active:cursor-grabbing"
+      }
+      onMouseDown={onMouseDown}
+      style={getCanvasItemStyle(card, { embedded, isDragging, defaultWidth })}
+    >
+      {children}
+    </div>
+  );
+}
+
 function TagPill({ tag, color }: { tag: string; color: string }) {
   const c = tagColorMap[color] || tagColorMap.slate;
   return (
     <Badge
       variant="outline"
-      className="rounded-full px-2 py-0.5 text-xs font-medium"
+      className="max-w-full shrink-0 whitespace-normal rounded-full px-2 py-0.5 text-center text-xs leading-tight font-medium"
       style={{ backgroundColor: c.bg, color: c.text, borderColor: c.border }}
     >
       {tag}
     </Badge>
   );
+}
+
+function CardTag({
+  tag,
+  color,
+  embedded,
+}: {
+  tag?: string;
+  color: string;
+  embedded?: boolean;
+}) {
+  const displayTag = embedded ? resolveKanbanCardTag(tag) : tag;
+  if (!displayTag) return null;
+  return <TagPill tag={displayTag} color={color} />;
 }
 
 function StarRating({ rating }: { rating: number }) {
@@ -43,25 +123,10 @@ export function PolaroidCard({
   card,
   onMouseDown,
   isDragging,
-}: {
-  card: CanvasCard;
-  onMouseDown?: (e: React.MouseEvent) => void;
-  isDragging?: boolean;
-}) {
+  embedded,
+}: CardRendererProps) {
   return (
-    <div
-      className="canvas-item group cursor-grab active:cursor-grabbing select-none"
-      onMouseDown={onMouseDown}
-      style={{
-        position: 'absolute',
-        left: card.x,
-        top: card.y,
-        width: card.width || 220,
-        transform: `rotate(${card.rotation}deg) ${isDragging ? 'scale(1.05)' : ''}`,
-        zIndex: isDragging ? 50 : 1,
-        transition: isDragging ? 'none' : 'transform 0.2s ease, box-shadow 0.2s ease',
-      }}
-    >
+    <CanvasCardShell card={card} embedded={embedded} isDragging={isDragging} onMouseDown={onMouseDown} defaultWidth={220}>
       <Card
         className={`rounded-lg bg-card transition-all duration-200 ring-0 ${
           isDragging ? "shadow-2xl ring-2 ring-amber-500/20" : "polaroid-shadow group-hover:polaroid-shadow-hover"
@@ -77,14 +142,14 @@ export function PolaroidCard({
         </div>
         {/* Content */}
         <div className="px-1">
-          {card.tag && <TagPill tag={card.tag} color={card.tagColor || 'slate'} />}
+          <CardTag tag={card.tag} color={card.tagColor || "slate"} embedded={embedded} />
           <p className="mt-1.5 text-sm leading-tight font-semibold text-foreground">{card.title}</p>
           {card.subtitle && (
             <p className="mt-0.5 text-xs leading-snug text-muted-foreground">{card.subtitle}</p>
           )}
         </div>
       </Card>
-    </div>
+    </CanvasCardShell>
   );
 }
 
@@ -101,26 +166,11 @@ export function StickyCard({
   card,
   onMouseDown,
   isDragging,
-}: {
-  card: CanvasCard;
-  onMouseDown?: (e: React.MouseEvent) => void;
-  isDragging?: boolean;
-}) {
+  embedded,
+}: CardRendererProps) {
   const colors = stickyColors[card.color || '#fef3c7'] || stickyColors['#fef3c7'];
   return (
-    <div
-      className="canvas-item group cursor-grab active:cursor-grabbing select-none"
-      onMouseDown={onMouseDown}
-      style={{
-        position: 'absolute',
-        left: card.x,
-        top: card.y,
-        width: card.width || 200,
-        transform: `rotate(${card.rotation}deg) ${isDragging ? 'scale(1.05)' : ''}`,
-        zIndex: isDragging ? 50 : 1,
-        transition: isDragging ? 'none' : 'transform 0.2s ease, box-shadow 0.2s ease',
-      }}
-    >
+    <CanvasCardShell card={card} embedded={embedded} isDragging={isDragging} onMouseDown={onMouseDown} defaultWidth={200}>
       <Card className={`relative overflow-hidden rounded-lg py-0 transition-all duration-200 ring-0 ${
         isDragging ? 'shadow-2xl ring-2 ring-amber-500/20' : 'sticky-shadow group-hover:shadow-lg'
       }`}
@@ -135,7 +185,7 @@ export function StickyCard({
           <p className="text-xs leading-relaxed text-muted-foreground">{card.subtitle}</p>
         )}
       </Card>
-    </div>
+    </CanvasCardShell>
   );
 }
 
@@ -144,25 +194,10 @@ export function ArticleCard({
   card,
   onMouseDown,
   isDragging,
-}: {
-  card: CanvasCard;
-  onMouseDown?: (e: React.MouseEvent) => void;
-  isDragging?: boolean;
-}) {
+  embedded,
+}: CardRendererProps) {
   return (
-    <div
-      className="canvas-item group cursor-grab active:cursor-grabbing select-none"
-      onMouseDown={onMouseDown}
-      style={{
-        position: 'absolute',
-        left: card.x,
-        top: card.y,
-        width: card.width || 260,
-        transform: `rotate(${card.rotation}deg) ${isDragging ? 'scale(1.05)' : ''}`,
-        zIndex: isDragging ? 50 : 1,
-        transition: isDragging ? 'none' : 'transform 0.2s ease, box-shadow 0.2s ease',
-      }}
-    >
+    <CanvasCardShell card={card} embedded={embedded} isDragging={isDragging} onMouseDown={onMouseDown} defaultWidth={260}>
       <Card
         className={`overflow-hidden rounded-xl border border-border bg-card py-0 transition-all duration-200 ring-0 ${
           isDragging ? "shadow-2xl ring-2 ring-amber-500/20" : "polaroid-shadow group-hover:polaroid-shadow-hover"
@@ -175,7 +210,7 @@ export function ArticleCard({
           </div>
         )}
         <div className="p-3.5">
-          {card.tag && <TagPill tag={card.tag} color={card.tagColor || 'slate'} />}
+          <CardTag tag={card.tag} color={card.tagColor || "slate"} embedded={embedded} />
           <p className="mt-2 text-sm leading-tight font-semibold text-foreground">{card.title}</p>
           {card.subtitle && (
             <p className="mt-1 text-xs leading-snug text-muted-foreground">{card.subtitle}</p>
@@ -192,7 +227,7 @@ export function ArticleCard({
           )}
         </div>
       </Card>
-    </div>
+    </CanvasCardShell>
   );
 }
 
@@ -201,25 +236,12 @@ export function FlightCard({
   card,
   onMouseDown,
   isDragging,
-}: {
-  card: CanvasCard;
-  onMouseDown?: (e: React.MouseEvent) => void;
-  isDragging?: boolean;
-}) {
+  embedded,
+}: CardRendererProps) {
+  const displayDetails = filterRedundantCardDetails(card.details, card.price);
+
   return (
-    <div
-      className="canvas-item group cursor-grab active:cursor-grabbing select-none"
-      onMouseDown={onMouseDown}
-      style={{
-        position: 'absolute',
-        left: card.x,
-        top: card.y,
-        width: card.width || 280,
-        transform: `rotate(${card.rotation}deg) ${isDragging ? 'scale(1.05)' : ''}`,
-        zIndex: isDragging ? 50 : 1,
-        transition: isDragging ? 'none' : 'transform 0.2s ease, box-shadow 0.2s ease',
-      }}
-    >
+    <CanvasCardShell card={card} embedded={embedded} isDragging={isDragging} onMouseDown={onMouseDown} defaultWidth={280}>
       <Card
         className={`rounded-xl border border-border bg-card py-0 transition-all duration-200 ring-0 ${
           isDragging ? "shadow-2xl ring-2 ring-amber-500/20" : "polaroid-shadow group-hover:polaroid-shadow-hover"
@@ -231,7 +253,7 @@ export function FlightCard({
             <Plane size={13} className="text-primary" />
             <span className="text-xs font-semibold text-primary">Flight</span>
           </div>
-          {card.tag && <TagPill tag={card.tag} color={card.tagColor || 'amber'} />}
+          <CardTag tag={card.tag} color={card.tagColor || "amber"} embedded={embedded} />
         </div>
 
         <div className="p-4">
@@ -254,9 +276,9 @@ export function FlightCard({
 
           {/* Details */}
           <p className="mb-2.5 text-xs text-muted-foreground">{card.subtitle}</p>
-          {card.details && (
+          {displayDetails.length > 0 && (
             <div className="space-y-1">
-              {card.details.map((d, i) => (
+              {displayDetails.map((d, i) => (
                 <div key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <span className="size-1 rounded-full bg-muted-foreground/30" />
                   {d}
@@ -265,14 +287,14 @@ export function FlightCard({
             </div>
           )}
           {card.price && (
-            <div className="mt-3 border-t border-border pt-3">
+            <div className={displayDetails.length > 0 ? "mt-3 border-t border-border pt-3" : "mt-1"}>
               <span className="text-lg font-bold text-foreground">{card.price}</span>
               <span className="ml-1 text-xs text-muted-foreground">total</span>
             </div>
           )}
         </div>
       </Card>
-    </div>
+    </CanvasCardShell>
   );
 }
 
@@ -281,25 +303,10 @@ export function HotelCard({
   card,
   onMouseDown,
   isDragging,
-}: {
-  card: CanvasCard;
-  onMouseDown?: (e: React.MouseEvent) => void;
-  isDragging?: boolean;
-}) {
+  embedded,
+}: CardRendererProps) {
   return (
-    <div
-      className="canvas-item group cursor-grab active:cursor-grabbing select-none"
-      onMouseDown={onMouseDown}
-      style={{
-        position: 'absolute',
-        left: card.x,
-        top: card.y,
-        width: card.width || 260,
-        transform: `rotate(${card.rotation}deg) ${isDragging ? 'scale(1.05)' : ''}`,
-        zIndex: isDragging ? 50 : 1,
-        transition: isDragging ? 'none' : 'transform 0.2s ease, box-shadow 0.2s ease',
-      }}
-    >
+    <CanvasCardShell card={card} embedded={embedded} isDragging={isDragging} onMouseDown={onMouseDown} defaultWidth={260}>
       <Card
         className={`overflow-hidden rounded-xl border border-border bg-card py-0 transition-all duration-200 ring-0 ${
           isDragging ? "shadow-2xl ring-2 ring-amber-500/20" : "polaroid-shadow group-hover:polaroid-shadow-hover"
@@ -314,7 +321,7 @@ export function HotelCard({
         <div className="p-3.5">
           <div className="flex items-start justify-between gap-2 mb-1">
             <p className="text-sm leading-tight font-semibold text-foreground">{card.title}</p>
-            {card.tag && <TagPill tag={card.tag} color={card.tagColor || 'amber'} />}
+            <CardTag tag={card.tag} color={card.tagColor || "amber"} embedded={embedded} />
           </div>
           <div className="flex items-center gap-1.5 mb-2">
             <MapPin size={11} className="text-muted-foreground" />
@@ -333,7 +340,7 @@ export function HotelCard({
           )}
         </div>
       </Card>
-    </div>
+    </CanvasCardShell>
   );
 }
 
@@ -342,56 +349,42 @@ export function NoteCard({
   card,
   onMouseDown,
   isDragging,
-}: {
-  card: CanvasCard;
-  onMouseDown?: (e: React.MouseEvent) => void;
-  isDragging?: boolean;
-}) {
+  embedded,
+}: CardRendererProps) {
   return (
-    <div
-      className="canvas-item group cursor-grab active:cursor-grabbing select-none"
-      onMouseDown={onMouseDown}
-      style={{
-        position: 'absolute',
-        left: card.x,
-        top: card.y,
-        width: card.width || 210,
-        transform: `rotate(${card.rotation}deg) ${isDragging ? 'scale(1.05)' : ''}`,
-        zIndex: isDragging ? 50 : 1,
-        transition: isDragging ? 'none' : 'transform 0.2s ease, box-shadow 0.2s ease',
-      }}
-    >
+    <CanvasCardShell card={card} embedded={embedded} isDragging={isDragging} onMouseDown={onMouseDown} defaultWidth={210}>
       <Card
         className={`rounded-xl border border-border bg-card p-3.5 transition-all duration-200 ring-0 ${
           isDragging ? "shadow-2xl ring-2 ring-amber-500/20" : "polaroid-shadow group-hover:polaroid-shadow-hover"
         }`}
       >
         <div className="mb-2 flex items-center justify-between">
-          {card.tag && <TagPill tag={card.tag} color={card.tagColor || "slate"} />}
+          <CardTag tag={card.tag} color={card.tagColor || "slate"} embedded={embedded} />
           <Wifi size={13} className="text-muted-foreground/50" />
         </div>
         <p className="mb-1 text-sm font-semibold text-foreground">{card.title}</p>
         <p className="text-xs leading-relaxed text-muted-foreground">{card.subtitle}</p>
       </Card>
-    </div>
+    </CanvasCardShell>
   );
 }
 
-export interface CardRendererProps {
-  card: CanvasCard;
-  onMouseDown?: (e: React.MouseEvent) => void;
-  isDragging?: boolean;
-}
-
 // Main dispatcher
-export function CanvasCardRenderer({ card, onMouseDown, isDragging }: CardRendererProps) {
+export function CanvasCardRenderer({ card, onMouseDown, isDragging, embedded }: CardRendererProps) {
   switch (card.type) {
-    case 'polaroid': return <PolaroidCard card={card} onMouseDown={onMouseDown} isDragging={isDragging} />;
-    case 'sticky': return <StickyCard card={card} onMouseDown={onMouseDown} isDragging={isDragging} />;
-    case 'article': return <ArticleCard card={card} onMouseDown={onMouseDown} isDragging={isDragging} />;
-    case 'flight': return <FlightCard card={card} onMouseDown={onMouseDown} isDragging={isDragging} />;
-    case 'hotel': return <HotelCard card={card} onMouseDown={onMouseDown} isDragging={isDragging} />;
-    case 'note': return <NoteCard card={card} onMouseDown={onMouseDown} isDragging={isDragging} />;
-    default: return null;
+    case "polaroid":
+      return <PolaroidCard card={card} onMouseDown={onMouseDown} isDragging={isDragging} embedded={embedded} />;
+    case "sticky":
+      return <StickyCard card={card} onMouseDown={onMouseDown} isDragging={isDragging} embedded={embedded} />;
+    case "article":
+      return <ArticleCard card={card} onMouseDown={onMouseDown} isDragging={isDragging} embedded={embedded} />;
+    case "flight":
+      return <FlightCard card={card} onMouseDown={onMouseDown} isDragging={isDragging} embedded={embedded} />;
+    case "hotel":
+      return <HotelCard card={card} onMouseDown={onMouseDown} isDragging={isDragging} embedded={embedded} />;
+    case "note":
+      return <NoteCard card={card} onMouseDown={onMouseDown} isDragging={isDragging} embedded={embedded} />;
+    default:
+      return null;
   }
 }

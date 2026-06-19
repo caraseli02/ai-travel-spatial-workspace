@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import type { CanvasCard } from "../models/trip";
+import { filterRedundantCardDetails } from "../utils/tripWorkspaceViewHelpers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -115,6 +116,8 @@ export default function CardDetailPanel({
   }, [card?.id]);
 
   if (!card) return null;
+
+  const displayDetails = filterRedundantCardDetails(card.details, card.price);
 
   const handleFieldChange = (updates: Partial<CanvasCard>) => {
     onUpdateCard?.({ ...card, ...updates });
@@ -426,13 +429,13 @@ export default function CardDetailPanel({
                 </div>
               )}
 
-              {card.details && card.details.length > 0 && (
+              {displayDetails.length > 0 && (
                 <div>
                   <p className="mb-1.5 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
                     Details
                   </p>
                   <ul className="space-y-1.5">
-                    {card.details.map((d, i) => (
+                    {displayDetails.map((d, i) => (
                       <li key={i} className="flex items-start gap-1.5 text-xs text-muted-foreground">
                         <Check size={12} className="mt-0.5 shrink-0 text-primary" />
                         <span>{d}</span>

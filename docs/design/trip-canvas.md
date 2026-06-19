@@ -9,17 +9,19 @@ Main planning surface at route `/trips/:tripId`. Light-themed spatial workspace 
 | Pencil design | `pencil-shadcn.pen` |
 | Theme tokens | `src/index.css` — Stone base + Orange accent (light workspace); Pencil `wf-*` variables |
 | shadcn config | `components.json` — style `radix-nova`, base color `stone`, icons `lucide` |
-| Implementation | `src/components/TripWorkspace.tsx`, `src/components/CanvasCards.tsx`, `src/components/InboxPanel.tsx`, `src/components/CardDetailPanel.tsx` |
+| Implementation | `src/components/TripWorkspace.tsx`, `src/components/TripWorkspaceViews.tsx`, `src/components/CanvasCards.tsx`, `src/components/InboxPanel.tsx`, `src/components/CardDetailPanel.tsx` |
 | Fixture data | `src/data/tripData.ts` — `createDemoTrip()` |
 | Layout patterns | **B** sidebar + canvas, **C** prompt bar, **E** modals ([patterns.md](patterns.md)) |
 
 | Handoff | Desktop frame | Mobile frame |
 |---------|---------------|--------------|
 | **Done** (shipped in React) | `lngHk` — Trip Canvas — Done | `rsL1N` — Trip Canvas — Done |
-| **Next** (not in React) | `v3Oai` — Trip Canvas — Next | `GTWXC` — Trip Canvas — Next |
+| **Next** (partially in React) | `v3Oai` — Trip Canvas — Next | `GTWXC` — Trip Canvas — Next |
 | **Exploration** | `kMh8w` — Dump (geo grounding) | — |
 
 See [README.md](README.md). On the Pencil canvas, **Trip View Done** groups `lngHk` + `rsL1N`; **Trip View in Progress** groups `v3Oai` + `GTWXC` + `kMh8w`.
+
+React ships **Canvas (Kanban)** + **Map** via `WorkspaceViewSwitcher`. The standalone **Days** schedule view from Pencil `v3Oai` was replaced by Kanban day columns on desktop/mobile.
 
 Domain components: **Wayfarer / DS / 06 Components · Trip Canvas** (`g967C`) — **Chrome** | **Inbox** | **Canvas Cards** | **Schedule** | **Map** | **Panels & Modals**. Map Route catalog lives under **DS / 06** → `10 Catalog / Map Route`.
 
@@ -28,10 +30,9 @@ Domain components: **Wayfarer / DS / 06 Components · Trip Canvas** (`g967C`) �
 Trip Canvas is split across **separate page frames** on the Pencil canvas — not sections inside one frame.
 
 **Handoff rules:**
-- **Done** frames (`lngHk`, `rsL1N`) match React at `/trips/:tripId` today — spatial canvas only.
-- **Next** frames (`v3Oai`, `GTWXC`) are design-only — Days view, Map view, view switcher.
-- **Done** frames omit **Workspace View Switcher** (`W5sjx`).
-- **Next** frames include `W5sjx` with the active tab set to **Days** or **Map**.
+- **Done** frames (`lngHk`, `rsL1N`) match the original spatial canvas — superseded in React by Kanban columns (`XFqhW` experiment).
+- **Next** frames (`v3Oai`, `GTWXC`) — Map view shipped; Days schedule view replaced by Kanban.
+- **Next** frames include `W5sjx` with the active tab set to **Canvas** or **Map** (Days tab removed from React switcher).
 
 ### Done — desktop `lngHk` → `Screens`
 
@@ -108,15 +109,18 @@ Desktop: **1440 × 1024**. Mobile: **390 × 844**. Theme: `Stone` + `Orange` + *
 
 ## Workspace views
 
-Three workspace views share the same header, inbox, day pills, stats pill, and AI prompt bar. A centered **Workspace View Switcher** (`W5sjx`) toggles the main content area.
+Two workspace views share the same header, inbox, day pills, stats pill, and AI prompt bar. A centered **Workspace View Switcher** (`W5sjx`) toggles the main content area.
 
 | View | Purpose | Toolbar | Day pills behavior |
 |------|---------|---------|-------------------|
-| **Canvas** | Spatial moodboard, connections, drag | `iBYSG` — zoom, reset, day labels | Dim non-active cards |
-| **Days** | Scan daily activities in **Optimized Sequence** order | None (schedule scroll) | Filter/highlight active day section |
-| **Map** | Geographic spread of place cards | `Cc8SA` — zoom, fit bounds, recenter | Filter/dim pins by day |
+| **Canvas** | Kanban day columns with embedded cards (desktop + mobile) | `iBYSG` — zoom, reset | Dim non-active columns |
+| **Map** | Geographic spread of place cards + route panel | `Cc8SA` — zoom, fit bounds, recenter | Filter/dim pins by day |
 
-Icons: `layout-grid` (Canvas), `list-ordered` (Days), `map` (Map).
+Icons: `layout-grid` (Canvas), `map` (Map).
+
+**Canvas layout:** React uses horizontal Kanban columns (`TripCanvasKanbanView`) aligned to `XFqhW` — four day columns for the Demo Trip, with logistics cards in the last column. Cards tagged to a future day (e.g. Day 5) stay in logistics until that day is added.
+
+**Map layout:** Stop markers use horizontal thumbnail chips (`v6iKM`). Desktop route panel (`I4gQFw`) stacks activities under Morning / Afternoon / Evening headers (`hIJ3Y`). Mobile uses a bottom sheet (`q8saP`) with snap-scrolling activity carousel tiles (`kuOO5`).
 
 ## Page sections (top to bottom)
 
@@ -124,9 +128,9 @@ Icons: `layout-grid` (Canvas), `list-ordered` (Days), `map` (Map).
 |---|---------|---------|-------------------|
 | 1 | **Workspace header** | Back to trips, trip identity, day pills, share/export, inbox toggle | `zVsPD` — **Wayfarer / Workspace Header** |
 | 2 | **Inbox sidebar** | Paste/process inbox items (280px) | `tS1mE` — **Wayfarer / Inbox Panel** |
-| 3 | **View switcher** | Canvas / Days / Map segmented control | `W5sjx` — **Wayfarer / Workspace View Switcher** |
-| 4 | **Main content** | Spatial canvas, day schedule, or map surface | View-dependent (see below) |
-| 5 | **Canvas toolbar** | Zoom, reset, day-label toggle (Canvas view only) | `iBYSG` — **Wayfarer / Canvas Toolbar** |
+| 3 | **View switcher** | Canvas / Map segmented control | `W5sjx` — **Wayfarer / Workspace View Switcher** |
+| 4 | **Main content** | Kanban day columns or map surface | View-dependent (see below) |
+| 5 | **Canvas toolbar** | Zoom, reset (Canvas view only; scales Kanban board) | `iBYSG` — **Wayfarer / Canvas Toolbar** |
 | 6 | **Trip stats pill** | Dates, destination, duration, budget, weather | `Hhcao` — **Wayfarer / Trip Stats Pill** |
 | 7 | **AI prompt bar** | Suggestion chips + natural-language input | `m5ldW7` — **Wayfarer / AI Prompt Bar** (`5:3IiAS` chips, `5:urnwK` send) |
 | 8 | **Card detail panel** | Right drawer when a canvas card is selected | `l5hjXc` — **Wayfarer / Card Detail Panel** |
@@ -153,7 +157,7 @@ All section refs live under **Wayfarer / DS / 06 Components · Trip Canvas** (`g
 | **Wayfarer / Link Mode Banner** | `AYtTV` | Linking-session active banner |
 | **Wayfarer / Create Card Modal** | `iMiJf` | `CreateCardModal` in `TripWorkspace.tsx` |
 | **Wayfarer / Add Day Modal** | `nn5gb` | `AddDayModal` in `TripWorkspace.tsx` |
-| **Wayfarer / Workspace View Switcher** | `W5sjx` | Canvas / Days / Map tabs (centered in main chrome) |
+| **Wayfarer / Workspace View Switcher** | `W5sjx` | Canvas / Map tabs (centered in main chrome) |
 
 ### Schedule
 
@@ -337,21 +341,21 @@ Pins approximate real Kyoto geography. Code implementation should use Leaflet + 
 
 | Priority | Work | Pencil section | React target |
 |----------|------|----------------|--------------|
-| **P0** | Done design/code sync | `lngHk` + `rsL1N` | Align `AiPromptBar` to `m5ldW7`; keep view switcher hidden |
-| **P1** | Days view | `v3Oai` + `GTWXC` | `workspaceView: 'days'` + schedule from `O2HBk`/`UmcVd` |
-| **P2** | Map view | `v3Oai` + `GTWXC` | `react-leaflet`, `d78wmq`/`Nbc1U` compose, Kyoto fixture coords |
-| **P3** | View switcher chrome | Enable `W5sjx` on Next frames once P1 starts | Centered tabs in header area |
-| **P4** | Geo grounding | `kMh8w` Dump | Card `location`, geo chips, mini map — after Map ships |
-| **P5** | Mobile modals | Add to Next if missing | Full-width dialog states |
+| **P0** | Done design/code sync | `lngHk` + `rsL1N` | Align `AiPromptBar` to `m5ldW7` |
+| **P1** | Kanban canvas + view switcher | `XFqhW`, `GTWXC` | `TripCanvasKanbanView`, `WorkspaceViewSwitcher` |
+| **P2** | Map view | `v3Oai` + `GTWXC` | `TripMapView`, `react-leaflet`, route panel + chips |
+| **P3** | Geo grounding | `kMh8w` Dump | Card `location`, geo chips, mini map |
+| **P4** | Mobile modals | Add to Next if missing | Full-width dialog states |
 
-**Next · Map** code handoff details:
+**Map** code handoff details:
 
-- `workspaceView: 'canvas' | 'days' | 'map'` in Trip Workspace state
+- `workspaceView: 'canvas' | 'map'` in Trip Workspace state
 - Optional `location?: { lat: number; lng: number }` on `CanvasCard` in `src/models/trip.ts`
 - Kyoto fixture coordinates in `src/data/tripData.ts`
 - `react-leaflet` + `leaflet` for OpenStreetMap tiles
-- Pure `buildOptimizedSequence(cards, day)` in `tripWorkspaceModel.ts`
 - Route stays `/trips/:tripId` — views toggle in-place, no new routes
+
+**Retired:** standalone Days schedule view (`ydtqA`) — replaced by Kanban columns. Pencil `Days` frames remain as reference for activity row styling (`UmcVd`).
 
 ## Light workspace tokens
 

@@ -123,6 +123,7 @@ export default function InboxPanel({
             onKeyDown={(e) => {
               if (e.key === "Enter" && e.metaKey) handleSend();
             }}
+            aria-describedby="inbox-input-hint"
           />
           <Button
             onClick={handleSend}
@@ -138,6 +139,11 @@ export default function InboxPanel({
             )}
           </Button>
         </div>
+        <p id="inbox-input-hint" className="mt-1.5 text-[11px] text-muted-foreground">
+          {inputVal.trim()
+            ? "Press ⌘ Enter or tap send to add this to your inbox."
+            : "Paste a link or note above to enable submit."}
+        </p>
         {isProcessing && (
           <div className="mt-2 flex items-center gap-1.5 text-xs text-primary">
             <Sparkles className="size-3" />
@@ -262,7 +268,7 @@ function InboxItemCard({
                   variant="ghost"
                   size="icon-xs"
                   onClick={() => onProcess(item.id)}
-                  className="size-5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-transparent hover:text-emerald-500"
+                  className="size-5 text-muted-foreground opacity-100 transition-opacity hover:bg-transparent hover:text-emerald-500 md:opacity-0 md:group-hover:opacity-100"
                   aria-label="Mark as organized"
                   title="Mark as organized"
                 >
@@ -287,7 +293,7 @@ function InboxItemCard({
                 variant="ghost"
                 size="sm"
                 onClick={() => onProcess(item.id)}
-                className="h-auto gap-1 px-0 text-xs font-medium text-primary opacity-0 transition-all group-hover:opacity-100 hover:bg-transparent hover:text-primary/80"
+                className="h-auto gap-1 px-0 text-xs font-medium text-primary opacity-100 transition-all hover:bg-transparent hover:text-primary/80 md:opacity-0 md:group-hover:opacity-100"
               >
                 <Sparkles className="size-2.5" />
                 Place on canvas

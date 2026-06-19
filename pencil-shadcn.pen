@@ -28975,6 +28975,7 @@
           "type": "frame",
           "id": "QeEfG",
           "name": "Cover",
+          "rotation": -0.03696975267604896,
           "width": "fill_container",
           "fill": "$5:--card",
           "stroke": "$5:--border",
@@ -29024,7 +29025,9 @@
           "type": "frame",
           "id": "H9WFo3",
           "name": "Screens",
+          "rotation": -0.03696975267604896,
           "width": "fill_container",
+          "height": 5521,
           "layout": "vertical",
           "gap": 80,
           "padding": [
@@ -35082,16 +35085,18 @@
     {
       "type": "frame",
       "id": "GTWXC",
-      "x": 22375,
-      "y": -1369,
+      "x": 22376.122801017267,
+      "y": -1370.5239080153196,
       "name": "Wayfarer / Screens / Mobile / Trip Canvas",
       "theme": {
         "5:Base": "Stone",
         "5:Accent": "Orange",
         "5:Mode": "Light"
       },
+      "rotation": -0.03696975267604896,
       "clip": true,
       "width": 1500,
+      "height": 3817,
       "fill": "$wf-page",
       "layout": "vertical",
       "children": [
@@ -41359,6 +41364,7 @@
           "type": "frame",
           "id": "lCL2R",
           "name": "Cover",
+          "rotation": -0.03696975267604896,
           "width": "fill_container",
           "fill": "$5:--card",
           "stroke": "$5:--border",
@@ -41398,6 +41404,7 @@
           "type": "frame",
           "id": "OEgUS",
           "name": "Screens",
+          "rotation": -0.03696975267604896,
           "width": "fill_container",
           "layout": "vertical",
           "gap": 80,
@@ -43518,176 +43525,6 @@
                   }
                 }
               ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "frame",
-      "id": "kwkNe",
-      "x": -247,
-      "y": 6794,
-      "name": "screenshots",
-      "width": 1600,
-      "fill": "#fafaf9",
-      "cornerRadius": 12,
-      "stroke": "#e7e5e4",
-      "strokeWidth": 1,
-      "layout": "vertical",
-      "gap": 24,
-      "padding": 32,
-      "children": [
-        {
-          "type": "frame",
-          "id": "O7rbA",
-          "name": "Cover",
-          "width": "fill_container",
-          "fill": "$5:--card",
-          "stroke": "$5:--border",
-          "strokeWidth": 1,
-          "layout": "vertical",
-          "gap": 6,
-          "padding": [
-            32,
-            40,
-            24,
-            40
-          ],
-          "children": [
-            {
-              "type": "text",
-              "id": "uDEeg",
-              "name": "Title",
-              "fill": "$5:--foreground",
-              "content": "Work In Progress",
-              "fontFamily": "Lora",
-              "fontSize": 20,
-              "fontWeight": "600"
-            },
-            {
-              "type": "text",
-              "id": "VvfRc",
-              "name": "Note",
-              "fill": "$5:--muted-foreground",
-              "content": "Experiments, explorations, and reference assets — not published screens",
-              "fontFamily": "Inter",
-              "fontSize": 11,
-              "fontWeight": "normal"
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "n2cXj",
-          "name": "Screens",
-          "width": "fill_container",
-          "layout": "vertical",
-          "gap": 80,
-          "padding": [
-            32,
-            40,
-            48,
-            40
-          ],
-          "children": [
-            {
-              "type": "rectangle",
-              "id": "t9YRFU",
-              "fill": {
-                "type": "image",
-                "enabled": true,
-                "url": "Screenshot%202026-06-16%20at%2011.58.45.png",
-                "mode": "fill"
-              },
-              "width": 728,
-              "height": 918
-            },
-            {
-              "type": "rectangle",
-              "id": "XvLeT",
-              "fill": {
-                "type": "image",
-                "enabled": true,
-                "url": "Screenshot%202026-06-16%20at%2011.58.00.png",
-                "mode": "fill"
-              },
-              "width": 744,
-              "height": 926
-            },
-            {
-              "type": "rectangle",
-              "id": "J0eOZ",
-              "fill": {
-                "type": "image",
-                "enabled": true,
-                "url": "Screenshot%202026-06-16%20at%2011.57.31.png",
-                "mode": "fill"
-              },
-              "width": 734,
-              "height": 922
-            },
-            {
-              "type": "rectangle",
-              "id": "n2q7N",
-              "fill": {
-                "type": "image",
-                "enabled": true,
-                "url": "Screenshot%202026-06-16%20at%2011.53.30.png",
-                "mode": "fill"
-              },
-              "width": 1490,
-              "height": 918
-            },
-            {
-              "type": "rectangle",
-              "id": "R2C4s",
-              "fill": {
-                "type": "image",
-                "enabled": true,
-                "url": "Screenshot%202026-06-16%20at%2011.52.56.png",
-                "mode": "fill"
-              },
-              "width": 1452,
-              "height": 920
-            },
-            {
-              "type": "rectangle",
-              "id": "h0wNK4",
-              "fill": {
-                "type": "image",
-                "enabled": true,
-                "url": "Screenshot%202026-06-16%20at%2011.52.35.png",
-                "mode": "fill"
-              },
-              "width": 1464,
-              "height": 930
-            },
-            {
-              "type": "rectangle",
-              "id": "W4jUsn",
-              "name": "Ref · Venice Desktop",
-              "fill": {
-                "type": "image",
-                "enabled": true,
-                "url": "Screenshot%202026-06-16%20at%2011.45.53.png",
-                "mode": "fill"
-              },
-              "width": 1490,
-              "height": 918
-            },
-            {
-              "type": "rectangle",
-              "id": "lJRhO",
-              "name": "Ref · Barcelona Desktop Day 1",
-              "fill": {
-                "type": "image",
-                "enabled": true,
-                "url": "Screenshot%202026-06-16%20at%2011.52.26.png",
-                "mode": "fill"
-              },
-              "width": 1490,
-              "height": 920
             }
           ]
         }
