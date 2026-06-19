@@ -13,7 +13,7 @@ test("landing page renders and routes into the demo workspace", async ({ page })
 
   await expect(page).toHaveURL(/\/trips\/demo-kyoto$/);
   await expect(page.getByRole("heading", { name: "7 Days in Kyoto" })).toBeVisible();
-  await expect(page.getByText("Kyoto, Japan")).toBeVisible();
+  await expect(page.getByRole("main").getByText("Kyoto, Japan")).toBeVisible();
 });
 
 test("trip list seeds trips and opens the demo workspace", async ({ page }) => {

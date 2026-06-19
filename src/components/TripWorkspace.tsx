@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   Compass,
@@ -8,7 +8,6 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize2,
-  Grid3X3,
   Share2,
   Download,
   Sparkles,
@@ -19,14 +18,18 @@ import {
   X,
   MoreHorizontal,
 } from "lucide-react";
-import { CanvasCardRenderer } from "./CanvasCards";
 import InboxPanel from "./InboxPanel";
 import OnboardingToast from "./OnboardingToast";
 import CardDetailPanel from "./CardDetailPanel";
+import {
+  TripCanvasKanbanView,
+  TripMapView,
+  WorkspaceViewSwitcher,
+  type WorkspaceView,
+} from "./TripWorkspaceViews";
 import type { CanvasCard } from "../models/trip";
 import {
   cardTypeOptions,
-  getCardCenter,
   isCardType,
 } from "../models/tripWorkspaceModel";
 import { resolveCardSourceMemory } from "../models/tripMaterialMemory";
@@ -52,7 +55,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useTripWorkspaceState } from '../hooks/useTripWorkspaceState';
-import { useSpatialViewport } from '../hooks/useSpatialViewport';
 import { useLinkingSession } from '../hooks/useLinkingSession';
 import { localTripRepository } from '../models/tripRepository';
 import type { Trip } from '../models/trip';
@@ -86,21 +88,28 @@ const workspaceStatusConfig = {
 };
 
 const formatRange = (startStr?: string, endStr?: string) => {
-  if (!startStr || !endStr) return 'Flexible';
+  if (!startStr || !endStr) return "Flexible";
   try {
-    const s = new Date(startStr);
-    const e = new Date(endStr);
-    const startOpt: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-    const endOpt: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-    if (s.getFullYear() !== new Date().getFullYear()) {
-      startOpt.year = '2-digit';
+    const start = new Date(startStr);
+    const end = new Date(endStr);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return "Flexible";
+
+    const startMonth = start.toLocaleDateString("en-US", { month: "short" });
+    const endMonth = end.toLocaleDateString("en-US", { month: "short" });
+    const year = start.getFullYear();
+
+    if (start.getFullYear() !== end.getFullYear()) {
+      return `${start.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} – ${end.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
     }
-    if (e.getFullYear() !== s.getFullYear()) {
-      endOpt.year = '2-digit';
+    if (startMonth !== endMonth) {
+      return `${startMonth} ${start.getDate()}–${endMonth} ${end.getDate()}, ${year}`;
     }
-    return `${s.toLocaleDateString('en-US', startOpt)} – ${e.toLocaleDateString('en-US', endOpt)}`;
+    if (start.getDate() !== end.getDate()) {
+      return `${startMonth} ${start.getDate()}–${end.getDate()}, ${year}`;
+    }
+    return start.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
   } catch {
-    return 'Flexible';
+    return "Flexible";
   }
 };
 
@@ -210,7 +219,8 @@ function TripWorkspacePresenter({
   navigate,
   showOnboardingToast,
 }: PresenterProps) {
-  const [showDayLabels, setShowDayLabels] = useState(true);
+  const [kanbanZoom, setKanbanZoom] = useState(1);
+  const [workspaceView, setWorkspaceView] = useState<WorkspaceView>("canvas");
 
   // Build initial state from loaded trip
   const initialState = useMemo<TripWorkspaceState>(() => {
@@ -246,7 +256,6 @@ function TripWorkspacePresenter({
     openAddDayModal,
     closeAddDayModal,
     toggleOverflow,
-    updateCardPosition,
     setActiveDay,
     createManualCard,
   } = useTripWorkspaceState(initialState);
@@ -306,36 +315,16 @@ function TripWorkspacePresenter({
     }
   }, [selectedCard, hookSetSelectedCard]);
 
-  // Initialize Spatial Viewport Physics hook
-  const {
-    zoom,
-    pan,
-    isDraggingCanvas,
-    draggingCardId,
-    handleZoom,
-    handleReset,
-    handleMouseDown,
-    handleTouchStart,
-    handleMouseMove,
-    handleTouchMove,
-    handleMouseUp,
-    handleCardMouseDown,
-    handleCardTouchStart,
-  } = useSpatialViewport({
-    cards,
-    onUpdateCardPosition: updateCardPosition,
-    isLinkingActive: linkingSession.isActive,
-    onCancelLinking: linkingSession.cancel,
-  });
+  const handleZoom = useCallback((direction: "in" | "out") => {
+    setKanbanZoom((current) => {
+      const next = direction === "in" ? current + 0.1 : current - 0.1;
+      return Math.min(1.4, Math.max(0.8, Number(next.toFixed(2))));
+    });
+  }, []);
+  const handleReset = useCallback(() => setKanbanZoom(1), []);
 
-  const canvasRef = useRef<HTMLDivElement>(null);
-  // Persist domain state to repository on every change (debounced and skipped during dragging to optimize performance)
+  // Persist domain state to repository on every change.
   useEffect(() => {
-    // Skip saving while a card is being dragged to prevent synchronous main-thread stalls
-    if (draggingCardId !== null) {
-      return;
-    }
-
     const handler = setTimeout(() => {
       localTripRepository.save({
         ...trip,
@@ -350,14 +339,53 @@ function TripWorkspacePresenter({
     return () => {
       clearTimeout(handler);
     };
-  }, [state.cards, activeConnections, items, days, dayLabels, trip, draggingCardId]);
+  }, [state.cards, activeConnections, items, days, dayLabels, trip]);
 
-  const filteredCards = activeDay
-    ? cards.filter(c => c.day === activeDay || c.day === 0)
-    : cards;
   const selectedCardSourceMemory = selectedCard
     ? resolveCardSourceMemory(selectedCard, items)
     : undefined;
+  const handleWorkspaceViewChange = useCallback((view: WorkspaceView) => {
+    setWorkspaceView(view);
+    if (view === "map" && !isMobile) {
+      setInboxOpen(false);
+    }
+  }, [isMobile, setInboxOpen]);
+
+  const handleCanvasCardSelect = useCallback((card: CanvasCard) => {
+    if (linkingSession.isActive) {
+      linkingSession.resolveTarget(card.id);
+      return;
+    }
+    setSelectedCard((current) => current?.id === card.id ? null : card);
+  }, [linkingSession, setSelectedCard]);
+
+  const handleShareTrip = useCallback(async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: trip.name, url });
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      alert("Trip link copied to clipboard.");
+    } catch {
+      alert("Could not copy the trip link. Copy it from the address bar.");
+    }
+  }, [trip.name]);
+
+  const handleExportTrip = useCallback(() => {
+    const blob = new Blob([JSON.stringify(trip, null, 2)], { type: "application/json" });
+    const objectUrl = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = objectUrl;
+    anchor.download = `${trip.id}.json`;
+    anchor.click();
+    URL.revokeObjectURL(objectUrl);
+  }, [trip]);
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
@@ -469,11 +497,11 @@ function TripWorkspacePresenter({
               {deriveTripTravelers(trip)}{" "}
               {deriveTripTravelers(trip) === 1 ? "traveler" : "travelers"}
             </span>
-            <Button variant="ghost" size="sm" className="h-auto gap-1 px-2.5 py-1.5 text-xs">
+            <Button variant="ghost" size="sm" className="h-auto gap-1 px-2.5 py-1.5 text-xs" onClick={handleShareTrip}>
               <Share2 className="size-3.5" />
               <span>Share</span>
             </Button>
-            <Button variant="ghost" size="sm" className="h-auto gap-1 px-2.5 py-1.5 text-xs">
+            <Button variant="ghost" size="sm" className="h-auto gap-1 px-2.5 py-1.5 text-xs" onClick={handleExportTrip}>
               <Download className="size-3.5" />
               <span>Export</span>
             </Button>
@@ -516,7 +544,10 @@ function TripWorkspacePresenter({
                   <Button
                     variant="ghost"
                     className="h-auto w-full justify-start gap-2.5 rounded-none px-3 py-2.5"
-                    onClick={() => toggleOverflow(false)}
+                    onClick={() => {
+                      void handleShareTrip();
+                      toggleOverflow(false);
+                    }}
                   >
                     <Share2 className="size-3.5" />
                     <span className="text-sm">Share</span>
@@ -524,7 +555,10 @@ function TripWorkspacePresenter({
                   <Button
                     variant="ghost"
                     className="h-auto w-full justify-start gap-2.5 rounded-none px-3 py-2.5"
-                    onClick={() => toggleOverflow(false)}
+                    onClick={() => {
+                      handleExportTrip();
+                      toggleOverflow(false);
+                    }}
                   >
                     <Download className="size-3.5" />
                     <span className="text-sm">Export</span>
@@ -592,6 +626,17 @@ function TripWorkspacePresenter({
             <Plus className="size-3" />
           </Button>
         </div>
+
+        {trip.dates && (
+          <div className="flex items-center gap-2 border-t border-border/60 px-4 py-2 text-[11px] text-muted-foreground md:hidden">
+            <Calendar className="size-3 shrink-0" />
+            <span className="truncate">{formatRange(trip.dates.start, trip.dates.end)}</span>
+            <span className="text-border">·</span>
+            <span className="shrink-0">{getDurationNights(trip.dates.start, trip.dates.end)}</span>
+            <span className="text-border">·</span>
+            <span className="truncate">{trip.destination}</span>
+          </div>
+        )}
       </header>
 
       {/* MAIN LAYOUT */}
@@ -629,46 +674,61 @@ function TripWorkspacePresenter({
         {/* CANVAS AREA */}
         <main className="flex-1 relative overflow-hidden">
 
-          {/* Canvas toolbar */}
-          <div className="absolute top-3 left-3 z-20 flex items-center gap-1 rounded-xl border border-border bg-card px-1 py-1 shadow-sm">
-            <ToolBtn icon={<ZoomIn size={14} />} onClick={() => handleZoom('in')} title="Zoom in" />
-            <span className="px-1.5 font-mono text-xs text-muted-foreground">{Math.round(zoom * 100)}%</span>
-            <ToolBtn icon={<ZoomOut size={14} />} onClick={() => handleZoom("out")} title="Zoom out" />
-            <div className="mx-0.5 h-4 w-px bg-border" />
-            <ToolBtn icon={<Maximize2 size={14} />} onClick={handleReset} title="Reset view" />
-            <ToolBtn
-              icon={<Grid3X3 size={14} />}
-              onClick={() => setShowDayLabels(s => !s)}
-              title="Toggle day labels"
-              active={showDayLabels}
-            />
-          </div>
+          {/* Workspace chrome: zoom (left) · view switcher (center) · stats (right) */}
+          <div className="absolute inset-x-3 top-3 z-[700] md:inset-x-0 md:px-3">
+            <div
+              className={cn(
+                "flex w-full items-center gap-2",
+                workspaceView === "canvas" ? "justify-between md:justify-start" : "justify-end",
+              )}
+            >
+              {workspaceView === "canvas" ? (
+                <div className="flex shrink-0 items-center gap-1 rounded-xl border border-border bg-card px-1 py-1 shadow-sm">
+                  <ToolBtn icon={<ZoomIn size={14} />} onClick={() => handleZoom("in")} title="Zoom in" />
+                  <span className="px-1 font-mono text-xs text-muted-foreground tabular-nums">
+                    {Math.round(kanbanZoom * 100)}%
+                  </span>
+                  <ToolBtn icon={<ZoomOut size={14} />} onClick={() => handleZoom("out")} title="Zoom out" />
+                  <div className="mx-0.5 hidden h-4 w-px bg-border sm:block" />
+                  <div className="hidden sm:contents">
+                    <ToolBtn icon={<Maximize2 size={14} />} onClick={handleReset} title="Reset view" />
+                  </div>
+                </div>
+              ) : (
+                <div className="hidden shrink-0 md:block md:w-0" aria-hidden />
+              )}
 
-          {/* Trip stats pill */}
-          <div className="absolute top-3 right-3 z-20 flex select-none items-center gap-1.5 rounded-xl border border-border bg-card px-2 py-1.5 shadow-sm md:gap-2.5 md:px-3 md:py-2">
-            {!isMobile && (
-              <>
-                <StatItem icon={<Calendar size={11} />} label={formatRange(trip.dates?.start, trip.dates?.end)} />
-                <div className="h-3 w-px bg-border" />
-              </>
-            )}
-            <StatItem icon={<MapPin size={11} />} label={trip.destination} />
-            {!isMobile && (
-              <>
-                {trip.dates && (
-                  <>
-                    <div className="h-3 w-px bg-border" />
-                    <StatItem icon={<Clock size={11} />} label={getDurationNights(trip.dates?.start, trip.dates?.end)} />
-                  </>
+              <div
+                className={cn(
+                  "shrink-0",
+                  workspaceView === "canvas"
+                    ? "md:flex md:min-w-0 md:flex-1 md:justify-center md:px-3"
+                    : "md:flex md:min-w-0 md:flex-1 md:justify-center",
                 )}
-                <div className="h-3 w-px bg-border" />
-                <span className="text-xs text-muted-foreground">
-                  Budget: <span className="font-semibold text-foreground">{deriveTripBudget(trip)}</span>
-                </span>
-              </>
-            )}
-            <div className="h-3 w-px bg-border" />
-            <span className="text-xs">🌤️ 8°C</span>
+              >
+                <WorkspaceViewSwitcher value={workspaceView} onValueChange={handleWorkspaceViewChange} />
+              </div>
+
+              {workspaceView !== "map" ? (
+                <div className="hidden max-w-[min(100%,28rem)] shrink-0 select-none items-center gap-1.5 overflow-hidden rounded-xl border border-border bg-card px-2 py-1.5 shadow-sm md:flex md:gap-2 md:px-2.5 md:py-2 lg:max-w-none lg:gap-2.5 lg:px-3">
+                  <StatItem icon={<Calendar size={11} />} label={formatRange(trip.dates?.start, trip.dates?.end)} />
+                  <div className="h-3 w-px shrink-0 bg-border" />
+                  <StatItem icon={<MapPin size={11} />} label={trip.destination} />
+                  {trip.dates && (
+                    <>
+                      <div className="h-3 w-px shrink-0 bg-border" />
+                      <StatItem icon={<Clock size={11} />} label={getDurationNights(trip.dates?.start, trip.dates?.end)} />
+                    </>
+                  )}
+                  <div className="hidden h-3 w-px shrink-0 bg-border lg:block" />
+                  <span className="hidden text-xs text-muted-foreground lg:inline">
+                    Budget: <span className="font-semibold text-foreground">{deriveTripBudget(trip)}</span>
+                  </span>
+                </div>
+              ) : (
+                <div className="hidden shrink-0 md:block md:w-0" aria-hidden />
+              )}
+            </div>
           </div>
 
           {/* Linking Mode Active Banner */}
@@ -689,147 +749,36 @@ function TripWorkspacePresenter({
           )}
 
           {/* AI prompt bar */}
-          <AiPromptBar onSendQuery={handleSendQuery} isThinking={isAiThinking} />
+          {workspaceView !== "map" && (
+            <AiPromptBar onSendQuery={handleSendQuery} isThinking={isAiThinking} dayCount={days.length} />
+          )}
 
           {/* THE CANVAS */}
-          <div
-            ref={canvasRef}
-            className="absolute inset-0 canvas-bg overflow-hidden"
-            style={{ cursor: isDraggingCanvas ? 'grabbing' : 'grab' }}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleMouseUp}
-            onTouchCancel={handleMouseUp}
-          >
-            <div
-              style={{
-                transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-                transformOrigin: '0 0',
-                position: 'relative',
-                width: '1200px',
-                height: '900px',
-              }}
-            >
-              {/* Connection SVG lines */}
-              <svg
-                className="connection-svg"
-                style={{ width: '1200px', height: '900px', zIndex: 0 }}
-              >
-                {activeConnections.map((conn, i) => {
-                  const fromCard = cards.find(c => c.id === conn.from);
-                  const toCard = cards.find(c => c.id === conn.to);
+          {workspaceView === "canvas" && (
+            <TripCanvasKanbanView
+              days={days}
+              cards={cards}
+              activeDay={activeDay}
+              selectedCard={selectedCard}
+              isLinkingActive={linkingSession.isActive}
+              linkingOriginId={linkingSession.originId}
+              zoom={kanbanZoom}
+              onActiveDayChange={setActiveDay}
+              onSelectCard={handleCanvasCardSelect}
+              onCreateCard={() => handleOpenCreateModal(900, 680)}
+              onOpenMap={() => handleWorkspaceViewChange("map")}
+            />
+          )}
 
-                  if (!fromCard || !toCard) return null;
-
-                  // Filter out connections for hidden cards if day filters are active
-                  const isFromHidden = activeDay !== null && fromCard.day !== activeDay && fromCard.day !== 0;
-                  const isToHidden = activeDay !== null && toCard.day !== activeDay && toCard.day !== 0;
-                  if (isFromHidden || isToHidden) return null;
-
-                  const fromCenter = getCardCenter(fromCard);
-                  const toCenter = getCardCenter(toCard);
-
-                  return (
-                    <g key={i}>
-                      <line
-                        x1={fromCenter.x} y1={fromCenter.y}
-                        x2={toCenter.x} y2={toCenter.y}
-                        className="ink-line text-stone-300"
-                        strokeWidth="1.5"
-                        strokeDasharray={conn.label === 'custom-link' ? '4,4' : '0'}
-                      />
-                      <circle cx={fromCenter.x} cy={fromCenter.y} r="3" fill="#d6cfc3" />
-                      <circle cx={toCenter.x} cy={toCenter.y} r="3" fill="#d6cfc3" />
-                    </g>
-                  );
-                })}
-              </svg>
-
-              {/* Day cluster labels */}
-              {showDayLabels && dayLabels.map(cfg => {
-                const group = days.find(d => d.day === cfg.day);
-                if (!group) return null;
-                const isActive = activeDay === cfg.day;
-                const isDimmed = activeDay !== null && !isActive;
-                return (
-                  <div
-                    key={cfg.day}
-                    className="absolute select-none transition-opacity duration-200"
-                    style={{
-                      left: cfg.x,
-                      top: cfg.y,
-                      opacity: isDimmed ? 0.3 : 1,
-                      zIndex: 0,
-                    }}
-                  >
-                    <div
-                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer transition-all hover:scale-105 active:scale-95"
-                      style={{
-                        backgroundColor: cfg.bg,
-                        color: cfg.color,
-                        border: `1.5px solid ${cfg.border}`,
-                      }}
-                      onClick={() => setActiveDay(d => d === cfg.day ? null : cfg.day)}
-                    >
-                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: cfg.color }} />
-                      {group.label}
-                    </div>
-                  </div>
-                );
-              })}
-
-              {/* CARDS */}
-              {filteredCards.map(card => {
-                const isNewlySpawned = card.id.startsWith('c_spawn_') || card.id.startsWith('c_ai_') || card.id.startsWith('c_manual_') || card.id === 'c15' || card.id === 'c16' || card.id === 'c17';
-                const isTargetOfLinking = linkingSession.isActive && linkingSession.originId !== card.id;
-
-                return (
-                  <div
-                    key={card.id}
-                    className={`transition-all duration-200 ${isNewlySpawned ? 'card-drop-in' : ''} ${
-                      isTargetOfLinking ? 'hover:ring-4 hover:ring-amber-500/40 hover:scale-[1.02] cursor-pointer' : ''
-                    }`}
-                    style={{
-                      opacity: activeDay !== null && card.day !== activeDay && card.day !== 0 ? 0.2 : 1,
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (linkingSession.isActive) {
-                        linkingSession.resolveTarget(card.id);
-                      } else {
-                        setSelectedCard(c => c?.id === card.id ? null : card);
-                      }
-                    }}
-                    onTouchStart={(e) => handleCardTouchStart(card.id, e)}
-                  >
-                    <CanvasCardRenderer
-                      card={card}
-                      onMouseDown={(e) => handleCardMouseDown(card.id, e)}
-                      isDragging={draggingCardId === card.id}
-                    />
-                  </div>
-                );
-              })}
-
-              {/* Add card button */}
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => handleOpenCreateModal(900, 680)}
-                className="group/button absolute h-auto gap-1.5 bg-transparent p-0 text-muted-foreground/40 hover:scale-105 hover:bg-transparent hover:text-muted-foreground active:scale-95"
-                style={{ left: 880, top: 640 }}
-              >
-                <div className="flex size-9 items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/30 transition-all group-hover/button:border-muted-foreground/50">
-                  <Plus size={16} />
-                </div>
-                <span className="text-xs">Add card</span>
-              </Button>
-            </div>
-          </div>
+          {workspaceView === "map" && (
+            <TripMapView
+              days={days}
+              cards={cards}
+              activeDay={activeDay}
+              selectedCard={selectedCard}
+              onSelectCard={(card) => setSelectedCard(card)}
+            />
+          )}
 
           {showOnboardingToast && <OnboardingToast />}
 
@@ -891,9 +840,9 @@ function ToolBtn({
 
 function StatItem({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <div className="flex items-center gap-1 text-muted-foreground">
-      {icon}
-      <span className="text-xs">{label}</span>
+    <div className="flex min-w-0 items-center gap-1 text-muted-foreground">
+      <span className="shrink-0">{icon}</span>
+      <span className="truncate text-xs">{label}</span>
     </div>
   );
 }
@@ -901,16 +850,19 @@ function StatItem({ icon, label }: { icon: React.ReactNode; label: string }) {
 interface AiPromptBarProps {
   onSendQuery: (query: string) => void;
   isThinking: boolean;
+  dayCount: number;
 }
 
-function AiPromptBar({ onSendQuery, isThinking }: AiPromptBarProps) {
+function AiPromptBar({ onSendQuery, isThinking, dayCount }: AiPromptBarProps) {
   const [value, setValue] = useState('');
   const [focused, setFocused] = useState(false);
+  const nextDay = dayCount + 1;
   const suggestions = [
-    'Plan Day 5',
+    `Plan Day ${nextDay}`,
     'Suggest a ryokan in Arashiyama',
     'Find a restaurant near Gion',
   ];
+  const placeholderExample = `Plan Day ${nextDay}`;
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -924,7 +876,7 @@ function AiPromptBar({ onSendQuery, isThinking }: AiPromptBarProps) {
   };
 
   return (
-    <div className="absolute bottom-6 left-1/2 z-20 w-full max-w-lg -translate-x-1/2 px-4 select-none md:bottom-14">
+    <div className="absolute bottom-6 left-1/2 z-20 w-full max-w-lg -translate-x-1/2 select-none px-4 md:bottom-14">
       <form
         onSubmit={handleSubmit}
         className={cn(
@@ -943,7 +895,7 @@ function AiPromptBar({ onSendQuery, isThinking }: AiPromptBarProps) {
             placeholder={
               isThinking
                 ? "AI is thinking..."
-                : 'Ask AI: "Plan Day 5" or "Suggest a ryokan in Arashiyama"'
+                : `Ask AI: "${placeholderExample}" or "Suggest a ryokan in Arashiyama"`
             }
             value={value}
             onChange={(e) => setValue(e.target.value)}
