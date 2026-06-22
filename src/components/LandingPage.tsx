@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -7,26 +8,33 @@ import {
   Camera,
   Check,
   CircleCheck,
+  GitBranch,
   Globe,
   Hotel,
   Inbox,
   Layers,
-  Link2,
-  Lock,
+  Menu,
   Plane,
   Play,
-  Share2,
   Sparkles,
   Star,
   Users,
-  X,
   Wallet,
+  X,
 } from "lucide-react";
+import LandingWorkspacePreview, { FeatureKanbanPreview } from "./LandingWorkspacePreview";
 import PricingSection from "./PricingSection";
 import { WayfarerLogo } from "./WayfarerLogo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { DEMO_TRIP_ID } from "../models/trip";
 
@@ -80,10 +88,10 @@ const inboxBullets = [
 ] as const;
 
 const tripFilters = [
-  { label: "All", icon: Globe, active: true },
-  { label: "Upcoming", icon: Plane, active: false },
-  { label: "Planning", icon: CalendarClock, active: false },
-  { label: "Completed", icon: CircleCheck, active: false },
+  { label: "All", icon: Globe, status: null },
+  { label: "Upcoming", icon: Plane, status: "Upcoming" },
+  { label: "Planning", icon: CalendarClock, status: "Planning" },
+  { label: "Completed", icon: CircleCheck, status: "Completed" },
 ] as const;
 
 const previewTrips = [
@@ -120,7 +128,7 @@ const previewTrips = [
     budget: "Budget: $5,100",
     status: "Upcoming",
     statusColor: "text-emerald-400",
-    image: "/images/arashiyama.jpg",
+    image: "/images/iceland-ring-road.jpg",
     tags: ["Blue Lagoon", "Goðafoss", "Vík"],
   },
 ] as const;
@@ -182,48 +190,15 @@ const footerLinks = {
   Legal: ["Privacy", "Terms"],
 } as const;
 
-const heroCanvasCards = [
-  {
-    label: "JAL JL69 · SFO→KIX",
-    sub: "Dec 14 · $743",
-    icon: "✈️",
-    tag: "Day 1",
-    tagBg: "bg-amber-100 text-primary",
-    image: null as string | null,
-  },
-  {
-    label: "Fushimi Inari",
-    sub: "Go at 5am — Yuki",
-    icon: "⛩️",
-    tag: "Day 2",
-    tagBg: "bg-orange-100 text-orange-700",
-    image: "/images/fushimi-inari.jpg",
-  },
-  {
-    label: "Hiiragiya Ryokan",
-    sub: "¥45,000/night · 4.9★",
-    icon: "🏯",
-    tag: "Stay",
-    tagBg: "bg-rose-100 text-rose-700",
-    image: "/images/ryokan.jpg",
-  },
-  {
-    label: '"Go at 5am!!"',
-    sub: "Yuki's tip 🌅",
-    icon: "",
-    tag: "",
-    tagBg: "",
-    image: null,
-    sticky: true,
-  },
-  {
-    label: "Arashiyama Bamboo",
-    sub: "Day 3 · Morning walk",
-    icon: "🌿",
-    tag: "Day 3",
-    tagBg: "bg-emerald-100 text-emerald-800",
-    image: "/images/arashiyama.jpg",
-  },
+const footerLinkHrefs: Partial<Record<string, string>> = {
+  Features: "#features",
+  Pricing: "#pricing",
+  "Spatial canvas": "#features",
+};
+
+const socialLinks = [
+  { href: "https://x.com", label: "X (Twitter)", icon: X },
+  { href: "https://github.com", label: "GitHub", icon: GitBranch },
 ] as const;
 
 export default function LandingPage() {
@@ -239,7 +214,7 @@ export default function LandingPage() {
       <SpatialCanvasFeature onEnterDemo={onEnterDemo} />
       <TripListFeature onEnterDemo={onEnterDemo} />
       <AiInboxFeature onEnterDemo={onEnterDemo} />
-      <PricingSection />
+      <PricingSection onCtaClick={onEnterDemo} />
       <TestimonialsSection />
       <CtaSection onEnterDemo={onEnterDemo} />
       <LandingFooter />
@@ -248,25 +223,81 @@ export default function LandingPage() {
 }
 
 function LandingNav({ onEnterDemo }: { onEnterDemo: () => void }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
-    <nav className="fixed top-0 right-0 left-0 z-50 flex h-[68px] items-center justify-between border-b border-border bg-background/92 px-4 backdrop-blur-md md:px-12">
-      <WayfarerLogo />
-      <div className="hidden items-center gap-7 text-sm font-medium text-muted-foreground md:flex">
-        {navLinks.map((link) => (
-          <a key={link.label} href={link.href} className="transition-colors hover:text-foreground">
-            {link.label}
-          </a>
-        ))}
-      </div>
-      <div className="flex items-center gap-2 md:gap-3">
-        <Button variant="ghost" className="hidden md:inline-flex">
-          Sign in
-        </Button>
-        <Button onClick={onEnterDemo} size="sm" className="md:h-9 md:px-4 md:py-2 md:text-sm">
-          Start planning
-        </Button>
-      </div>
-    </nav>
+    <>
+      <nav className="fixed top-0 right-0 left-0 z-50 flex h-[68px] items-center justify-between border-b border-border bg-background/92 px-4 backdrop-blur-md md:px-12">
+        <WayfarerLogo />
+        <div className="hidden items-center gap-7 text-sm font-medium text-muted-foreground md:flex">
+          {navLinks.map((link) => (
+            <a key={link.label} href={link.href} className="transition-colors hover:text-foreground">
+              {link.label}
+            </a>
+          ))}
+        </div>
+        <div className="flex items-center gap-2 md:gap-3">
+          <Button
+            type="button"
+            variant="ghost"
+            className="hidden md:inline-flex"
+            disabled
+            title="Sign in coming soon"
+          >
+            Sign in
+          </Button>
+          <Button onClick={onEnterDemo} size="sm" className="md:h-9 md:px-4 md:py-2 md:text-sm">
+            <span className="md:hidden">Start</span>
+            <span className="hidden md:inline">Start planning</span>
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="size-11 rounded-lg md:hidden"
+            aria-label="Open menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen(true)}
+          >
+            <Menu className="size-5" />
+          </Button>
+        </div>
+      </nav>
+
+      <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+        <SheetContent side="right" className="w-[min(100vw,20rem)]">
+          <SheetHeader>
+            <SheetTitle>Menu</SheetTitle>
+          </SheetHeader>
+          <nav className="flex flex-col gap-1 px-4">
+            {navLinks.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                className="rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+                onClick={() => setMenuOpen(false)}
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+          <div className="mt-4 flex flex-col gap-2 px-4">
+            <Button type="button" variant="outline" disabled title="Sign in coming soon">
+              Sign in
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setMenuOpen(false);
+                onEnterDemo();
+              }}
+            >
+              Start planning
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }
 
@@ -305,11 +336,12 @@ function HeroSection({ onEnterDemo }: { onEnterDemo: () => void }) {
             ))}
           </div>
           <p className="text-[13px] font-medium text-muted-foreground">
-            Loved by 12,000+ travelers planning smarter
+            <span className="md:hidden">Loved by 12,000+ travelers</span>
+            <span className="hidden md:inline">Loved by 12,000+ travelers planning smarter</span>
           </p>
         </div>
 
-        <ProductWindow />
+        <LandingWorkspacePreview />
       </div>
     </section>
   );
@@ -318,98 +350,37 @@ function HeroSection({ onEnterDemo }: { onEnterDemo: () => void }) {
 function PromptCta({ onEnterDemo }: { onEnterDemo: () => void }) {
   return (
     <div className="w-full max-w-[660px]">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:rounded-full md:border md:border-border md:bg-background md:p-2 md:pl-4 md:shadow-[0_8px_24px_rgba(12,10,9,0.08)]">
-        <div className="flex flex-1 items-center gap-3 rounded-full border border-border bg-background px-4 py-3 md:border-0 md:bg-transparent md:px-0 md:py-0">
-          <div className="flex size-[30px] shrink-0 items-center justify-center rounded-full bg-primary">
+      <div className="flex flex-col gap-2.5 rounded-2xl border border-border bg-background p-3 shadow-[0_4px_16px_rgba(12,10,9,0.05)] md:flex-row md:items-center md:gap-3 md:rounded-full md:p-2 md:pl-4 md:shadow-[0_8px_24px_rgba(12,10,9,0.08)]">
+        <div className="flex flex-1 items-center gap-2 md:gap-3 md:px-0 md:py-0">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary md:size-[30px]">
             <Sparkles className="size-4 text-primary-foreground" />
           </div>
-          <p className="text-left text-sm text-muted-foreground md:text-[15px]">
-            Describe your dream trip… &ldquo;7 relaxed days in Kyoto for two&rdquo;
-          </p>
+          <Input
+            readOnly
+            aria-readonly="true"
+            aria-label="Describe your dream trip"
+            placeholder='Describe your dream trip… "7 relaxed days in Kyoto for two"'
+            className="h-auto cursor-pointer border-0 bg-transparent px-0 text-[13px] shadow-none focus-visible:ring-0 md:text-[15px]"
+            onClick={onEnterDemo}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onEnterDemo();
+              }
+            }}
+          />
         </div>
-        <Button onClick={onEnterDemo} className="h-11 w-full rounded-full md:w-auto md:shrink-0">
+        <Button
+          onClick={onEnterDemo}
+          className="h-10 w-full rounded-xl md:h-11 md:w-auto md:shrink-0 md:rounded-full"
+        >
           Start planning
           <ArrowUp className="size-4" />
         </Button>
       </div>
-    </div>
-  );
-}
-
-function ProductWindow() {
-  return (
-    <div className="mt-2 w-full max-w-[1180px] overflow-hidden rounded-2xl border border-border bg-background shadow-[0_30px_60px_rgba(12,10,9,0.15)]">
-      <div className="flex h-11 items-center gap-2 border-b border-border px-4">
-        <div className="flex gap-1.5">
-          <div className="size-2.5 rounded-full bg-red-400" />
-          <div className="size-2.5 rounded-full bg-amber-400" />
-          <div className="size-2.5 rounded-full bg-emerald-400" />
-        </div>
-        <div className="flex h-[26px] items-center gap-1.5 rounded-full bg-muted px-3">
-          <Lock className="size-2.5 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground">wayfarer.app/trips/kyoto</span>
-        </div>
-        <div className="flex-1" />
-        <Share2 className="size-4 text-muted-foreground" />
-      </div>
-
-      <div className="canvas-bg relative min-h-[320px] p-4 md:h-[600px] md:p-0">
-        <div className="flex flex-col gap-3 md:hidden">
-          <DayLabel label="Day 1 — Arrival" color="bg-amber-500" />
-          {heroCanvasCards.slice(0, 2).map((card) => (
-            <CanvasCard key={card.label} card={card} className="w-full" />
-          ))}
-          <DayLabel label="Day 2 — Higashiyama" color="bg-primary" />
-          {heroCanvasCards.slice(2, 4).map((card) => (
-            <CanvasCard key={card.label} card={card} className="w-full" />
-          ))}
-          <DayLabel label="Day 3 — Arashiyama" color="bg-emerald-500" />
-          <CanvasCard card={heroCanvasCards[4]} className="w-full" />
-        </div>
-
-        <div className="relative hidden h-full md:block">
-          <DayLabel
-            label="Day 1 — Arrival"
-            color="bg-amber-500"
-            className="absolute top-6 left-10"
-          />
-          <DayLabel
-            label="Day 2 — Higashiyama"
-            color="bg-primary"
-            className="absolute top-6 left-[352px]"
-          />
-          <DayLabel
-            label="Day 3 — Arashiyama"
-            color="bg-emerald-500"
-            className="absolute top-6 left-[628px]"
-          />
-          <div className="absolute top-[58px] left-10">
-            <CanvasCard card={heroCanvasCards[0]} />
-          </div>
-          <div className="absolute top-[250px] left-10">
-            <StickyNote text='"Laundry is cheap in Kyoto — bring half what you think 🧳"' />
-          </div>
-          <div className="absolute top-[58px] left-[352px]">
-            <CanvasCard card={heroCanvasCards[1]} />
-          </div>
-          <div className="absolute top-[316px] left-[352px]">
-            <MiniArticleCard label="Nishiki Market" image="/images/nishiki-market.jpg" />
-          </div>
-          <div className="absolute top-[58px] left-[628px]">
-            <CanvasCard card={heroCanvasCards[2]} />
-          </div>
-          <div className="absolute top-[320px] left-[628px]">
-            <StickyNote text='"Go at 5am!!" — Yuki 🌅' />
-          </div>
-          <div className="absolute top-[58px] left-[908px]">
-            <CanvasCard card={heroCanvasCards[4]} />
-          </div>
-          <svg className="ink-line pointer-events-none absolute inset-0 h-full w-full">
-            <line x1="18%" y1="22%" x2="38%" y2="18%" opacity="0.7" />
-            <line x1="16%" y1="58%" x2="36%" y2="54%" opacity="0.7" />
-          </svg>
-        </div>
-      </div>
+      <p className="mt-2 text-center text-xs text-muted-foreground md:text-left">
+        Try the demo — full trip planning opens in one click.
+      </p>
     </div>
   );
 }
@@ -439,7 +410,7 @@ function TrustStrip() {
 
 function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="bg-muted px-4 py-16 md:px-12 md:py-24">
+    <section id="how-it-works" className="scroll-mt-[68px] bg-muted px-4 py-16 md:px-12 md:py-24">
       <div className="mx-auto max-w-7xl">
         <div className="mx-auto mb-12 max-w-3xl text-center md:mb-14">
           <p className="mb-3 text-xs font-semibold tracking-widest text-primary uppercase">
@@ -461,7 +432,9 @@ function HowItWorksSection() {
                   <div className="flex size-[52px] items-center justify-center rounded-[14px] border border-primary/15 bg-primary/5 text-primary">
                     <step.icon size={22} />
                   </div>
-                  <span className="font-serif text-3xl font-semibold text-border">{step.num}</span>
+                  <span className="font-serif text-3xl font-semibold text-muted-foreground/30">
+                    {step.num}
+                  </span>
                 </div>
                 <h3 className="text-xl font-semibold">{step.title}</h3>
                 <p className="text-sm leading-relaxed text-muted-foreground">{step.desc}</p>
@@ -476,7 +449,7 @@ function HowItWorksSection() {
 
 function SpatialCanvasFeature({ onEnterDemo }: { onEnterDemo: () => void }) {
   return (
-    <section id="features" className="px-4 py-16 md:px-12 md:py-24">
+    <section id="features" className="scroll-mt-[68px] px-4 py-16 md:px-12 md:py-24">
       <div className="mx-auto flex max-w-7xl flex-col items-center gap-10 lg:flex-row lg:gap-[72px]">
         <div className="flex flex-col gap-5 lg:flex-1">
           <p className="text-xs font-semibold tracking-widest text-primary uppercase">
@@ -506,70 +479,8 @@ function SpatialCanvasFeature({ onEnterDemo }: { onEnterDemo: () => void }) {
           </Button>
         </div>
 
-        <div className="canvas-bg relative h-[360px] w-full overflow-hidden rounded-[20px] border border-border shadow-lg md:h-[440px] lg:w-[600px] lg:shrink-0">
-          <div className="flex flex-col gap-3 p-4 md:hidden">
-            <DayLabel label="Day 2 — Higashiyama" color="bg-primary" />
-            <CanvasCard
-              card={{
-                label: "Fushimi Inari",
-                sub: "Go at 5am — Yuki",
-                icon: "⛩️",
-                tag: "Day 2",
-                tagBg: "bg-orange-100 text-orange-700",
-                image: "/images/fushimi-inari.jpg",
-              }}
-              className="w-full"
-            />
-            <StickyNote text='"Go at 5am!!" — Yuki 🌅' className="w-full" />
-            <CanvasCard
-              card={{
-                label: "Hiiragiya Ryokan",
-                sub: "¥45,000/night",
-                icon: "🏯",
-                tag: "Stay",
-                tagBg: "bg-rose-100 text-rose-700",
-                image: "/images/ryokan.jpg",
-              }}
-              className="w-full"
-            />
-          </div>
-          <div className="relative hidden h-full md:block">
-            <DayLabel
-              label="Day 2 — Higashiyama"
-              color="bg-primary"
-              className="absolute top-6 left-7"
-            />
-            <div className="absolute top-[58px] left-7">
-              <CanvasCard
-                card={{
-                  label: "Fushimi Inari",
-                  sub: "Go at 5am — Yuki",
-                  icon: "⛩️",
-                  tag: "Day 2",
-                  tagBg: "bg-orange-100 text-orange-700",
-                  image: "/images/fushimi-inari.jpg",
-                }}
-              />
-            </div>
-            <div className="absolute top-[322px] left-10">
-              <StickyNote text='"Go at 5am!!" — Yuki 🌅' />
-            </div>
-            <div className="absolute top-24 left-[300px]">
-              <CanvasCard
-                card={{
-                  label: "Hiiragiya Ryokan",
-                  sub: "¥45,000/night",
-                  icon: "🏯",
-                  tag: "Stay",
-                  tagBg: "bg-rose-100 text-rose-700",
-                  image: "/images/ryokan.jpg",
-                }}
-              />
-            </div>
-            <svg className="ink-line pointer-events-none absolute inset-0 h-full w-full">
-              <line x1="28%" y1="42%" x2="52%" y2="38%" opacity="0.7" />
-            </svg>
-          </div>
+        <div className="h-[360px] w-full rounded-[20px] border border-border shadow-lg md:h-[440px] lg:w-[600px] lg:shrink-0">
+          <FeatureKanbanPreview />
         </div>
       </div>
     </section>
@@ -577,6 +488,11 @@ function SpatialCanvasFeature({ onEnterDemo }: { onEnterDemo: () => void }) {
 }
 
 function TripListFeature({ onEnterDemo }: { onEnterDemo: () => void }) {
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const filteredTrips = previewTrips.filter(
+    (trip) => activeFilter === null || trip.status === activeFilter,
+  );
+
   return (
     <section className="bg-stone-950 px-4 py-16 text-stone-50 md:px-12 md:py-24">
       <div className="mx-auto max-w-7xl">
@@ -589,20 +505,21 @@ function TripListFeature({ onEnterDemo }: { onEnterDemo: () => void }) {
           </h2>
           <p className="text-[15px] text-stone-400 md:text-[17px]">
             Past, present, and someday — every trip lives in one quiet dashboard. Filter by status,
-            search by feeling, or just start a new one with a sentence.
+            or just start a new one with a sentence.
           </p>
         </div>
 
-        <div className="mb-10 grid grid-cols-2 gap-2 md:flex md:flex-wrap md:justify-center md:gap-2">
+        <div className="mb-10 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2 md:flex md:flex-wrap md:justify-center">
           {tripFilters.map((filter) => (
             <Button
               key={filter.label}
               type="button"
               variant="outline"
               size="sm"
+              onClick={() => setActiveFilter(filter.status)}
               className={cn(
-                "h-auto justify-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-medium",
-                filter.active
+                "h-auto min-w-[7rem] justify-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-medium",
+                activeFilter === filter.status
                   ? "border-white/15 bg-white/10 text-stone-50 hover:bg-white/10 hover:text-stone-50"
                   : "border-white/5 bg-white/5 text-stone-400 hover:bg-white/10 hover:text-stone-50",
               )}
@@ -613,11 +530,17 @@ function TripListFeature({ onEnterDemo }: { onEnterDemo: () => void }) {
           ))}
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          {previewTrips.map((trip) => (
-            <PreviewTripCard key={trip.title} trip={trip} onOpen={onEnterDemo} />
-          ))}
-        </div>
+        {filteredTrips.length === 0 ? (
+          <p className="text-center text-sm text-stone-400">No trips in this view yet.</p>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-3 md:gap-6">
+            {filteredTrips.map((trip, index) => (
+              <div key={trip.title} className={cn(index === 2 && "hidden md:block")}>
+                <PreviewTripCard trip={trip} onOpen={onEnterDemo} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -661,7 +584,7 @@ function AiInboxFeature({ onEnterDemo }: { onEnterDemo: () => void }) {
 
 function TestimonialsSection() {
   return (
-    <section id="stories" className="px-4 py-16 md:px-12 md:py-24">
+    <section id="stories" className="scroll-mt-[68px] px-4 py-16 md:px-12 md:py-24">
       <div className="mx-auto max-w-7xl">
         <div className="mx-auto mb-12 max-w-3xl text-center">
           <p className="mb-3 text-xs font-semibold tracking-widest text-primary uppercase">
@@ -748,23 +671,37 @@ function LandingFooter() {
   return (
     <footer className="border-t border-white/10 bg-stone-900 px-4 py-12 text-stone-400 md:px-12">
       <div className="mx-auto flex max-w-7xl flex-col gap-9">
-        <div className="flex flex-col gap-10 lg:flex-row lg:justify-between">
-          <div className="max-w-xs space-y-3.5">
+        <div className="flex flex-col gap-10 lg:flex-row lg:justify-between lg:gap-12">
+          <div className="shrink-0 space-y-3.5 lg:max-w-sm">
             <WayfarerLogo className="[&_span]:text-stone-50" />
             <p className="text-sm leading-relaxed">
               The AI-native workspace for trips you can see. Capture anything, organize
               automatically, plan spatially.
             </p>
           </div>
-          <div className="grid gap-8 sm:grid-cols-3">
+          <div className="grid min-w-0 flex-1 gap-8 sm:grid-cols-3 sm:gap-x-10">
             {Object.entries(footerLinks).map(([heading, links]) => (
-              <div key={heading} className="flex flex-col gap-3">
+              <div key={heading} className="flex min-w-[8rem] flex-col gap-3">
                 <p className="text-[13px] font-semibold text-stone-50">{heading}</p>
-                {links.map((link) => (
-                  <a key={link} href="#" className="text-sm transition-colors hover:text-stone-50">
-                    {link}
-                  </a>
-                ))}
+                {links.map((link) => {
+                  const href = footerLinkHrefs[link];
+                  if (href) {
+                    return (
+                      <a
+                        key={link}
+                        href={href}
+                        className="text-sm transition-colors hover:text-stone-50"
+                      >
+                        {link}
+                      </a>
+                    );
+                  }
+                  return (
+                    <span key={link} className="text-sm text-stone-500">
+                      {link}
+                    </span>
+                  );
+                })}
               </div>
             ))}
           </div>
@@ -773,92 +710,22 @@ function LandingFooter() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-[13px]">© 2026 Wayfarer. Made for people who love the going.</p>
           <div className="flex gap-4">
-            <X className="size-[18px] cursor-pointer transition-colors hover:text-stone-50" aria-label="X" />
-            <Share2 className="size-[18px] cursor-pointer transition-colors hover:text-stone-50" aria-label="Share" />
-            <Link2 className="size-[18px] cursor-pointer transition-colors hover:text-stone-50" aria-label="GitHub" />
+            {socialLinks.map(({ href, label, icon: Icon }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                className="text-stone-400 transition-colors hover:text-stone-50"
+              >
+                <Icon className="size-[18px]" />
+              </a>
+            ))}
           </div>
         </div>
       </div>
     </footer>
-  );
-}
-
-function DayLabel({
-  label,
-  color,
-  className,
-}: {
-  label: string;
-  color: string;
-  className?: string;
-}) {
-  return (
-    <div className={cn("flex items-center gap-2", className)}>
-      <span className={cn("size-2 rounded-full", color)} />
-      <span className="text-xs font-semibold text-foreground">{label}</span>
-    </div>
-  );
-}
-
-type CanvasCardData = {
-  label: string;
-  sub: string;
-  icon: string;
-  tag: string;
-  tagBg: string;
-  image: string | null;
-  sticky?: boolean;
-};
-
-function CanvasCard({ card, className }: { card: CanvasCardData; className?: string }) {
-  if (card.sticky) {
-    return <StickyNote text={card.label} className={className} />;
-  }
-
-  return (
-    <div
-      className={cn(
-        "w-[180px] rounded-lg bg-card p-2.5 polaroid-shadow",
-        className,
-      )}
-    >
-      {card.image && (
-        <div className="mb-2 h-20 w-full overflow-hidden rounded bg-border">
-          <img src={card.image} alt={card.label} className="h-full w-full object-cover" />
-        </div>
-      )}
-      <div className="flex items-start gap-1.5">
-        {card.icon && <span className="text-sm">{card.icon}</span>}
-        <div className="min-w-0">
-          <p className="truncate text-xs font-semibold">{card.label}</p>
-          <p className="text-xs leading-tight text-muted-foreground">{card.sub}</p>
-        </div>
-      </div>
-      {card.tag && (
-        <span className={cn("mt-2 inline-block rounded-full px-2 py-0.5 text-xs", card.tagBg)}>
-          {card.tag}
-        </span>
-      )}
-    </div>
-  );
-}
-
-function StickyNote({ text, className }: { text: string; className?: string }) {
-  return (
-    <div className={cn("sticky-shadow w-[160px] rounded-lg bg-amber-100 px-2.5 py-2", className)}>
-      <p className="text-xs leading-relaxed text-foreground">{text}</p>
-    </div>
-  );
-}
-
-function MiniArticleCard({ label, image }: { label: string; image: string }) {
-  return (
-    <div className="w-[180px] rounded-lg bg-card p-2 polaroid-shadow">
-      <div className="mb-1.5 h-16 w-full overflow-hidden rounded bg-border">
-        <img src={image} alt={label} className="h-full w-full object-cover" />
-      </div>
-      <p className="text-xs font-semibold">{label}</p>
-    </div>
   );
 }
 
