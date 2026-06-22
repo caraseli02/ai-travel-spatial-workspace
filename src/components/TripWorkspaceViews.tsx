@@ -261,12 +261,16 @@ export function TripMapView({
   activeDay,
   selectedCard,
   onSelectCard,
+  showRoutePanel = true,
+  interactive = true,
 }: {
   days: DayGroup[];
   cards: CanvasCard[];
   activeDay: number | null;
   selectedCard: CanvasCard | null;
   onSelectCard: (card: CanvasCard) => void;
+  showRoutePanel?: boolean;
+  interactive?: boolean;
 }) {
   const mappedCards = useMemo(() => getMappedCards(cards), [cards]);
   const isOverview = activeDay === null;
@@ -286,11 +290,21 @@ export function TripMapView({
   const visibleRoute = routePositions.length > 1 ? routePositions : mappedCards.map(({ position }) => position);
 
   return (
-    <div className="absolute inset-0 overflow-hidden bg-muted">
+    <div
+      className={cn(
+        "absolute inset-0 overflow-hidden bg-muted",
+        !interactive && "pointer-events-none",
+      )}
+    >
       <MapContainer
         center={[35.006, 135.76]}
         zoom={13}
-        scrollWheelZoom
+        scrollWheelZoom={interactive}
+        dragging={interactive}
+        doubleClickZoom={interactive}
+        touchZoom={interactive}
+        boxZoom={interactive}
+        keyboard={interactive}
         className="h-full w-full wayfarer-osm-map"
         zoomControl={false}
       >
@@ -305,9 +319,9 @@ export function TripMapView({
         {routeDay !== null && routePositions.length > 1 && (
           <Polyline positions={routePositions} pathOptions={{ color: "#2563eb", weight: 4, opacity: 0.72 }} />
         )}
-        <MapControlButtons />
+        {interactive && <MapControlButtons />}
         {mappedCards.map(({ card, position }) => {
-          const isSelected = selectedCard?.id === card.id;
+          const isSelected = interactive && selectedCard?.id === card.id;
           const isDimmed = activeDay !== null && card.day !== activeDay && card.day !== 0;
           const routeIndex = routeCards.findIndex((routeCard) => routeCard.id === card.id);
           const sequence = routeIndex >= 0 ? routeIndex + 1 : undefined;
@@ -317,28 +331,33 @@ export function TripMapView({
               key={card.id}
               position={markerPosition}
               icon={createRouteStopMarkerIcon(card, sequence, isSelected, isDimmed, isOverview)}
-              eventHandlers={{ click: () => onSelectCard(card) }}
+              interactive={interactive}
+              eventHandlers={interactive ? { click: () => onSelectCard(card) } : undefined}
             >
-              <Popup>
-                <div className="min-w-40">
-                  <p className="font-semibold">{card.title}</p>
-                  {card.subtitle && <p className="mt-1 text-xs text-neutral-600">{card.subtitle}</p>}
-                </div>
-              </Popup>
+              {interactive && (
+                <Popup>
+                  <div className="min-w-40">
+                    <p className="font-semibold">{card.title}</p>
+                    {card.subtitle && <p className="mt-1 text-xs text-neutral-600">{card.subtitle}</p>}
+                  </div>
+                </Popup>
+              )}
             </Marker>
           );
         })}
       </MapContainer>
 
-      <RoutePanelShell>
-        <RoutePanel
-          activeDay={activeDay}
-          day={routeDay === null ? undefined : days.find((item) => item.day === routeDay)}
-          cards={routeCards}
-          onSelectCard={onSelectCard}
-          selectedCard={selectedCard}
-        />
-      </RoutePanelShell>
+      {showRoutePanel && (
+        <RoutePanelShell>
+          <RoutePanel
+            activeDay={activeDay}
+            day={routeDay === null ? undefined : days.find((item) => item.day === routeDay)}
+            cards={routeCards}
+            onSelectCard={onSelectCard}
+            selectedCard={selectedCard}
+          />
+        </RoutePanelShell>
+      )}
     </div>
   );
 }

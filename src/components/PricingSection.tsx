@@ -54,9 +54,9 @@ const plans = [
   },
 ] as const;
 
-export default function PricingSection() {
+export default function PricingSection({ onCtaClick }: { onCtaClick?: () => void }) {
   return (
-    <section id="pricing" className="bg-muted px-4 py-16 md:px-12 md:py-24">
+    <section id="pricing" className="scroll-mt-[68px] bg-muted px-4 py-16 md:px-12 md:py-24">
       <div className="mx-auto max-w-7xl">
         <div className="mb-12 text-center md:mb-14">
           <p className="mb-3 text-xs font-semibold tracking-widest text-primary uppercase">
@@ -75,7 +75,7 @@ export default function PricingSection() {
             <div key={plan.name} className="relative">
               <Card
                 className={cn(
-                  "h-full gap-5 rounded-[18px] py-8",
+                  "flex h-full flex-col gap-5 rounded-[18px] py-8",
                   plan.highlighted && "border-2 border-primary shadow-[0_18px_40px_rgba(234,88,12,0.15)]",
                 )}
               >
@@ -108,10 +108,12 @@ export default function PricingSection() {
                   </ul>
                 </CardContent>
 
-                <CardFooter className="border-t-0 bg-transparent px-8">
+                <CardFooter className="mt-auto border-t-0 bg-transparent px-8">
                   <Button
+                    type="button"
                     variant={plan.highlighted ? "default" : "outline"}
                     className="w-full"
+                    onClick={onCtaClick}
                   >
                     {plan.cta}
                   </Button>
