@@ -357,6 +357,7 @@ function PromptCta({ onEnterDemo }: { onEnterDemo: () => void }) {
           </div>
           <Input
             readOnly
+            role="button"
             aria-readonly="true"
             aria-label="Describe your dream trip"
             placeholder='Describe your dream trip… "7 relaxed days in Kyoto for two"'

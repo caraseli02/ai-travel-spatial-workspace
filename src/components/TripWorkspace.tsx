@@ -258,7 +258,7 @@ function TripWorkspacePresenter({
     toggleOverflow,
     setActiveDay,
     createManualCard,
-  } = useTripWorkspaceState(initialState);
+  } = useTripWorkspaceState(initialState, trip);
 
   // Extract variables for easier mapping back to existing JSX naming
   const {

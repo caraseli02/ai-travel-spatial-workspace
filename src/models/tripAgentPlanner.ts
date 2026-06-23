@@ -97,6 +97,16 @@ export function planWithMockAgent(
     }
   }
 
+  const demoRestaurantDraft = buildDemoRestaurantDraft(context, query);
+  if (demoRestaurantDraft) {
+    return demoRestaurantDraft;
+  }
+
+  const demoRyokanDraft = buildDemoRyokanDraft(context, query);
+  if (demoRyokanDraft) {
+    return demoRyokanDraft;
+  }
+
   const matchingCard = context.canvasCards.find((card) =>
     hasSharedSearchTerm(query, `${card.title} ${card.subtitle ?? ''}`),
   );
@@ -150,6 +160,115 @@ export function planWithMockAgent(
     type: 'reply',
     message: `I can help plan ${context.trip.name}.`,
     citations: [],
+  };
+}
+
+function buildDemoRyokanDraft(
+  context: TripAgentContext,
+  query: string,
+): AgentPlannerOutcome | undefined {
+  const lower = query.toLowerCase();
+  if (
+    !context.trip.destination.toLowerCase().includes('kyoto') ||
+    !lower.includes('arashiyama') ||
+    !(lower.includes('ryokan') || lower.includes('stay') || lower.includes('hotel'))
+  ) {
+    return undefined;
+  }
+
+  const ryokanCard = context.canvasCards.find((card) =>
+    card.type === 'hotel' || `${card.title} ${card.subtitle ?? ''}`.toLowerCase().includes('ryokan'),
+  );
+  const arashiyamaCard = context.canvasCards.find((card) =>
+    `${card.title} ${card.subtitle ?? ''}`.toLowerCase().includes('arashiyama'),
+  );
+  const citations: AgentPlannerCitation[] = [
+    ryokanCard
+      ? {
+          ref: ryokanCard.citationRef,
+          kind: 'canvas-card',
+          label: ryokanCard.title,
+        }
+      : undefined,
+    arashiyamaCard
+      ? {
+          ref: arashiyamaCard.citationRef,
+          kind: 'canvas-card',
+          label: arashiyamaCard.title,
+        }
+      : undefined,
+  ].filter((citation): citation is AgentPlannerCitation => citation !== undefined);
+
+  if (citations.length === 0) {
+    return undefined;
+  }
+
+  return {
+    type: 'canvas-card-draft',
+    draft: {
+      type: 'hotel',
+      title: 'Hoshinoya Kyoto',
+      subtitle: 'Arashiyama river ryokan option',
+      day: arashiyamaCard?.day,
+      details: ['Compare against the saved ryokan before promoting this draft to the Spatial Canvas.'],
+    },
+    rationale: 'Suggested from saved Arashiyama and stay context.',
+    citations,
+  };
+}
+
+function buildDemoRestaurantDraft(
+  context: TripAgentContext,
+  query: string,
+): AgentPlannerOutcome | undefined {
+  const lower = query.toLowerCase();
+  if (
+    !context.trip.destination.toLowerCase().includes('kyoto') ||
+    !lower.includes('gion') ||
+    !(lower.includes('restaurant') || lower.includes('food') || lower.includes('dinner'))
+  ) {
+    return undefined;
+  }
+
+  const restaurantItem = context.inboxItems.find((item) =>
+    item.sourceLabel.toLowerCase().includes('eater') ||
+    item.content.toLowerCase().includes('restaurant'),
+  );
+  const gionCard = context.canvasCards.find((card) =>
+    `${card.title} ${card.subtitle ?? ''}`.toLowerCase().includes('gion'),
+  );
+  const citations: AgentPlannerCitation[] = [
+    restaurantItem
+      ? {
+          ref: restaurantItem.citationRef,
+          kind: 'inbox-item',
+          label: restaurantItem.sourceLabel,
+        }
+      : undefined,
+    gionCard
+      ? {
+          ref: gionCard.citationRef,
+          kind: 'canvas-card',
+          label: gionCard.title,
+        }
+      : undefined,
+  ].filter((citation): citation is AgentPlannerCitation => citation !== undefined);
+
+  if (citations.length === 0) {
+    return undefined;
+  }
+
+  return {
+    type: 'canvas-card-draft',
+    draft: {
+      type: 'article',
+      title: 'Gion Sasaki',
+      subtitle: 'Michelin creative counter dining near Gion',
+      day: gionCard?.day,
+      details: ['Confirm reservation timing before promoting this draft to the Spatial Canvas.'],
+    },
+    rationale: 'Suggested from saved Trip Material near Gion.',
+    citations,
   };
 }
 

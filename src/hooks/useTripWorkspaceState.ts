@@ -3,9 +3,9 @@ import {
   tripWorkspaceReducer,
   type TripWorkspaceState
 } from '../models/tripWorkspaceModel';
-import type { CanvasCard } from '../models/trip';
+import type { CanvasCard, Trip } from '../models/trip';
 
-export function useTripWorkspaceState(initialState: TripWorkspaceState) {
+export function useTripWorkspaceState(initialState: TripWorkspaceState, trip?: Trip) {
   const [state, dispatch] = useReducer(tripWorkspaceReducer, initialState);
 
   const addInboxItem = useCallback((content: string) => {
@@ -36,9 +36,9 @@ export function useTripWorkspaceState(initialState: TripWorkspaceState) {
     if (!query.trim()) return;
     dispatch({ type: 'AI_PROMPT_START' });
     setTimeout(() => {
-      dispatch({ type: 'AI_PROMPT_SUCCESS', query });
+      dispatch({ type: 'AI_PROMPT_SUCCESS', query, trip });
     }, 1200);
-  }, []);
+  }, [trip]);
 
   const setSelectedCard = useCallback((card: CanvasCard | null) => {
     dispatch({ type: 'SET_SELECTED_CARD', card });
