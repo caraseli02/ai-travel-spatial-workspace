@@ -8,6 +8,7 @@ import {
   deriveTripBudget,
   deriveTripActivities,
   formatTripDates,
+  formatTripDurationNights,
 } from './tripCardHelpers';
 
 // A mock function to help build a minimal trip for tests
@@ -194,6 +195,25 @@ describe('Trip Card Helpers', () => {
     it('formats single-day dates simple and clean', () => {
       expect(formatTripDates({ start: '2026-05-14', end: '2026-05-14' }))
         .toBe('May 14, 2026');
+    });
+  });
+
+  describe('formatTripDurationNights', () => {
+    it('returns Flexible when dates are missing or partial', () => {
+      expect(formatTripDurationNights()).toBe('Flexible');
+      expect(formatTripDurationNights({ start: '', end: '2026-05-30' })).toBe('Flexible');
+    });
+
+    it('returns Flexible when dates are invalid', () => {
+      expect(formatTripDurationNights({ start: 'not-a-date', end: '2026-05-30' })).toBe('Flexible');
+    });
+
+    it('formats a single night', () => {
+      expect(formatTripDurationNights({ start: '2026-05-14', end: '2026-05-15' })).toBe('1 night');
+    });
+
+    it('formats multiple nights', () => {
+      expect(formatTripDurationNights({ start: '2026-05-14', end: '2026-05-21' })).toBe('7 nights');
     });
   });
 });
