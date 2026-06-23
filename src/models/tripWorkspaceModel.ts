@@ -1,4 +1,6 @@
-import type { CanvasCard, InboxItem, Connection, DayGroup, DayLabel } from './trip';
+import type { CanvasCard, InboxItem, Connection, DayGroup, DayLabel, Trip } from './trip';
+import { buildTripAgentContext } from './tripAgentContext';
+import { mockAgentPlanner, type AgentPlannerOutcome } from './tripAgentPlanner';
 import { dayLabelConfig } from './trip';
 
 export type { Connection, DayGroup, DayLabel };
@@ -241,132 +243,230 @@ export function applyAiPromptToTripWorkspace({
   dayLabels,
   cards,
   connections,
+  items = [],
+  trip,
   now = Date.now,
   random = Math.random,
   ...rest
 }: TripWorkspaceState & {
   query: string;
+  trip?: Trip;
   now?: () => number;
   random?: () => number;
 }): TripWorkspaceState {
-  const lower = query.toLowerCase();
+  const plannerTrip = buildPlannerTrip({
+    trip,
+    cards,
+    connections,
+    items,
+    days,
+    dayLabels,
+  });
+  const context = buildTripAgentContext(plannerTrip);
+  const outcome = mockAgentPlanner.plan(context, query);
 
-  if (lower.includes('plan day 5') || lower.includes('suggest day 5') || lower.includes('day 5 itinerary')) {
-    const curamaDera: CanvasCard = {
-      id: 'c15',
-      type: 'polaroid',
-      x: 790,
-      y: 520,
-      rotation: 2.2,
-      title: 'Kurama-dera Temple',
-      subtitle: 'Mountain hike north of Kyoto',
-      image: '/images/fushimi-inari.jpg',
-      tag: 'Day 5 · Morning',
-      tagColor: 'rose',
-      day: 5,
-      width: 220,
-    };
+  return applyAgentPlannerOutcomeToTripWorkspace({
+    outcome,
+    query,
+    activeDay,
+    days,
+    dayLabels,
+    cards,
+    connections,
+    items,
+    now,
+    random,
+    ...rest,
+  });
+}
 
+function buildPlannerTrip({
+  trip,
+  cards,
+  connections,
+  items,
+  days,
+  dayLabels,
+}: {
+  trip?: Trip;
+  cards: CanvasCard[];
+  connections: Connection[];
+  items: InboxItem[];
+  days: DayGroup[];
+  dayLabels: DayLabel[];
+}): Trip {
+  const now = new Date().toISOString();
+
+  return {
+    id: trip?.id ?? 'current-trip',
+    name: trip?.name ?? 'Current Trip',
+    destination: trip?.destination ?? 'Current destination',
+    emoji: trip?.emoji ?? '🧭',
+    dates: trip?.dates,
+    createdAt: trip?.createdAt ?? now,
+    updatedAt: trip?.updatedAt ?? now,
+    country: trip?.country,
+    status: trip?.status,
+    image: trip?.image,
+    travelers: trip?.travelers,
+    budget: trip?.budget,
+    activities: trip?.activities,
+    cards,
+    connections,
+    inboxItems: items,
+    days,
+    dayLabels,
+  };
+}
+
+function applyAgentPlannerOutcomeToTripWorkspace({
+  outcome,
+  query,
+  activeDay,
+  days,
+  dayLabels,
+  cards,
+  connections,
+  items,
+  now,
+  random,
+  ...rest
+}: Omit<TripWorkspaceState, 'isAiThinking'> & {
+  outcome: AgentPlannerOutcome;
+  query: string;
+  now: () => number;
+  random: () => number;
+}): TripWorkspaceState {
+  if (outcome.type === 'inbox-item-draft') {
     return {
       ...rest,
-      activeDay: 5,
-      days: days.some(day => day.day === 5)
-        ? days
-        : [...days, { day: 5, label: 'Day 5 — Kurama & Kaiseki', color: '#8b5cf6' }],
-      dayLabels: dayLabels.some(label => label.day === 5)
-        ? dayLabels
-        : [...dayLabels, { day: 5, x: 775, y: 555, color: '#8b5cf6', bg: '#f5f3ff', border: '#ddd6fe' }],
-      cards: [...cards.filter(card => card.id !== 'c15'), curamaDera],
-      connections: [
-        ...connections.filter(conn => !(conn.from === 'c15' && conn.to === 'c14') && !(conn.from === 'c14' && conn.to === 'c15')),
-        { from: 'c15', to: 'c14', label: 'hiking to dining' },
-      ],
-    };
-  }
-
-  if (lower.includes('ryokan') || lower.includes('hoshinoya') || lower.includes('stay in arashiyama')) {
-    const hoshinoya: CanvasCard = {
-      id: 'c16',
-      type: 'hotel',
-      x: 290,
-      y: 690,
-      rotation: -1.2,
-      title: 'Hoshinoya Kyoto',
-      subtitle: 'Arashiyama River Luxury Ryokan',
-      tag: 'Day 3 · Luxury Ryokan',
-      tagColor: 'emerald',
-      day: 3,
-      details: ['Accessible only via wooden boat ride', 'Stunning river views', '¥110,000/night', 'Private pavilion standard'],
-      rating: 5.0,
-      image: '/images/ryokan.jpg',
-      width: 260,
-    };
-
-    return {
-      ...rest,
-      activeDay: 3,
+      activeDay,
       days,
       dayLabels,
-      cards: [...cards.filter(card => card.id !== 'c16'), hoshinoya],
-      connections: [
-        ...connections.filter(conn => !(conn.from === 'c7' && conn.to === 'c16') && !(conn.from === 'c16' && conn.to === 'c7')),
-        { from: 'c7', to: 'c16', label: 'stay option' },
+      cards,
+      connections,
+      items: [
+        {
+          id: `i_ai_draft_${now()}`,
+          type: outcome.draft.type,
+          source: outcome.draft.source,
+          content: outcome.draft.content,
+          sourceUrl: outcome.draft.sourceUrl,
+          rawContent: buildPlannerDraftRawContent(outcome.rationale, outcome.citations),
+          timestamp: 'Just now',
+          processed: false,
+        },
+        ...items,
       ],
+      isAiThinking: false,
     };
   }
 
-  if (lower.includes('restaurant') || lower.includes('gion food') || lower.includes('gion restaurant') || lower.includes('sasaki')) {
-    const gionSasaki: CanvasCard = {
-      id: 'c17',
-      type: 'article',
-      x: 1040,
-      y: 280,
-      rotation: 1.8,
-      title: 'Gion Sasaki',
-      subtitle: 'Michelin 3★ creative counter dining',
-      tag: 'Day 4 · Splurge dinner',
-      tagColor: 'rose',
-      day: 4,
-      details: ['Pre-book 2 months in advance', 'Counter seating only'],
-      width: 260,
-    };
-
+  if (outcome.type === 'canvas-card-draft') {
     return {
       ...rest,
-      activeDay: 4,
+      activeDay,
       days,
       dayLabels,
-      cards: [...cards.filter(card => card.id !== 'c17'), gionSasaki],
-      connections: [
-        ...connections.filter(conn => !(conn.from === 'c10' && conn.to === 'c17') && !(conn.from === 'c17' && conn.to === 'c10')),
-        { from: 'c10', to: 'c17', label: 'dinner option' },
+      cards,
+      connections,
+      items: [
+        {
+          id: `i_ai_card_draft_${now()}`,
+          type: inboxTypeForCanvasDraft(outcome.draft.type),
+          source: 'AI Planner Draft',
+          content: formatCanvasDraftContent(outcome),
+          rawContent: buildPlannerDraftRawContent(outcome.rationale, outcome.citations),
+          timestamp: 'Just now',
+          processed: false,
+        },
+        ...items,
       ],
+      isAiThinking: false,
     };
   }
 
-  const notesId = `c_ai_sticky_${now()}`;
-  const newSticky: CanvasCard = {
-    id: notesId,
+  const requestedDay = extractRequestedDay(query);
+  const responseDay = requestedDay && days.some(day => day.day === requestedDay)
+    ? requestedDay
+    : activeDay || 0;
+  const message = outcome.type === 'reply' ? outcome.message : outcome.question;
+  const responseCard: CanvasCard = {
+    id: `c_ai_response_${now()}`,
     type: 'note',
     x: 480 + (random() * 60 - 30),
     y: 350 + (random() * 60 - 30),
     rotation: (random() * 4) - 2,
-    title: 'AI Helper Answer 🤖',
-    subtitle: `Regarding "${query}": Based on local guides, I highly recommend visiting early morning. Make sure to check weather and transit times!`,
-    tag: 'AI Assistant Answer',
+    title: outcome.type === 'reply' ? 'AI Planner Reply' : 'AI Planner Follow-up',
+    subtitle: message,
+    tag: outcome.type === 'reply' ? 'AI reply' : 'AI follow-up',
     tagColor: 'slate',
-    day: activeDay || 0,
-    width: 230,
+    day: responseDay,
+    details: formatPlannerCitations(outcome.citations),
+    width: 240,
   };
 
   return {
     ...rest,
-    activeDay,
+    activeDay: requestedDay && days.some(day => day.day === requestedDay)
+      ? requestedDay
+      : activeDay,
     days,
     dayLabels,
-    cards: [...cards, newSticky],
+    cards: [...cards, responseCard],
     connections,
+    items,
+    isAiThinking: false,
   };
+}
+
+function buildPlannerDraftRawContent(
+  rationale: string,
+  citations: AgentPlannerOutcome['citations'],
+): string {
+  const citationLabels = citations.map(citation => citation.label);
+  return [
+    rationale,
+    citationLabels.length > 0 ? `Citations: ${citationLabels.join(', ')}` : undefined,
+  ].filter(Boolean).join('\n');
+}
+
+function formatCanvasDraftContent(
+  outcome: Extract<AgentPlannerOutcome, { type: 'canvas-card-draft' }>,
+): string {
+  return [
+    `Draft Canvas Card: ${outcome.draft.title}`,
+    outcome.draft.subtitle,
+    outcome.draft.day ? `Day ${outcome.draft.day}` : undefined,
+    ...(outcome.draft.details ?? []),
+  ].filter(Boolean).join('\n');
+}
+
+function formatPlannerCitations(
+  citations: AgentPlannerOutcome['citations'],
+): string[] | undefined {
+  if (citations.length === 0) {
+    return undefined;
+  }
+
+  return [`Citations: ${citations.map(citation => citation.label).join(', ')}`];
+}
+
+function inboxTypeForCanvasDraft(type: CanvasCard['type']): InboxItem['type'] {
+  if (type === 'hotel' || type === 'flight') {
+    return type;
+  }
+
+  if (type === 'article') {
+    return 'link';
+  }
+
+  return 'note';
+}
+
+function extractRequestedDay(query: string): number | undefined {
+  const dayMatch = query.match(/\bday\s+(\d+)\b/i);
+  return dayMatch ? Number(dayMatch[1]) : undefined;
 }
 
 export function buildManualCanvasCard({
@@ -473,7 +573,7 @@ export type TripWorkspaceAction =
   | { type: 'ADD_CONNECTION'; fromId: string; toId: string }
   | { type: 'ADD_CUSTOM_DAY'; dayNum: number; label: string }
   | { type: 'AI_PROMPT_START' }
-  | { type: 'AI_PROMPT_SUCCESS'; query: string }
+  | { type: 'AI_PROMPT_SUCCESS'; query: string; trip?: Trip }
   | { type: 'SET_SELECTED_CARD'; card: CanvasCard | null }
   | { type: 'OPEN_CREATE_MODAL'; coords: { x: number; y: number } | null }
   | { type: 'CLOSE_CREATE_MODAL' }
@@ -574,6 +674,7 @@ export function tripWorkspaceReducer(
       const updatedState = applyAiPromptToTripWorkspace({
         ...state,
         query: action.query,
+        trip: action.trip,
       });
       return {
         ...state,

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { canvasCards, connections, dayGroups, inboxItems } from '../data/tripData';
+import { canvasCards, connections, createDemoTrip, dayGroups, inboxItems } from '../data/tripData';
+import { createEmptyTrip } from './trip';
 import {
   applyAiPromptToTripWorkspace,
   buildInboxItem,
@@ -68,31 +69,33 @@ describe('Trip Workspace model', () => {
     });
   });
 
-  it('applies the mocked Day 5 AI prompt without duplicating generated trip structure', () => {
-    const firstResult = applyAiPromptToTripWorkspace({
+  it('applies the mocked Day 5 AI prompt as a cited planner reply without hardcoded card mutation', () => {
+    const result = applyAiPromptToTripWorkspace({
       query: 'Plan Day 5',
+      trip: createDemoTrip(),
       activeDay: null,
       days: dayGroups,
       dayLabels: dayLabelConfig,
       cards: canvasCards,
       connections,
-      now: fixedNow,
-      random: zeroRandom,
-    });
-    const secondResult = applyAiPromptToTripWorkspace({
-      query: 'Plan Day 5',
-      ...firstResult,
+      items: inboxItems,
       now: fixedNow,
       random: zeroRandom,
     });
 
-    expect(secondResult.activeDay).toBe(5);
-    expect(secondResult.days.filter(day => day.day === 5)).toHaveLength(1);
-    expect(secondResult.dayLabels.filter(label => label.day === 5)).toHaveLength(1);
-    expect(secondResult.cards.filter(card => card.id === 'c15')).toHaveLength(1);
-    expect(secondResult.connections.filter(conn => conn.from === 'c15' && conn.to === 'c14')).toEqual([
-      { from: 'c15', to: 'c14', label: 'hiking to dining' },
-    ]);
+    expect(result.activeDay).toBe(5);
+    expect(result.days).toEqual(dayGroups);
+    expect(result.dayLabels).toEqual(dayLabelConfig);
+    expect(result.cards.some(card => card.id === 'c15')).toBe(false);
+    expect(result.cards.at(-1)).toMatchObject({
+      id: 'c_ai_response_1774200000000',
+      type: 'note',
+      title: 'AI Planner Reply',
+      subtitle: 'Day 5 already has Kikunoi Honten.',
+      day: 5,
+      details: ['Citations: Kikunoi Honten'],
+    });
+    expect(result.connections).toEqual(connections);
   });
 
   it('computes connection endpoints from Canvas Card dimensions', () => {
@@ -412,10 +415,104 @@ describe('Trip Workspace model', () => {
       // 2. Complete AI thinking and apply the prompt
       const successState = tripWorkspaceReducer(thinkingState, { type: 'AI_PROMPT_SUCCESS', query: 'Plan Day 5' });
       expect(successState.isAiThinking).toBe(false);
-      expect(successState.activeDay).toBe(5);
-      expect(successState.days).toHaveLength(2); // Day 5 is added
+      expect(successState.activeDay).toBe(null);
+      expect(successState.days).toHaveLength(1);
+      expect(successState.cards).toEqual([
+        expect.objectContaining({
+          type: 'note',
+          title: 'AI Planner Reply',
+          subtitle: 'I can help plan Current Trip.',
+        }),
+      ]);
       expect(successState.items).toEqual([mockItem]); // Items are preserved
       expect(successState.showOverflow).toBe(true); // Other fields are preserved
+    });
+
+    it('routes non-demo AI prompts through grounded planner outcomes instead of Kyoto-specific card mutations', () => {
+      const trip = createEmptyTrip('Barcelona Weekend', 'Barcelona, Spain', '🇪🇸');
+      const state = {
+        ...createInitialState(),
+        showOverflow: true,
+        isAiThinking: true,
+      };
+
+      const successState = tripWorkspaceReducer(state, {
+        type: 'AI_PROMPT_SUCCESS',
+        query: 'Find a restaurant near Gion',
+        trip,
+      });
+
+      expect(successState.isAiThinking).toBe(false);
+      expect(successState.showOverflow).toBe(true);
+      expect(successState.cards).toEqual([
+        expect.objectContaining({
+          type: 'note',
+          title: 'AI Planner Follow-up',
+          subtitle: 'What saved Trip Material should I use for this suggestion?',
+        }),
+      ]);
+      expect(successState.cards.some(card => card.title === 'Gion Sasaki')).toBe(false);
+      expect(successState.connections).toEqual([]);
+    });
+
+    it('captures Demo Trip restaurant suggestions as cited planner drafts instead of final Canvas Cards', () => {
+      const trip = createDemoTrip();
+      const state: TripWorkspaceState = {
+        ...createInitialState(),
+        days: trip.days,
+        dayLabels: trip.dayLabels,
+        cards: trip.cards,
+        connections: trip.connections,
+        items: trip.inboxItems,
+        isAiThinking: true,
+      };
+
+      const successState = tripWorkspaceReducer(state, {
+        type: 'AI_PROMPT_SUCCESS',
+        query: 'Find a restaurant near Gion',
+        trip,
+      });
+
+      expect(successState.isAiThinking).toBe(false);
+      expect(successState.cards.some(card => card.id === 'c17' || card.title === 'Gion Sasaki')).toBe(false);
+      expect(successState.items[0]).toMatchObject({
+        type: 'link',
+        source: 'AI Planner Draft',
+        content: expect.stringContaining('Draft Canvas Card: Gion Sasaki'),
+        rawContent: 'Suggested from saved Trip Material near Gion.\nCitations: Eater Japan, Gion at Dusk',
+        processed: false,
+      });
+      expect(successState.items.slice(1)).toEqual(trip.inboxItems);
+    });
+
+    it('captures Demo Trip ryokan suggestions as planner drafts for the traveler to organize', () => {
+      const trip = createDemoTrip();
+      const state: TripWorkspaceState = {
+        ...createInitialState(),
+        days: trip.days,
+        dayLabels: trip.dayLabels,
+        cards: trip.cards,
+        connections: trip.connections,
+        items: trip.inboxItems,
+        isAiThinking: true,
+      };
+
+      const successState = tripWorkspaceReducer(state, {
+        type: 'AI_PROMPT_SUCCESS',
+        query: 'Suggest a ryokan in Arashiyama',
+        trip,
+      });
+
+      expect(successState.isAiThinking).toBe(false);
+      expect(successState.cards.some(card => card.id === 'c16' || card.title === 'Hoshinoya Kyoto')).toBe(false);
+      expect(successState.items[0]).toMatchObject({
+        type: 'hotel',
+        source: 'AI Planner Draft',
+        content: expect.stringContaining('Draft Canvas Card: Hoshinoya Kyoto'),
+        rawContent: 'Suggested from saved Arashiyama and stay context.\nCitations: Hiiragiya Ryokan, Arashiyama Bamboo',
+        processed: false,
+      });
+      expect(successState.items.slice(1)).toEqual(trip.inboxItems);
     });
 
     it('can transition UI overlay states', () => {
