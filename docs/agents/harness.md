@@ -98,7 +98,22 @@ Completion is external evidence, not agent confidence. Use this hierarchy:
 
 `make check` is the standard consistency command and includes the smoke E2E suite. For visible UI or runtime workflow changes beyond the smoke coverage, record the route, flow exercised, and result in the PR. Example: `make dev` + browser check of `/trips/:tripId` card edit persistence — pass.
 
-Do not refactor or polish adjacent code until the core behavior has passed the required validation layer. When a repeated review comment exposes a defect class, promote it into a test, lint rule, or focused check with an error message that says what failed and how to fix it.
+Do not refactor or polish adjacent code until the core behavior has passed the required validation layer.
+
+## Agent-Oriented Errors (L11)
+
+Observability is only useful if a failure tells the next agent what to do. When you add or promote a check, write its failure message in the "Red Pen Markup" style — not a bare assertion, but actionable feedback with three parts:
+
+- **What** failed: the concrete observed result (e.g. `expected Trip Material status "linked", got "loose"`).
+- **Why** it matters or the likely cause: the rule or invariant broken.
+- **How** to fix it: the file/area to change and, when relevant, a doc link.
+
+Examples:
+
+- Bad: `Test failed: expected true`.
+- Good: `tripRepository.save did not persist the Trip: localStorage key "wayfarer.trips" was empty after save. Ensure writes go through TripRepository (src/models/tripRepository.ts); see docs/adr/0001-localstorage-first-persistence.md.`
+
+This is the same practice as **Review Feedback Promotion**: when a repeated review comment exposes a defect class, promote it into a test, lint rule, or focused check — and give that check an agent-oriented message so the failure is self-explaining. Prefer custom assertion messages over default matcher output when a test guards a domain invariant.
 
 ## Harness Audit Matrix
 
@@ -109,7 +124,7 @@ Do not refactor or polish adjacent code until the core behavior has passed the r
 | Environment | Node 22 baseline in `.nvmrc`; dependencies locked. | Run `npm ci` when dependency state changes. | `make setup`, CI |
 | State | `PROGRESS.md`, issues, PRs, ADRs, and `CONTEXT.md` hold durable state. | No durable decision may live only in chat. | Clock-out checklist |
 | Feedback | Unit tests, strict lint, typecheck, build, Playwright smoke tests. | Add focused tests when smoke coverage is too broad. | `make check`, CI |
-| Observability | E2E traces on failure; `docs/agents/quality.md` records health. | Recurring failures become checks or quality entries. | PR template + quality review |
+| Observability | E2E traces on failure; `docs/agents/quality.md` records health. | Recurring failures become checks or quality entries with agent-oriented messages (see Agent-Oriented Errors). | PR template + quality review |
 | Clean state | Completion requires passing checks, progress record, no stale artifacts. | Temporary screenshots/backups are ignored or deleted. | PR template + `.gitignore` |
 
 ## State Management

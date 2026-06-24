@@ -106,13 +106,17 @@ describe('Trip Material memory display helpers', () => {
     const demoTrip = createDemoTrip();
     const sourceBackedCards = demoTrip.cards.filter((card) => card.promotedFromInboxId);
 
-    expect(sourceBackedCards.length).toBeGreaterThan(0);
+    expect(
+      sourceBackedCards.length,
+      'The Demo Trip shipped with no source-backed Canvas Cards. createDemoTrip in src/data/tripData.ts must include cards with promotedFromInboxId so source memory is visible on first run.',
+    ).toBeGreaterThan(0);
     expect(
       sourceBackedCards.every((card) =>
         demoTrip.inboxItems.some(
           (item) => item.id === card.promotedFromInboxId && item.resultingCardId === card.id,
         ),
       ),
+      'A source-backed Demo Trip card points to a missing/mismatched Inbox Item. In src/data/tripData.ts each card.promotedFromInboxId must reference an inbox item whose resultingCardId points back to that card.',
     ).toBe(true);
   });
 });

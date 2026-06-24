@@ -1,6 +1,6 @@
 # Progress
 
-Last updated: 2026-06-18
+Last updated: 2026-06-24
 
 This file is the durable handoff point for current project state. Update it when work changes the roadmap, verification baseline, or harness expectations.
 
@@ -8,16 +8,16 @@ This file is the durable handoff point for current project state. Update it when
 
 Update this section at clock-out for multi-session or non-issue work. For a single `ready-for-agent` issue, the GitHub issue and PR are enough.
 
-- Latest commit: `479aee0` (PROGRESS snapshot after PR #35 merge)
-- Test status: 85/85 passing (`make test`, 2026-06-18)
-- E2E status: 3/3 passing (`make e2e`, 2026-06-18)
-- Full check: pass on 2026-06-18 after merging `origin/main` (`make check` — test, build, strict lint, typecheck, E2E, fresh-session test)
-- Active WIP: harness-readiness closure on `codex/update-harness-trip-canvas-design`
-- In progress: none; harness-readiness closure implementation is verified and ready for review.
-- Known issues: local shell is currently Node `v25.8.1`, while the repo baseline is Node 22 LTS; `npm ci` passes but reports an engine warning until the local runtime is switched. npm audit reports 4 dependency findings after adding Playwright (2 low, 2 high); no fix applied yet because it may require broader dependency changes.
+- Latest commit: `6cc2d2d` (Unify trip date formatting across Trip List and Trip Workspace, #74) on `main`
+- Test status: 99/99 passing (`make test`, 2026-06-24)
+- E2E status: 3/3 passing (`make e2e`, 2026-06-24)
+- Full check: pass on 2026-06-24 (`make check` — test, build, strict lint, typecheck, E2E, fresh-session test)
+- Active WIP: harness lecture alignment (dedupe entry files, refresh this snapshot, agent-oriented error guidance) — tracks issue #66.
+- In progress: harness alignment edits; no feature implementation slice active.
+- Known issues: local shell may run Node `>=25`, while the repo baseline is Node 22 LTS; `npm ci` passes but reports an engine warning until the local runtime is switched. npm audit reports dependency findings from Playwright; deferred to a scoped dependency-maintenance issue.
 - Next steps:
-  1. Finish harness-readiness verification and clean temporary artifacts.
-  2. Use #29, "Route Workspace AI Prompt through the agent planner," as the next implementation slice after this harness work lands.
+  1. Land harness alignment work and close #66.
+  2. Pick the next `ready-for-agent` tech-debt slice from the open backlog (e.g. #56 typecheck test files, #67 normalize import paths, #65 coverage gate).
 
 ## Current State
 
@@ -32,16 +32,12 @@ Update this section at clock-out for multi-session or non-issue work. For a sing
 
 ## Harness State
 
-- `AGENTS.md` and `CLAUDE.md` are short routing entry files with Work Rules (WIP=1).
-- `docs/agents/harness.md` records harness rules, fresh-session checks, L1–L12 references, GitHub Issues as the scope surface, completion validation, observability, clean-state rules, and Matt Pocock skill integration.
-- `docs/agents/startup-readiness.md` defines initialization acceptance.
-- `docs/agents/quality.md` tracks module health, recurring issues, cleanup candidates, and harness simplification.
-- `Makefile` standardizes setup, development, test, build, E2E, doctor, fresh-session, and full verification commands.
+The harness design and rules live in `docs/agents/harness.md` (do not restate them here). This section records only the current snapshot facts:
+
+- `AGENTS.md` is the canonical routing entry file; `CLAUDE.md` is a thin pointer to it (single source of truth).
 - Runtime baseline: Node 22 LTS via `.nvmrc` and `package.json` `engines`.
 - CI: GitHub Actions `Check` workflow runs `npm ci`, installs Chromium, and runs `make check`.
-- `src/AGENTS.md` gives source-area routing near implementation files.
-- Session handoffs: `/handoff` → OS temp (Matt Pocock default); durable state in issues and `PROGRESS.md`.
-- Last harness audit: 2026-06-15 (Lectures 8–10 gap closure).
+- Last harness audit: 2026-06-24 (L01–L12 lecture-alignment pass: entry-file dedupe, snapshot refresh, agent-oriented error guidance).
 
 ## Verification Baseline
 
@@ -53,7 +49,7 @@ Update this section at clock-out for multi-session or non-issue work. For a sing
 - Fresh-session check: `make fresh-session-test`
 - Full consistency check: `make check` (test, build, strict lint, typecheck, E2E, fresh-session test)
 - UI/runtime flow evidence: for visible UI, routing, localStorage persistence, or cross-component changes beyond smoke coverage, record a browser/full-flow check in addition to `make check`.
-- Last verified on 2026-06-18 after merging `origin/main`: `make check` passed with 85 unit tests, build, strict lint, typecheck, 3 E2E tests, and fresh-session test.
+- Last verified on 2026-06-24: `make check` passed with 99 unit tests, build, strict lint, typecheck, 3 E2E tests, and fresh-session test.
 
 When verification cannot be run, record the reason in the final task handoff rather than editing this file for transient failures.
 
@@ -63,4 +59,4 @@ When verification cannot be run, record the reason in the final task handoff rat
 - Convert recurring historical notes into tests or ADRs instead of adding more entry-file rules.
 - Optionally tighten test-file types so `tsconfig.json` can typecheck tests without exclusion.
 - Resolve npm audit findings with a focused dependency-maintenance pass.
-- Continue the GitHub roadmap around Trip Material memory and agent planning: #23 and #24 are PRDs; #28 and #30 are closed; #29 is the next open implementation issue now that #28 is closed.
+- Work the open tech-debt backlog (issues #53–#73), prioritizing `ready-for-agent` slices such as #56 (typecheck test files), #65 (coverage gate), and #67 (normalize import paths).
