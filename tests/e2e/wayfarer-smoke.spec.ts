@@ -46,3 +46,19 @@ test("created Trip persists through localStorage and can be reopened", async ({ 
   await expect(page).toHaveURL(/\/trips$/);
   await expect(page.getByRole("heading", { name: "Lisbon Food Weekend" })).toBeVisible();
 });
+
+test("trip list prompt creates a Trip that opens in the workspace", async ({ page }) => {
+  await page.goto("/trips");
+
+  const promptInput = page.getByPlaceholder("Describe your dream trip...");
+  await promptInput.fill("Plan a 5-day trip to Paris for 2 people");
+  await promptInput.press("Enter");
+
+  await expect(page.getByRole("heading", { name: "Trip to Paris" })).toBeVisible();
+  await expect(page.getByText("I've created a trip to")).toBeVisible();
+
+  await page.getByRole("button", { name: /Open trip workspace for Trip to Paris/i }).click();
+
+  await expect(page).toHaveURL(/\/trips\/trip_/);
+  await expect(page.getByRole("heading", { name: "Trip to Paris" })).toBeVisible();
+});
