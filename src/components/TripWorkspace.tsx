@@ -62,6 +62,8 @@ import {
   deriveTripStatus,
   deriveTripTravelers,
   deriveTripBudget,
+  formatTripDates,
+  formatTripDurationNights,
 } from '../utils/tripCardHelpers';
 
 const workspaceStatusConfig = {
@@ -86,46 +88,6 @@ const workspaceStatusConfig = {
     label: "Planning",
   },
 };
-
-const formatRange = (startStr?: string, endStr?: string) => {
-  if (!startStr || !endStr) return "Flexible";
-  try {
-    const start = new Date(startStr);
-    const end = new Date(endStr);
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) return "Flexible";
-
-    const startMonth = start.toLocaleDateString("en-US", { month: "short" });
-    const endMonth = end.toLocaleDateString("en-US", { month: "short" });
-    const year = start.getFullYear();
-
-    if (start.getFullYear() !== end.getFullYear()) {
-      return `${start.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} – ${end.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
-    }
-    if (startMonth !== endMonth) {
-      return `${startMonth} ${start.getDate()}–${endMonth} ${end.getDate()}, ${year}`;
-    }
-    if (start.getDate() !== end.getDate()) {
-      return `${startMonth} ${start.getDate()}–${end.getDate()}, ${year}`;
-    }
-    return start.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  } catch {
-    return "Flexible";
-  }
-};
-
-const getDurationNights = (startStr?: string, endStr?: string) => {
-  if (!startStr || !endStr) return 'Flexible';
-  try {
-    const s = new Date(startStr);
-    const e = new Date(endStr);
-    const diffTime = Math.abs(e.getTime() - s.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return `${diffDays} ${diffDays === 1 ? 'night' : 'nights'}`;
-  } catch {
-    return 'Flexible';
-  }
-};
-
 
 export default function TripWorkspace() {
   const { tripId } = useParams<{ tripId: string }>();
@@ -642,9 +604,9 @@ function TripWorkspacePresenter({
           <div className="flex items-center justify-between gap-3 border-t border-border/60 px-4 py-2 md:hidden">
             <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
               <Calendar className="size-3 shrink-0" />
-              <span className="truncate">{formatRange(trip.dates.start, trip.dates.end)}</span>
+              <span className="truncate">{formatTripDates(trip.dates)}</span>
               <span className="text-border">·</span>
-              <span className="shrink-0">{getDurationNights(trip.dates.start, trip.dates.end)}</span>
+              <span className="shrink-0">{formatTripDurationNights(trip.dates)}</span>
               <span className="text-border">·</span>
               <span className="truncate">{trip.destination}</span>
             </div>
@@ -731,13 +693,13 @@ function TripWorkspacePresenter({
 
               {workspaceView !== "map" ? (
                 <div className="hidden max-w-[min(100%,28rem)] shrink-0 select-none items-center gap-1.5 overflow-hidden rounded-xl border border-border bg-card px-2 py-1.5 shadow-sm md:flex md:gap-2 md:px-2.5 md:py-2 lg:max-w-none lg:gap-2.5 lg:px-3">
-                  <StatItem icon={<Calendar size={11} />} label={formatRange(trip.dates?.start, trip.dates?.end)} />
+                  <StatItem icon={<Calendar size={11} />} label={formatTripDates(trip.dates)} />
                   <div className="h-3 w-px shrink-0 bg-border" />
                   <StatItem icon={<MapPin size={11} />} label={trip.destination} />
                   {trip.dates && (
                     <>
                       <div className="h-3 w-px shrink-0 bg-border" />
-                      <StatItem icon={<Clock size={11} />} label={getDurationNights(trip.dates?.start, trip.dates?.end)} />
+                      <StatItem icon={<Clock size={11} />} label={formatTripDurationNights(trip.dates)} />
                     </>
                   )}
                   <div className="hidden h-3 w-px shrink-0 bg-border lg:block" />

@@ -89,3 +89,21 @@ export function formatTripDates(dates?: { start: string; end: string }): string 
     return "Flexible";
   }
 }
+
+export function formatTripDurationNights(dates?: { start: string; end: string }): string {
+  if (!dates || !dates.start || !dates.end) {
+    return "Flexible";
+  }
+  try {
+    const start = new Date(dates.start);
+    const end = new Date(dates.end);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return "Flexible";
+    }
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return `${diffDays} ${diffDays === 1 ? "night" : "nights"}`;
+  } catch {
+    return "Flexible";
+  }
+}
