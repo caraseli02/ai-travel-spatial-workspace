@@ -152,7 +152,10 @@ describe('Trip Workspace model', () => {
 
     expect(nextState.cards).toEqual([remainingCard]);
     expect(nextState.connections).toEqual([{ from: 'c_remaining', to: 'c_other', label: 'keep' }]);
-    expect(nextState.items).toEqual([sourceItem]);
+    expect(
+      nextState.items,
+      'Deleting a source-backed Canvas Card also dropped its source Inbox Item. deleteCanvasCardFromWorkspace in src/models/tripWorkspaceModel.ts must preserve Trip Material memory so the item becomes "previously-organized" rather than disappearing.',
+    ).toEqual([sourceItem]);
     expect(nextState.selectedCard).toBeNull();
     expect(resolveInboxItemDisplayState(nextState.items[0], nextState.cards)).toEqual({
       kind: 'previously-organized',
@@ -291,7 +294,10 @@ describe('Trip Workspace model', () => {
       const editedCard = { ...promotedCard, title: 'Updated Title', promotedFromInboxId: undefined };
       const nextState = tripWorkspaceReducer(state, { type: 'UPDATE_CARD', card: editedCard });
 
-      expect(nextState.cards[0]).toMatchObject({
+      expect(
+        nextState.cards[0],
+        'UPDATE_CARD let an edit erase promotedFromInboxId. The reducer in src/models/tripWorkspaceModel.ts must preserve the source relationship even when the incoming edited card omits it.',
+      ).toMatchObject({
         title: 'Updated Title',
         promotedFromInboxId: 'i1',
       });
@@ -316,7 +322,10 @@ describe('Trip Workspace model', () => {
 
       expect(newState.cards).toHaveLength(1);
       expect(newState.cards[0].id).toBe('c2');
-      expect(newState.connections).toHaveLength(0); // connection swept
+      expect(
+        newState.connections,
+        'DELETE_CARD left a dangling connection referencing the deleted card. The reducer in src/models/tripWorkspaceModel.ts must sweep every connection whose from/to is the deleted card id.',
+      ).toHaveLength(0); // connection swept
       expect(newState.selectedCard).toBeNull(); // selection cleared
     });
 

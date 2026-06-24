@@ -47,7 +47,10 @@ describe('localTripRepository', () => {
     expect(trips).toHaveLength(1);
     expect(trips[0].id).toBe(custom.id);
     // Should NOT have the demo trip
-    expect(trips.find(t => t.id === DEMO_TRIP_ID)).toBeUndefined();
+    expect(
+      trips.find(t => t.id === DEMO_TRIP_ID),
+      'Demo Trip was re-seeded even though a user trip already exists. ensureDemoTrip in src/models/tripRepository.ts must only seed when the store is empty; see docs/adr/0001-localstorage-first-persistence.md.',
+    ).toBeUndefined();
   });
 
   it('saves and loads a trip by ID', () => {
@@ -55,7 +58,10 @@ describe('localTripRepository', () => {
     localTripRepository.save(trip);
 
     const loaded = localTripRepository.load(trip.id);
-    expect(loaded).not.toBeNull();
+    expect(
+      loaded,
+      'A saved Trip could not be loaded back. Writes/reads must round-trip through localTripRepository (src/models/tripRepository.ts) using the same storage key; see docs/adr/0001-localstorage-first-persistence.md.',
+    ).not.toBeNull();
     expect(loaded!.name).toBe('Barcelona Summer');
     expect(loaded!.destination).toBe('Barcelona, Spain');
     expect(loaded!.emoji).toBe('🇪🇸');
@@ -132,7 +138,10 @@ describe('localTripRepository', () => {
     localTripRepository.delete(PARIS_FIXTURE_TRIP_ID);
 
     trips = localTripRepository.list();
-    expect(trips).toHaveLength(0);
+    expect(
+      trips,
+      'Demo Trip re-seeded after the user deleted it. The demo-seeded flag in src/models/tripRepository.ts must persist so deletion stays permanent even when the store is empty; see docs/adr/0001-localstorage-first-persistence.md.',
+    ).toHaveLength(0);
   });
 
   it('preserves domain data through save/load round-trip', () => {
@@ -169,7 +178,10 @@ describe('localTripRepository', () => {
 
     expect(loaded!.cards).toHaveLength(1);
     expect(loaded!.cards[0].title).toBe('Test Card');
-    expect(loaded!.cards[0].promotedFromInboxId).toBe('i_test_1');
+    expect(
+      loaded!.cards[0].promotedFromInboxId,
+      'Canvas Card provenance was lost on save/load. tripRepository must persist promotedFromInboxId so Trip Material memory survives a round-trip; check serialize/deserialize in src/models/tripRepository.ts.',
+    ).toBe('i_test_1');
     expect(loaded!.inboxItems).toHaveLength(1);
     expect(loaded!.inboxItems[0].content).toBe('Test content');
     expect(loaded!.inboxItems[0].resultingCardId).toBe('c_test_1');
@@ -232,7 +244,10 @@ describe('localTripRepository', () => {
     store.wayfarer_demo_seeded = 'true';
 
     const loaded = localTripRepository.load('old-partial');
-    expect(loaded).toMatchObject({
+    expect(
+      loaded,
+      'Older localStorage payloads missing workspace collections were not backfilled. tripRepository.load (src/models/tripRepository.ts) must default cards/connections/inboxItems/days/dayLabels to [] so the Trip Workspace never reads undefined; see docs/adr/0001-localstorage-first-persistence.md.',
+    ).toMatchObject({
       id: 'old-partial',
       cards: [],
       connections: [],

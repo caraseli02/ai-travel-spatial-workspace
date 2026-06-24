@@ -28,7 +28,10 @@ describe('Linking Session Model', () => {
     });
 
     expect(result.originId).toBeNull();
-    expect(onAddConnection).not.toHaveBeenCalled();
+    expect(
+      onAddConnection,
+      'A self-link was created (origin card linked to itself). resolveLinkingSessionTarget in src/models/linkingSessionModel.ts must reject targetId === originId and skip onAddConnection.',
+    ).not.toHaveBeenCalled();
   });
 
   it('triggers onAddConnection and clears session when resolving a valid target card', () => {
@@ -57,6 +60,9 @@ describe('Linking Session Model', () => {
     });
 
     expect(result.originId).toBeNull();
-    expect(onAddConnection).not.toHaveBeenCalled();
+    expect(
+      onAddConnection,
+      'A duplicate connection was created between already-linked cards. resolveLinkingSessionTarget in src/models/linkingSessionModel.ts must check existing connections (both directions) before calling onAddConnection.',
+    ).not.toHaveBeenCalled();
   });
 });
