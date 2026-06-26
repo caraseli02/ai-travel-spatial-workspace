@@ -14,7 +14,10 @@
     "preview": "vite preview",
     "lint": "oxlint src tests vite.config.ts playwright.config.ts --deny-warnings",
     "e2e": "playwright test",
-    "typecheck": "tsc --noEmit -p tsconfig.check.json"
+    "typecheck": "tsc --noEmit -p tsconfig.check.json",
+    "debt:next": "bash scripts/next-tech-debt-issue.sh",
+    "debt:prompt": "bash scripts/next-tech-debt-issue.sh --prompt",
+    "debt:agent": "node scripts/run-next-tech-debt-agent.mjs"
   },
   "dependencies": {
     "@types/leaflet": "^1.9.21",
@@ -33,6 +36,7 @@
     "tw-animate-css": "^1.4.0"
   },
   "devDependencies": {
+    "@cursor/sdk": "^1.0.21",
     "@playwright/test": "^1.61.0",
     "@tailwindcss/vite": "4.1.17",
     "@types/node": "22.19.17",

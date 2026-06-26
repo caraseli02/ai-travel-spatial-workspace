@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Optional: run the local tech-debt SDK agent on a schedule or at login.
+
+  1. cp scripts/com.wayfarer.debt-next.plist.example ~/Library/LaunchAgents/com.wayfarer.debt-next.plist
+  2. Edit REPO_ROOT and CURSOR_API_KEY below
+  3. launchctl load ~/Library/LaunchAgents/com.wayfarer.debt-next.plist
+
+  Prefer `make debt-agent` manually after merging a PR until the queue is stable.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.wayfarer.debt-next</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-lc</string>
+    <string>cd REPO_ROOT &amp;&amp; export CURSOR_API_KEY=YOUR_KEY &amp;&amp; make debt-agent</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>REPO_ROOT</string>
+  <key>StartInterval</key>
+  <integer>3600</integer>
+  <key>StandardOutPath</key>
+  <string>/tmp/wayfarer-debt-agent.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/wayfarer-debt-agent.err</string>
+  <key>RunAtLoad</key>
+  <false/>
+</dict>
+</plist>
