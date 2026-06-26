@@ -1,6 +1,6 @@
 NPM ?= npm
 
-.PHONY: setup dev test build lint typecheck e2e doctor fresh-session-test check status
+.PHONY: setup dev test build lint typecheck e2e doctor fresh-session-test check status debt-next debt-prompt debt-agent
 
 setup:
 	$(NPM) ci
@@ -50,3 +50,12 @@ check: test build lint typecheck e2e fresh-session-test
 
 status:
 	git status --short
+
+debt-next:
+	@bash scripts/next-tech-debt-issue.sh
+
+debt-prompt:
+	@bash scripts/next-tech-debt-issue.sh --prompt
+
+debt-agent:
+	@node scripts/run-next-tech-debt-agent.mjs

@@ -1,0 +1,43 @@
+---
+description: Implement the next tech-debt issue with TDD (run make debt-next / debt-prompt)
+alwaysApply: false
+---
+
+# Tech-debt agent session
+
+Use when the user asks to implement the **next tech-debt issue**, `/next-debt`, or pastes output from `make debt-prompt`.
+
+## Before coding
+
+1. Run `make debt-next` (or read the issue URL the user provided).
+2. If no eligible issue, stop and report why (all blocked or open PRs exist).
+3. Read the issue body, parent epic (`## Parent`), `CONTEXT.md`, `docs/agents/implementation-workflow.md`, and relevant ADRs.
+4. Load `.agents/skills/tdd/SKILL.md` — **vertical RED→GREEN slices only**; do not bulk-write tests then implement.
+
+## Session rules
+
+- **WIP=1** — only the picked issue in this session.
+- Branch: `codex/issue-<number>-<short-slug>`.
+- Scope: issue acceptance criteria only; no drive-by refactors.
+- Skip `ready-for-human` issues (e.g. #63).
+
+## Verification
+
+| Change type | Command |
+| --- | --- |
+| Models / utils only | `make test` |
+| UI, routing, persistence, E2E | `make check` |
+
+Record exact commands and pass/fail in the PR.
+
+## PR
+
+- Title: concise, issue-focused
+- Body: `Closes #<number>`, acceptance criteria checklist, verification section
+- Link parent epic in PR description if helpful
+
+## Out of scope
+
+- Starting a second tech-debt issue in the same session
+- Implementing blocked issues before blockers merge
+- Product planner work (#29) unless that is the picked issue
