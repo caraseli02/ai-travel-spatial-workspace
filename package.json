@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "test": "vitest run --exclude tests/e2e/**",
+    "test": "vitest run",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "oxlint src tests vite.config.ts playwright.config.ts --deny-warnings",
