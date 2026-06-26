@@ -1,5 +1,5 @@
-import type { CanvasCard, DayGroup, InboxItem, Trip } from './trip';
-import { resolveCardSourceMemory } from './tripMaterialMemory';
+import type { CanvasCard, DayGroup, InboxItem, Trip } from '@/models/trip';
+import { resolveCardSourceMemory } from '@/models/tripMaterialMemory';
 
 export interface AgentInboxItemSummary {
   id: string;

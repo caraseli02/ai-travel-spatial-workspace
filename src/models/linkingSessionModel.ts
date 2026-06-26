@@ -1,5 +1,5 @@
-import type { Connection } from './tripWorkspaceModel';
-import { canConnectCards } from './tripWorkspaceModel';
+import type { Connection } from '@/models/tripWorkspaceModel';
+import { canConnectCards } from '@/models/tripWorkspaceModel';
 
 export interface LinkingSessionData {
   originId: string | null;
@@ -33,4 +33,3 @@ export function resolveLinkingSessionTarget({
   }
   return { originId: null };
 }
-

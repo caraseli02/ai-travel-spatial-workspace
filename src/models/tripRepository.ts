@@ -1,5 +1,5 @@
-import type { Trip } from "./trip";
-import { createDemoTrip, createParisFixtureTrip } from "../data/tripData";
+import type { Trip } from "@/models/trip";
+import { createDemoTrip, createParisFixtureTrip } from "@/data/tripData";
 
 const STORAGE_KEY = "wayfarer_trips";
 

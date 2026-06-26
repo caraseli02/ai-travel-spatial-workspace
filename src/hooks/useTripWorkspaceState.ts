@@ -2,8 +2,8 @@ import { useReducer, useCallback } from 'react';
 import {
   tripWorkspaceReducer,
   type TripWorkspaceState
-} from '../models/tripWorkspaceModel';
-import type { CanvasCard, Trip } from '../models/trip';
+} from '@/models/tripWorkspaceModel';
+import type { CanvasCard, Trip } from '@/models/trip';
 
 export function useTripWorkspaceState(initialState: TripWorkspaceState, trip?: Trip) {
   const [state, dispatch] = useReducer(tripWorkspaceReducer, initialState);

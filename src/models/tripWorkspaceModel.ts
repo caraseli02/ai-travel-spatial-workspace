@@ -1,7 +1,7 @@
-import type { CanvasCard, InboxItem, Connection, DayGroup, DayLabel, Trip } from './trip';
-import { buildTripAgentContext } from './tripAgentContext';
-import { mockAgentPlanner, type AgentPlannerOutcome } from './tripAgentPlanner';
-import { dayLabelConfig } from './trip';
+import type { CanvasCard, InboxItem, Connection, DayGroup, DayLabel, Trip } from '@/models/trip';
+import { buildTripAgentContext } from '@/models/tripAgentContext';
+import { mockAgentPlanner, type AgentPlannerOutcome } from '@/models/tripAgentPlanner';
+import { dayLabelConfig } from '@/models/trip';
 
 export type { Connection, DayGroup, DayLabel };
 export { dayLabelConfig };

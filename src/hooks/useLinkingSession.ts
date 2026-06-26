@@ -1,10 +1,10 @@
 import { useState, useCallback } from 'react';
-import type { Connection } from '../models/tripWorkspaceModel';
+import type { Connection } from '@/models/tripWorkspaceModel';
 import {
   startLinkingSession,
   cancelLinkingSession,
   resolveLinkingSessionTarget,
-} from '../models/linkingSessionModel';
+} from '@/models/linkingSessionModel';
 
 export interface UseLinkingSessionProps {
   connections: Connection[];

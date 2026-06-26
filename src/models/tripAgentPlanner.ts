@@ -1,5 +1,5 @@
-import type { AgentCitationReference, TripAgentContext } from './tripAgentContext';
-import type { CanvasCard, InboxItem } from './trip';
+import type { AgentCitationReference, TripAgentContext } from '@/models/tripAgentContext';
+import type { CanvasCard, InboxItem } from '@/models/trip';
 
 export interface AgentPlannerCitation {
   ref: string;
