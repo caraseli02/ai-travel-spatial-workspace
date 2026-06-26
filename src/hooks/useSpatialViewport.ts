@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { CanvasCard } from '../models/trip';
+import type { CanvasCard } from '@/models/trip';
 
 // Pure Math/Physics Helpers for Testability
 export function clampZoom(zoom: number): number {

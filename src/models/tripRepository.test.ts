@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { Trip } from './trip';
-import { DEMO_TRIP_ID, createEmptyTrip } from './trip';
-import { PARIS_FIXTURE_TRIP_ID } from '../data/tripData';
-import { localTripRepository } from './tripRepository';
+import type { Trip } from '@/models/trip';
+import { DEMO_TRIP_ID, createEmptyTrip } from '@/models/trip';
+import { PARIS_FIXTURE_TRIP_ID } from '@/data/tripData';
+import { localTripRepository } from '@/models/tripRepository';
 
 // Mock localStorage
 const store: Record<string, string> = {};

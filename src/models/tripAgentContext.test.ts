@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { createDemoTrip } from '../data/tripData';
-import { createEmptyTrip } from './trip';
-import { buildTripAgentContext } from './tripAgentContext';
+import { createDemoTrip } from '@/data/tripData';
+import { createEmptyTrip } from '@/models/trip';
+import { buildTripAgentContext } from '@/models/tripAgentContext';
 
 describe('Trip agent context builder', () => {
   it('builds a serializable context with Trip identity and destination metadata for an empty Trip', () => {

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { createDemoTrip } from '../data/tripData';
-import type { CanvasCard, InboxItem } from './trip';
+import { createDemoTrip } from '@/data/tripData';
+import type { CanvasCard, InboxItem } from '@/models/trip';
 import {
   resolveCardSourceMemory,
   resolveInboxItemDisplayState,
-} from './tripMaterialMemory';
+} from '@/models/tripMaterialMemory';
 
 describe('Trip Material memory display helpers', () => {
   it('resolves source memory for a source-backed Canvas Card with an original URL', () => {

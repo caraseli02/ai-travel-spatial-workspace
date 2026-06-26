@@ -3,7 +3,7 @@ import {
   clampZoom,
   screenToCanvas,
   calculateCardPosition
-} from './useSpatialViewport';
+} from '@/hooks/useSpatialViewport';
 
 describe('Spatial Viewport Physics', () => {
   it('clamps zoom scale between 0.4x and 2.0x via clampZoom', () => {

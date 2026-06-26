@@ -3,7 +3,7 @@ import {
   startLinkingSession,
   cancelLinkingSession,
   resolveLinkingSessionTarget,
-} from './linkingSessionModel';
+} from '@/models/linkingSessionModel';
 
 describe('Linking Session Model', () => {
   it('starts a new linking session with an origin card ID', () => {

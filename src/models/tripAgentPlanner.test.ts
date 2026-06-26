@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { createDemoTrip } from '../data/tripData';
-import { createEmptyTrip } from './trip';
-import { buildTripAgentContext } from './tripAgentContext';
-import { planWithMockAgent } from './tripAgentPlanner';
+import { createDemoTrip } from '@/data/tripData';
+import { createEmptyTrip } from '@/models/trip';
+import { buildTripAgentContext } from '@/models/tripAgentContext';
+import { planWithMockAgent } from '@/models/tripAgentPlanner';
 
 describe('mock agent planner', () => {
   it('returns a cited typed reply for a Demo Trip AI Prompt without mutating context', () => {

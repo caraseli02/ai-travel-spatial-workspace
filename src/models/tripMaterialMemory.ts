@@ -1,4 +1,4 @@
-import type { CanvasCard, InboxItem } from './trip';
+import type { CanvasCard, InboxItem } from '@/models/trip';
 
 export type CardSourceMemory =
   | {

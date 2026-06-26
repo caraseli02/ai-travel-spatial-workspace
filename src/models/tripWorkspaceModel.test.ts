@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { canvasCards, connections, createDemoTrip, dayGroups, inboxItems } from '../data/tripData';
-import { createEmptyTrip } from './trip';
+import { canvasCards, connections, createDemoTrip, dayGroups, inboxItems } from '@/data/tripData';
+import { createEmptyTrip } from '@/models/trip';
 import {
   applyAiPromptToTripWorkspace,
   buildInboxItem,
@@ -12,8 +12,8 @@ import {
   connectCards,
   tripWorkspaceReducer,
   type TripWorkspaceState,
-} from './tripWorkspaceModel';
-import { resolveInboxItemDisplayState } from './tripMaterialMemory';
+} from '@/models/tripWorkspaceModel';
+import { resolveInboxItemDisplayState } from '@/models/tripMaterialMemory';
 
 const zeroRandom = () => 0.5;
 const fixedNow = () => 1_774_200_000_000;
