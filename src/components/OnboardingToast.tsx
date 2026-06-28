@@ -3,6 +3,10 @@ import { Sparkles, X, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import {
+  getOnboardingCompleted,
+  setOnboardingCompleted,
+} from "@/models/preferences";
 
 export default function OnboardingToast() {
   const [visible, setVisible] = useState(false);
@@ -25,10 +29,8 @@ export default function OnboardingToast() {
       icon: "✨",
     },
   ];
-
   useEffect(() => {
-    const completed = localStorage.getItem("wayfarer_onboarding_completed") === "true";
-    if (!completed) {
+    if (!getOnboardingCompleted()) {
       const t = setTimeout(() => setVisible(true), 800);
       return () => clearTimeout(t);
     }
@@ -40,7 +42,7 @@ export default function OnboardingToast() {
 
   const handleClose = () => {
     setVisible(false);
-    localStorage.setItem("wayfarer_onboarding_completed", "true");
+    setOnboardingCompleted(true);
   };
 
   return (
