@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { canvasCards, connections, createDemoTrip, dayGroups, inboxItems } from '@/data/tripData';
-import { createEmptyTrip } from '@/models/trip';
+import { createEmptyTrip, type CanvasCard } from '@/models/trip';
 import {
   applyAiPromptToTripWorkspace,
   buildInboxItem,
@@ -17,6 +17,32 @@ import { resolveInboxItemDisplayState } from '@/models/tripMaterialMemory';
 
 const zeroRandom = () => 0.5;
 const fixedNow = () => 1_774_200_000_000;
+
+const createBaseWorkspaceState = (overrides: Partial<TripWorkspaceState> = {}): TripWorkspaceState => ({
+  activeDay: null,
+  days: [],
+  dayLabels: [],
+  cards: [],
+  connections: [],
+  items: [],
+  selectedCard: null,
+  isAiThinking: false,
+  showCreateModal: false,
+  createModalCoords: null,
+  showAddDayModal: false,
+  showOverflow: false,
+  ...overrides,
+});
+
+const createStickyCard = (overrides: Partial<CanvasCard> = {}): CanvasCard => ({
+  id: 'c1',
+  type: 'sticky',
+  x: 100,
+  y: 100,
+  rotation: 0,
+  title: 'Card',
+  ...overrides,
+});
 
 describe('Trip Workspace model', () => {
   it('classifies new trip material into Inbox Items', () => {
@@ -71,14 +97,16 @@ describe('Trip Workspace model', () => {
 
   it('applies the mocked Day 5 AI prompt as a cited planner reply without hardcoded card mutation', () => {
     const result = applyAiPromptToTripWorkspace({
+      ...createBaseWorkspaceState({
+        activeDay: null,
+        days: dayGroups,
+        dayLabels: dayLabelConfig,
+        cards: canvasCards,
+        connections,
+        items: inboxItems,
+      }),
       query: 'Plan Day 5',
       trip: createDemoTrip(),
-      activeDay: null,
-      days: dayGroups,
-      dayLabels: dayLabelConfig,
-      cards: canvasCards,
-      connections,
-      items: inboxItems,
       now: fixedNow,
       random: zeroRandom,
     });
@@ -186,13 +214,13 @@ describe('Trip Workspace model', () => {
     });
 
     it('connectCards adds a valid connection to state', () => {
-      const initialState = {
+      const initialState = createBaseWorkspaceState({
         activeDay: null,
         days: dayGroups,
         dayLabels: dayLabelConfig,
         cards: canvasCards,
         connections: mockConnections,
-      };
+      });
 
       const result = connectCards(initialState, 'c1', 'c3');
       expect(result.connections).toHaveLength(3);
@@ -204,13 +232,13 @@ describe('Trip Workspace model', () => {
     });
 
     it('connectCards does not duplicate an existing connection in state', () => {
-      const initialState = {
+      const initialState = createBaseWorkspaceState({
         activeDay: null,
         days: dayGroups,
         dayLabels: dayLabelConfig,
         cards: canvasCards,
         connections: mockConnections,
-      };
+      });
 
       const result = connectCards(initialState, 'c1', 'c2');
       expect(result.connections).toHaveLength(2); // no additions
@@ -218,20 +246,7 @@ describe('Trip Workspace model', () => {
   });
 
   describe('tripWorkspaceReducer', () => {
-    const createInitialState = (): TripWorkspaceState => ({
-      activeDay: null,
-      days: [],
-      dayLabels: [],
-      cards: [],
-      connections: [],
-      items: [],
-      selectedCard: null,
-      isAiThinking: false,
-      showCreateModal: false,
-      createModalCoords: null,
-      showAddDayModal: false,
-      showOverflow: false,
-    });
+    const createInitialState = (): TripWorkspaceState => createBaseWorkspaceState();
 
     it('can add raw items to the inbox list via ADD_INBOX_ITEM', () => {
       const state = createInitialState();
@@ -249,7 +264,7 @@ describe('Trip Workspace model', () => {
     it('can process an inbox item via PROCESS_INBOX_ITEM', () => {
       const mockItem = {
         id: 'i7',
-        type: 'article' as const,
+        type: 'link' as const,
         source: 'Web Parser',
         content: 'Mizai Restaurant',
         timestamp: 'Just now',
@@ -276,15 +291,14 @@ describe('Trip Workspace model', () => {
     });
 
     it('preserves source relationship when updating a promoted Canvas Card', () => {
-      const promotedCard = {
+      const promotedCard = createStickyCard({
         id: 'c1',
-        type: 'sticky' as const,
         x: 100,
         y: 100,
         day: 1,
         title: 'Original Title',
         promotedFromInboxId: 'i1',
-      };
+      });
       const state = {
         ...createInitialState(),
         cards: [promotedCard],
@@ -308,8 +322,8 @@ describe('Trip Workspace model', () => {
     });
 
     it('can delete a card via DELETE_CARD and sweep dangling connections', () => {
-      const mockCard1 = { id: 'c1', type: 'sticky' as const, x: 100, y: 100, day: 1, title: 'Card 1' };
-      const mockCard2 = { id: 'c2', type: 'sticky' as const, x: 200, y: 200, day: 1, title: 'Card 2' };
+      const mockCard1 = createStickyCard({ id: 'c1', x: 100, y: 100, day: 1, title: 'Card 1' });
+      const mockCard2 = createStickyCard({ id: 'c2', x: 200, y: 200, day: 1, title: 'Card 2' });
       const mockConnection = { from: 'c1', to: 'c2', label: 'custom-link' };
       const state: TripWorkspaceState = {
         ...createInitialState(),
@@ -330,8 +344,8 @@ describe('Trip Workspace model', () => {
     });
 
     it('can establish manual connections via ADD_CONNECTION', () => {
-      const mockCard1 = { id: 'c1', type: 'sticky' as const, x: 100, y: 100, day: 1, title: 'Card 1' };
-      const mockCard2 = { id: 'c2', type: 'sticky' as const, x: 200, y: 200, day: 1, title: 'Card 2' };
+      const mockCard1 = createStickyCard({ id: 'c1', x: 100, y: 100, day: 1, title: 'Card 1' });
+      const mockCard2 = createStickyCard({ id: 'c2', x: 200, y: 200, day: 1, title: 'Card 2' });
       const state: TripWorkspaceState = {
         ...createInitialState(),
         cards: [mockCard1, mockCard2],
@@ -374,7 +388,7 @@ describe('Trip Workspace model', () => {
     });
 
     it('can update card details and position via UPDATE_CARD and UPDATE_CARD_POSITION', () => {
-      const mockCard = { id: 'c1', type: 'sticky' as const, x: 100, y: 100, day: 1, title: 'Original Title' };
+      const mockCard = createStickyCard({ id: 'c1', x: 100, y: 100, day: 1, title: 'Original Title' });
       const state = {
         ...createInitialState(),
         cards: [mockCard],
@@ -400,7 +414,7 @@ describe('Trip Workspace model', () => {
     it('can transition AI prompt states via AI_PROMPT_START and AI_PROMPT_SUCCESS', () => {
       const mockItem = {
         id: 'i7',
-        type: 'article' as const,
+        type: 'link' as const,
         source: 'Web Parser',
         content: 'Mizai Restaurant',
         timestamp: 'Just now',
@@ -528,7 +542,7 @@ describe('Trip Workspace model', () => {
       const state = createInitialState();
 
       // selectedCard
-      const mockCard = { id: 'c1', type: 'sticky' as const, x: 100, y: 100, day: 1, title: 'Card 1' };
+      const mockCard = createStickyCard({ id: 'c1', x: 100, y: 100, day: 1, title: 'Card 1' });
       let newState = tripWorkspaceReducer(state, { type: 'SET_SELECTED_CARD', card: mockCard });
       expect(newState.selectedCard).toEqual(mockCard);
 
