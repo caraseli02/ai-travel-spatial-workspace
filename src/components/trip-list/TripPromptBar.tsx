@@ -27,7 +27,10 @@ export function TripPromptBar({
   onSubmit,
 }: TripPromptBarProps) {
   return (
-    <div className="absolute right-0 bottom-0 left-0 z-40 px-4 pb-4 sm:px-12 sm:pb-6">
+    <div
+      data-testid="trip-prompt-bar"
+      className="shrink-0 border-t border-border/60 bg-background px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-12 sm:pb-6"
+    >
       <div className="mx-auto flex w-full max-w-[760px] flex-col items-center gap-3">
         <div className="scrollbar-none flex w-full flex-nowrap items-center justify-start gap-2 overflow-x-auto pb-1">
           {suggestions.map((suggestion) => (
