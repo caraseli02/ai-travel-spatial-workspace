@@ -18,6 +18,12 @@ export function TripListHeader({
   onToggleChat,
   onCreateTrip,
 }: TripListHeaderProps) {
+  const chatToggleLabel = `${showChatHistory ? "Close" : "Open"} chat history${
+    chatCount > 0
+      ? `, ${chatCount} ${chatCount === 1 ? "conversation" : "conversations"}`
+      : ""
+  }`;
+
   return (
     <header className="z-20 h-16 shrink-0 border-b border-border bg-background">
       <div className="mx-auto flex h-full w-full max-w-[1344px] items-center justify-between px-4 sm:px-12">
@@ -39,6 +45,7 @@ export function TripListHeader({
             variant="ghost"
             size="sm"
             onClick={onToggleChat}
+            aria-label={chatToggleLabel}
             className={cn(showChatHistory && "bg-accent text-foreground")}
           >
             <MessageSquare className="size-4" />

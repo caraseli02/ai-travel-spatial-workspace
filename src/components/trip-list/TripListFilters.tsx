@@ -1,6 +1,5 @@
 import { CheckCircle2, Clock3, Compass, Filter, Globe, Plane } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import type { TripStatusFilter } from "./types";
@@ -27,9 +26,12 @@ export function TripListFilters({
   return (
     <div className="shrink-0 border-b border-border bg-background">
       <div className="mx-auto flex w-full max-w-[1344px] items-center gap-2.5 overflow-x-auto px-4 py-4 sm:px-12">
-        <Button variant="outline" size="icon" className="shrink-0" aria-hidden>
+        <span
+          aria-hidden
+          className="inline-flex size-9 shrink-0 items-center justify-center rounded-md border border-input bg-background"
+        >
           <Filter className="size-4 text-muted-foreground" />
-        </Button>
+        </span>
 
         <Tabs value={selectedFilter} onValueChange={(value) => onSelectedFilterChange(value as TripStatusFilter)}>
           <TabsList className="gap-2 bg-transparent p-0">
