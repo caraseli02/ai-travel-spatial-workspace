@@ -35,6 +35,7 @@ export function TripGrid({
               className="group h-full min-h-[154px] cursor-pointer rounded-2xl border-2 border-dashed border-border/60 bg-white/[0.01] py-0 shadow-none ring-0 transition-all duration-300 hover:border-primary/40 hover:bg-muted/30 sm:min-h-[420px]"
               role="button"
               tabIndex={0}
+              aria-label="Create a new trip"
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") {
                   event.preventDefault();
