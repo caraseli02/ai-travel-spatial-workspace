@@ -114,7 +114,7 @@ export function TripCanvasKanbanView({
     <div className="absolute inset-0 overflow-hidden bg-[#f5f3ef]">
       <div
         className={cn(
-          "absolute inset-x-0 bottom-[calc(7rem+env(safe-area-inset-bottom))] md:bottom-14 md:top-14",
+          "absolute inset-x-0 bottom-[calc(7rem+env(safe-area-inset-bottom))] md:bottom-32 md:top-14",
           isMobile && activeDay !== null && "top-0 overflow-x-hidden overflow-y-auto",
           isMobile && activeDay === null && "top-0 snap-x snap-mandatory scroll-pl-4 overflow-x-auto overflow-y-hidden",
           !isMobile && "top-14 overflow-x-auto overflow-y-hidden",
@@ -122,7 +122,7 @@ export function TripCanvasKanbanView({
       >
         <div
           className={cn(
-            "flex h-full min-w-max origin-top-left gap-3 p-3 pb-6 transition-[zoom] md:px-10 md:py-4",
+            "flex h-full min-w-max origin-top-left gap-3 p-3 pb-6 transition-[zoom] md:py-4 md:pr-[18rem] md:pl-10",
             isMobile && activeDay === null && "[&>section]:snap-center",
             isMobile && activeDay !== null && "h-auto min-h-full w-full min-w-0 flex-col",
           )}
