@@ -85,7 +85,13 @@ export function TripGrid({
           )}
 
           {filteredTrips.length === 0 && selectedFilter !== "all" && trips.length > 0 && (
-            <motion.div layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+            <motion.div
+              layout
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              data-testid="trip-list-filter-empty-state"
+              className="lg:col-span-2"
+            >
               <Card className="h-full min-h-[420px] rounded-2xl border border-border bg-card py-0 shadow-sm ring-0">
                 <CardContent className="flex h-full min-h-[420px] flex-col justify-between p-8 [--card-spacing:--spacing(4)]">
                   <div className="space-y-6">
