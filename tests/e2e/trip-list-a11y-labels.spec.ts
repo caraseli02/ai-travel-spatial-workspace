@@ -23,7 +23,7 @@ test("trip list exposes accessible names for chat toggle and new trip card on mo
   await expect(newTripCard).toBeFocused();
 });
 
-test("trip list mobile filters show overflow affordance without a focusable filter glyph", async ({
+test("trip list mobile filters show overflow affordance without a filter glyph", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });

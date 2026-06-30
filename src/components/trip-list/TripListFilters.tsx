@@ -1,4 +1,4 @@
-import { CheckCircle2, Clock3, Compass, Filter, Globe, Plane } from "lucide-react";
+import { CheckCircle2, Clock3, Compass, Globe, Plane } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
@@ -27,13 +27,6 @@ export function TripListFilters({
     <section aria-label="Trip status filters" className="shrink-0 border-b border-border bg-background">
       <div className="relative mx-auto w-full max-w-[1344px]">
         <div className="flex w-full items-center gap-2.5 overflow-x-auto px-4 py-4 pr-12 sm:px-12">
-          <span
-            aria-hidden
-            className="inline-flex size-8 shrink-0 items-center justify-center text-muted-foreground"
-          >
-            <Filter className="size-4" />
-          </span>
-
           <Tabs value={selectedFilter} onValueChange={(value) => onSelectedFilterChange(value as TripStatusFilter)}>
             <TabsList className="gap-2 bg-transparent p-0">
               {tabConfig.map((tab) => {
