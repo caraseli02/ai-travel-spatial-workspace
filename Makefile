@@ -1,6 +1,6 @@
 NPM ?= npm
 
-.PHONY: setup dev test build lint typecheck e2e doctor fresh-session-test check status debt-next debt-prompt debt-agent
+.PHONY: setup dev test test-coverage build lint typecheck e2e doctor fresh-session-test check status debt-next debt-prompt debt-agent
 
 setup:
 	$(NPM) ci
@@ -10,6 +10,9 @@ dev:
 
 test:
 	$(NPM) test
+
+test-coverage:
+	$(NPM) run test:coverage
 
 build:
 	$(NPM) run build
@@ -46,7 +49,7 @@ fresh-session-test:
 	@grep -q "ready-for-agent" docs/agents/implementation-workflow.md
 	@echo "fresh-session-test: ok"
 
-check: test build lint typecheck e2e fresh-session-test
+check: test test-coverage build lint typecheck e2e fresh-session-test
 
 status:
 	git status --short

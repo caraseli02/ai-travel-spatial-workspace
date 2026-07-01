@@ -139,4 +139,29 @@ describe('tripListHelpers - generateTripFromMessage', () => {
       expect(diffDays).toBe(7); // 7-day duration
     }
   });
+
+  it('should create an exploratory destination when the prompt names an unmapped city', () => {
+    const trip = generateTripFromMessage('Plan a trip to Seville for two for 3 nights');
+
+    expect(trip.destination).toBe('Seville, Explore');
+    expect(trip.country).toBe('Explore');
+    expect(trip.travelers).toBe(2);
+    expect(trip.emoji).toBe('✈️');
+    expect(trip.cards[0]?.title).toBe('Flight to Seville');
+    if (trip.dates) {
+      const start = new Date(trip.dates.start);
+      const end = new Date(trip.dates.end);
+      const diffTime = Math.abs(end.getTime() - start.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      expect(diffDays).toBe(3);
+    }
+  });
+
+  it('should fall back to the default Paris Trip when no destination can be parsed', () => {
+    const trip = generateTripFromMessage('Surprise me with a relaxed food weekend');
+
+    expect(trip.destination).toBe('Paris, France');
+    expect(trip.travelers).toBe(1);
+    expect(trip.cards[0]?.price).toBe('$350');
+  });
 });

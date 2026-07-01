@@ -29,6 +29,19 @@ describe("tripWorkspaceViewHelpers", () => {
     expect(columns[6].cards.map((card) => card.id)).toEqual(["c13"]);
   });
 
+  it("uses a planning column when the Trip has no Day Groups yet", () => {
+    const columns = getKanbanCanvasColumns([], canvasCards.slice(0, 2));
+
+    expect(columns).toEqual([
+      {
+        day: 0,
+        label: "Planning",
+        color: "#78716c",
+        cards: [canvasCards[0], canvasCards[1]],
+      },
+    ]);
+  });
+
   it("keeps the map route panel aligned with the active day filter", () => {
     expect(getRouteDay(null)).toBeNull();
     expect(getRouteDay(4)).toBe(4);
@@ -41,6 +54,13 @@ describe("tripWorkspaceViewHelpers", () => {
     expect(sections.map((section) => section.label)).toEqual(["Morning", "Afternoon"]);
     expect(sections[0]?.cards.map((card) => card.id)).toEqual(["c4", "c5"]);
     expect(sections[1]?.cards.map((card) => card.id)).toEqual(["c6"]);
+  });
+
+  it("wraps route time slots across long optimized sequences", async () => {
+    const { getRouteTimeSlot } = await import("./tripWorkspaceViewHelpers");
+
+    expect(getRouteTimeSlot(0)).toBe("8:30 AM");
+    expect(getRouteTimeSlot(5)).toBe("8:30 AM");
   });
 
   it("strips redundant day labels from kanban card tags", () => {
@@ -68,5 +88,10 @@ describe("tripWorkspaceViewHelpers", () => {
         "$743",
       ),
     ).toEqual(["Window seat 32A confirmed"]);
+  });
+
+  it("keeps card details when no price comparison is needed", () => {
+    expect(filterRedundantCardDetails(undefined, "$10")).toEqual([]);
+    expect(filterRedundantCardDetails(["Bring cash"], undefined)).toEqual(["Bring cash"]);
   });
 });

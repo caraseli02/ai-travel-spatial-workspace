@@ -12,6 +12,14 @@ This document tracks codebase health signals that should survive session boundar
 | Environment | Improving | `.nvmrc`, `package.json` engines, `npm ci`, and CI are in place. | Use Node 22 LTS locally before release verification. |
 | Dependency health | Needs follow-up | `npm install --save-dev @playwright/test` reports 4 audit findings. | Run a scoped dependency-maintenance issue; avoid broad force updates during feature work. |
 
+## Coverage Expectations
+
+`make test-coverage` runs Vitest with V8 coverage over `src/models/` and
+`src/utils/`. The gate is 80% for lines, functions, statements, and branches so
+changes to Trip Workspace Model and helper behavior keep meaningful test
+coverage. Current model/utils baseline from the 2026-07-01 run: 92.15%
+statements, 80.68% branches, 97.97% functions, and 92.47% lines.
+
 ## Recurring Issues
 
 - Stale session state: `PROGRESS.md` can drift from GitHub issue state. Mitigation: update Operational Snapshot during non-issue or multi-session work.

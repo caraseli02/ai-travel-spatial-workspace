@@ -43,4 +43,34 @@ describe("preferences accessors", () => {
     );
     expect(getOnboardingCompleted()).toBe(true);
   });
+
+  it("falls back safely when storage reads fail", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    localStorageMock.getItem.mockImplementationOnce(() => {
+      throw new Error("storage unavailable");
+    });
+
+    expect(getOnboardingCompleted()).toBe(false);
+    expect(warnSpy).toHaveBeenCalledWith(
+      'Failed to get item "wayfarer_onboarding_completed" from localStorage:',
+      expect.any(Error),
+    );
+
+    warnSpy.mockRestore();
+  });
+
+  it("does not throw when storage writes fail", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    localStorageMock.setItem.mockImplementationOnce(() => {
+      throw new Error("storage unavailable");
+    });
+
+    expect(() => setOnboardingCompleted(false)).not.toThrow();
+    expect(warnSpy).toHaveBeenCalledWith(
+      'Failed to set item "wayfarer_onboarding_completed" in localStorage:',
+      expect.any(Error),
+    );
+
+    warnSpy.mockRestore();
+  });
 });
