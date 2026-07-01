@@ -49,7 +49,7 @@ fresh-session-test:
 	@grep -q "ready-for-agent" docs/agents/implementation-workflow.md
 	@echo "fresh-session-test: ok"
 
-check: test test-coverage build lint typecheck e2e fresh-session-test
+check: test-coverage build lint typecheck e2e fresh-session-test
 
 status:
 	git status --short

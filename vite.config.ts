@@ -22,7 +22,7 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "json-summary"],
       include: ["src/models/**/*.ts", "src/utils/**/*.ts"],
-      exclude: ["src/**/*.test.ts"],
+      exclude: ["src/**/*.{test,spec}.{ts,tsx}"],
       thresholds: {
         lines: 80,
         functions: 80,

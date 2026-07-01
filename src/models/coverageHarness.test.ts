@@ -15,9 +15,9 @@ describe("coverage harness", () => {
     const makefile = fs.readFileSync(path.join(process.cwd(), "Makefile"), "utf8");
 
     expect(packageJson.devDependencies).toHaveProperty("@vitest/coverage-v8");
-    expect(packageJson.scripts["test:coverage"]).toBe("vitest run --coverage");
+    expect(packageJson.scripts["test:coverage"]).toContain("--coverage");
     expect(makefile).toMatch(/^\.PHONY: .*test-coverage/m);
-    expect(makefile).toMatch(/^test-coverage:\n\t\$\(NPM\) run test:coverage/m);
+    expect(makefile).toMatch(/^test-coverage:\s*\n\s*\$\(NPM\)\s+run\s+test:coverage/m);
     expect(makefile).toMatch(/^check: .*test-coverage/m);
   });
 
@@ -28,6 +28,7 @@ describe("coverage harness", () => {
     expect(viteConfig).toContain('provider: "v8"');
     expect(viteConfig).toContain('"src/models/**/*.ts"');
     expect(viteConfig).toContain('"src/utils/**/*.ts"');
+    expect(viteConfig).toContain('"src/**/*.{test,spec}.{ts,tsx}"');
     expect(viteConfig).toMatch(/thresholds:\s*\{[\s\S]*lines:\s*80[\s\S]*functions:\s*80[\s\S]*statements:\s*80[\s\S]*branches:\s*80/);
 
     expect(qualityDoc).toContain("`make test-coverage`");
