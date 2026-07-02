@@ -27,6 +27,7 @@ Wayfarer is a React/Vite prototype for an AI-native travel workspace. It helps a
 - Preserve localStorage-first persistence behind the Trip Repository interface.
 - Preserve `react-router-dom` routes: `/`, `/trips`, and `/trips/:tripId`.
 - New interactive UI should compose shadcn primitives from `src/components/ui/` before custom markup (source: `docs/adr/0003-shadcn-ui-foundation.md`).
+- Keep new source files under the line limits enforced by `make file-size-check` (`docs/agents/file-size-limits.json`). Do not grow allowlisted legacy files; extract submodules instead.
 
 ## Fresh Session Map
 

@@ -6,7 +6,7 @@ This document tracks codebase health signals that should survive session boundar
 
 | Area | Rating | Evidence | Next action |
 | --- | --- | --- | --- |
-| Harness | Strong | Split routing docs, `make check`, CI, E2E smoke, startup checks. | Keep entry files short and maintain `PROGRESS.md`. |
+| Harness | Strong | Split routing docs, `make check`, CI, E2E smoke, startup checks, file-size ratchet. | Keep entry files short and maintain `PROGRESS.md`. |
 | Domain model | Strong | 99 unit tests cover Trip Repository, Trip Workspace Model, Trip Material memory, Linking Session, agent context, and the planner (wired via #49). | Add focused tests alongside the tech-debt module splits (#59, #60). |
 | UI runtime flows | Improving | Playwright smoke covers Landing Page, Trip List, Trip Workspace routing, and localStorage persistence. | Add focused E2E flows for new UI behavior beyond smoke coverage. |
 | Environment | Improving | `.nvmrc`, `package.json` engines, `npm ci`, and CI are in place. | Use Node 22 LTS locally before release verification. |
@@ -25,6 +25,7 @@ statements, 80.68% branches, 97.97% functions, and 92.47% lines.
 - Stale session state: `PROGRESS.md` can drift from GitHub issue state. Mitigation: update Operational Snapshot during non-issue or multi-session work.
 - Temporary visual artifacts: screenshots and `.pen.bak` files can pollute the worktree. Mitigation: `.gitignore` covers root screenshots and Pencil backups; referenced generated images stay tracked.
 - UI verification gaps: unit tests do not prove route, browser, or localStorage flows. Mitigation: `make e2e` is part of `make check`.
+- Monolithic source files: large coordinators hide responsibilities and bypass review. Mitigation: `make file-size-check` enforces per-area line limits with a ratcheting allowlist (`docs/agents/file-size-limits.json`).
 
 ## Cleanup Candidates
 

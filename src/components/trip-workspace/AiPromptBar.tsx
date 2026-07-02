@@ -1,0 +1,109 @@
+import { useState } from "react";
+import { Plus, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+
+export interface AiPromptBarProps {
+  onSendQuery: (query: string) => void;
+  isThinking: boolean;
+  dayCount: number;
+  isMobile: boolean;
+}
+
+export function AiPromptBar({ onSendQuery, isThinking, dayCount, isMobile }: AiPromptBarProps) {
+  const [value, setValue] = useState("");
+  const [focused, setFocused] = useState(false);
+  const nextDay = dayCount + 1;
+  const suggestions = [
+    `Plan Day ${nextDay}`,
+    "Suggest a ryokan in Arashiyama",
+    "Find a restaurant near Gion",
+  ];
+  const placeholderExample = `Plan Day ${nextDay}`;
+
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!value.trim() || isThinking) return;
+    onSendQuery(value);
+    setValue("");
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    onSendQuery(suggestion);
+  };
+
+  return (
+    <div className="absolute bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-1/2 z-20 w-full max-w-lg -translate-x-1/2 select-none px-4 md:bottom-14">
+      <form
+        onSubmit={handleSubmit}
+        className={cn(
+          "rounded-xl border bg-card transition-all duration-200",
+          focused ? "border-amber-300 shadow-lg" : "border-border shadow-sm",
+        )}
+      >
+        <div className="flex items-center gap-2 px-3 py-2.5">
+          {isThinking ? (
+            <Sparkles size={14} className="animate-spin text-amber-500" />
+          ) : (
+            <Sparkles size={14} className="text-primary" />
+          )}
+          <Input
+            className="h-auto flex-1 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:ring-0"
+            placeholder={
+              isThinking
+                ? "AI is thinking..."
+                : isMobile
+                  ? "Ask AI about this trip…"
+                  : `Ask AI: "${placeholderExample}" or "Suggest a ryokan in Arashiyama"`
+            }
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setTimeout(() => setFocused(false), 200)}
+            disabled={isThinking}
+          />
+          {isThinking ? (
+            <div className="flex items-center gap-1">
+              <span
+                className="size-1.5 animate-bounce rounded-full bg-amber-500"
+                style={{ animationDelay: "0ms" }}
+              />
+              <span
+                className="size-1.5 animate-bounce rounded-full bg-amber-500"
+                style={{ animationDelay: "150ms" }}
+              />
+              <span
+                className="size-1.5 animate-bounce rounded-full bg-amber-500"
+                style={{ animationDelay: "300ms" }}
+              />
+            </div>
+          ) : (
+            value && (
+              <Button type="submit" size="icon-sm" className="size-6 shrink-0">
+                <Plus size={12} className="rotate-45" />
+              </Button>
+            )
+          )}
+        </div>
+
+        {focused && !value && !isThinking && (
+          <div className="flex animate-in flex-wrap gap-1.5 px-3 pb-2.5 fade-in slide-in-from-bottom-1">
+            {suggestions.map((s, i) => (
+              <Button
+                key={i}
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => handleSuggestionClick(s)}
+                className="h-auto rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs text-amber-900 hover:bg-amber-100"
+              >
+                {s}
+              </Button>
+            ))}
+          </div>
+        )}
+      </form>
+    </div>
+  );
+}

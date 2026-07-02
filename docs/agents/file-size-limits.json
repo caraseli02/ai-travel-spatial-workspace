@@ -1,0 +1,54 @@
+{
+  "limits": [
+    {
+      "id": "components",
+      "root": "src/components",
+      "extensions": [".tsx"],
+      "excludeDirs": ["ui"],
+      "maxLines": 500,
+      "guidance": "Extract subcomponents into a feature folder (for example trip-workspace/ or trip-list/). Keep coordinators thin."
+    },
+    {
+      "id": "models",
+      "root": "src/models",
+      "extensions": [".ts"],
+      "excludeSuffixes": [".test.ts"],
+      "maxLines": 500,
+      "guidance": "Split pure behavior into focused modules. See issue #60 for tripWorkspaceModel."
+    },
+    {
+      "id": "hooks",
+      "root": "src/hooks",
+      "extensions": [".ts"],
+      "excludeSuffixes": [".test.ts"],
+      "maxLines": 400,
+      "guidance": "Move orchestration into models or feature subcomponents when a hook grows past one responsibility."
+    }
+  ],
+  "allowlist": [
+    {
+      "path": "src/components/LandingPage.tsx",
+      "maxLines": 853,
+      "issue": 70,
+      "note": "Landing Page decomposition epic"
+    },
+    {
+      "path": "src/components/LandingWorkspacePreview.tsx",
+      "maxLines": 649,
+      "issue": 63,
+      "note": "Shared workspace preview chrome"
+    },
+    {
+      "path": "src/components/TripWorkspaceViews.tsx",
+      "maxLines": 599,
+      "issue": 70,
+      "note": "Canvas and map view shells"
+    },
+    {
+      "path": "src/models/tripWorkspaceModel.ts",
+      "maxLines": 737,
+      "issue": 60,
+      "note": "Split Trip Workspace Model into focused modules"
+    }
+  ]
+}

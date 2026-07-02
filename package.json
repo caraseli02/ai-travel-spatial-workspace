@@ -16,6 +16,7 @@
     "lint": "oxlint src tests vite.config.ts playwright.config.ts --deny-warnings",
     "e2e": "playwright test",
     "typecheck": "tsc --noEmit -p tsconfig.check.json",
+    "file-size-check": "node scripts/check-file-sizes.mjs",
     "debt:next": "bash scripts/next-tech-debt-issue.sh",
     "debt:prompt": "bash scripts/next-tech-debt-issue.sh --prompt",
     "debt:agent": "node scripts/run-next-tech-debt-agent.mjs"
