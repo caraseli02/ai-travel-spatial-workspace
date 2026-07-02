@@ -11,6 +11,7 @@ dist/
 dist-ssr/
 test-results/
 playwright-report/
+coverage/
 
 # Local verification screenshots
 mobile_*.png

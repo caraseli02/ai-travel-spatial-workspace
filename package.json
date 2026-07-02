@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "vite",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "oxlint src tests vite.config.ts playwright.config.ts --deny-warnings",
@@ -43,6 +44,7 @@
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "5.1.1",
+    "@vitest/coverage-v8": "^4.1.7",
     "oxlint": "^1.36.0",
     "tailwindcss": "4.1.17",
     "typescript": "5.9.3",
