@@ -25,18 +25,5 @@
       "guidance": "Move orchestration into models or feature subcomponents when a hook grows past one responsibility."
     }
   ],
-  "allowlist": [
-    {
-      "path": "src/components/LandingPage.tsx",
-      "maxLines": 853,
-      "issue": 70,
-      "note": "Landing Page decomposition epic"
-    },
-    {
-      "path": "src/components/LandingWorkspacePreview.tsx",
-      "maxLines": 649,
-      "issue": 63,
-      "note": "Shared workspace preview chrome"
-    }
-  ]
+  "allowlist": []
 }
