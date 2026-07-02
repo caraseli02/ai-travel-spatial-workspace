@@ -25,12 +25,5 @@
       "guidance": "Move orchestration into models or feature subcomponents when a hook grows past one responsibility."
     }
   ],
-  "allowlist": [
-    {
-      "path": "src/components/TripWorkspaceViews.tsx",
-      "maxLines": 599,
-      "issue": 70,
-      "note": "Canvas and map view shells"
-    }
-  ]
+  "allowlist": []
 }
