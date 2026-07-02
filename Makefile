@@ -1,6 +1,6 @@
 NPM ?= npm
 
-.PHONY: setup dev test test-coverage build lint typecheck e2e doctor fresh-session-test check status debt-next debt-prompt debt-agent
+.PHONY: setup dev test test-coverage build lint typecheck e2e doctor fresh-session-test file-size-check check status debt-next debt-prompt debt-agent
 
 setup:
 	$(NPM) ci
@@ -42,6 +42,7 @@ fresh-session-test:
 	@test -s CONTEXT.md
 	@test -s docs/agents/harness.md
 	@test -s docs/agents/startup-readiness.md
+	@test -s docs/agents/file-size-limits.json
 	@test -s docs/architecture/codebase-map.md
 	@grep -q "make check" AGENTS.md
 	@grep -q "make check" docs/agents/startup-readiness.md
@@ -49,7 +50,10 @@ fresh-session-test:
 	@grep -q "ready-for-agent" docs/agents/implementation-workflow.md
 	@echo "fresh-session-test: ok"
 
-check: test-coverage build lint typecheck e2e fresh-session-test
+file-size-check:
+	node scripts/check-file-sizes.mjs
+
+check: test-coverage build lint typecheck file-size-check e2e fresh-session-test
 
 status:
 	git status --short

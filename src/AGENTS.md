@@ -19,3 +19,4 @@ Read this when editing files under `src/`.
 - Prefer testing pure behavior in `models/`, `hooks/`, or `utils/` before testing through component rendering.
 - Use shadcn primitives from `components/ui/` for new interactive controls when a primitive exists.
 - Update `docs/architecture/codebase-map.md` if a source-area responsibility moves.
+- New or growing files must pass `make file-size-check`. Extract feature subfolders (`trip-list/`, `trip-workspace/`, etc.) before a coordinator reaches ~500 lines. See `docs/agents/file-size-limits.json`.

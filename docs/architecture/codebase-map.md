@@ -69,4 +69,12 @@ To decouple rendering layout from state orchestration:
 
 ## Main Workspace
 
-`src/components/TripWorkspace.tsx` is the primary screen coordinator. It loads the requested Trip by ID via `localTripRepository` on mount, mounts state and physics hooks, renders the spatial grid, SVG links, and sub-components, and persists all workspace changes to the repository reactively.
+`src/components/TripWorkspace.tsx` is the route-level coordinator. It loads the requested Trip by ID via `localTripRepository`, handles not-found/loading states, and renders `TripWorkspacePresenter`.
+
+`src/components/TripWorkspacePresenter.tsx` wires workspace state hooks, persistence, and the main layout. It composes focused subcomponents from `src/components/trip-workspace/`:
+
+- `TripWorkspaceHeaderChrome.tsx`: top navigation, day filters, share/export, inbox toggle.
+- `AiPromptBar.tsx`: bottom AI prompt with suggestions.
+- `CreateCardModal.tsx` / `AddDayModal.tsx`: manual card and custom day dialogs.
+
+Canvas and map views live in `TripWorkspaceViews.tsx`; inbox, card detail, and canvas card renderers remain sibling components under `src/components/`.

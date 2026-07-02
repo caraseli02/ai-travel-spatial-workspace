@@ -92,7 +92,7 @@ Fix the harness layer that failed. Do not upgrade the model first.
 
 Completion is external evidence, not agent confidence. Use this hierarchy:
 
-1. Static layer: `make lint`, `make typecheck`, and `make build` where relevant.
+1. Static layer: `make lint`, `make typecheck`, `make build`, and `make file-size-check` where relevant.
 2. Runtime behavior layer: `make test`, focused tests, and application startup checks.
 3. Full-flow layer: `make e2e` and focused browser verification for cross-component UI, routing, persistence, or interaction changes.
 
@@ -123,7 +123,7 @@ This is the same practice as **Review Feedback Promotion**: when a repeated revi
 | Tools | Commands are standardized in `Makefile`. | Add commands before adding prose-only rules. | `make doctor`, CI |
 | Environment | Node 22 baseline in `.nvmrc`; dependencies locked. | Run `npm ci` when dependency state changes. | `make setup`, CI |
 | State | `PROGRESS.md`, issues, PRs, ADRs, and `CONTEXT.md` hold durable state. | No durable decision may live only in chat. | Clock-out checklist |
-| Feedback | Unit tests, strict lint, typecheck, build, Playwright smoke tests. | Add focused tests when smoke coverage is too broad. | `make check`, CI |
+| Feedback | Unit tests, strict lint, typecheck, build, file-size ratchet, Playwright smoke tests. | Add focused tests when smoke coverage is too broad. | `make check`, CI |
 | Observability | E2E traces on failure; `docs/agents/quality.md` records health. | Recurring failures become checks or quality entries with agent-oriented messages (see Agent-Oriented Errors). | PR template + quality review |
 | Clean state | Completion requires passing checks, progress record, no stale artifacts. | Temporary screenshots/backups are ignored or deleted. | PR template + `.gitignore` |
 

@@ -49,6 +49,7 @@ Do not start a blocked issue until every blocker is merged, not merely opened.
 6. Run verification:
    - `make test` for behavior-only changes.
    - `make check` for runtime, build, or UI changes.
+   - `make file-size-check` when adding or growing files under `src/components/`, `src/models/`, or `src/hooks/`.
    - Focused browser/full-flow verification for visible UI, routing, localStorage
      persistence, or multi-component interactions.
 7. Open a PR that links the issue, lists acceptance criteria status, and records
