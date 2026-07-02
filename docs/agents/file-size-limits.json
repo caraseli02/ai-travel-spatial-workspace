@@ -33,12 +33,6 @@
       "note": "Landing Page decomposition epic"
     },
     {
-      "path": "src/components/LandingWorkspacePreview.tsx",
-      "maxLines": 649,
-      "issue": 63,
-      "note": "Shared workspace preview chrome"
-    },
-    {
       "path": "src/components/TripWorkspaceViews.tsx",
       "maxLines": 599,
       "issue": 70,
