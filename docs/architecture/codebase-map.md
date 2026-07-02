@@ -55,9 +55,11 @@ To enable persistent plans without backend infra, we use a clean repository patt
 
 `src/models/tripWorkspaceModel.ts` is the pure state logic module:
 
-- `tripWorkspaceReducer`: handles semantic transitions (adding inbox items, processing inbox items, custom day groups, card edits, manual cards, and mock AI suggestions).
-- `buildInboxItem`: parses pasted Trip Material text into structured Inbox Items.
-- `buildProcessedCanvasCard`: handles promoting raw items into canvas cards placed dynamically near their active Day Label coordinates.
+- `tripWorkspaceInbox.ts`: parses pasted Trip Material into structured Inbox Items (`buildInboxItem`).
+- `tripWorkspaceCanvas.ts`: Canvas Card placement, dimensions, and manual card/day builders.
+- `tripWorkspaceAi.ts`: applies mocked AI planner outcomes to workspace state.
+- `tripWorkspaceReducer.ts`: `tripWorkspaceReducer`, connection helpers, and action handling.
+- `tripWorkspaceModel.ts`: stable barrel re-exporting the public API for hooks and components.
 
 ## State Coordinator & Viewport Hooks
 

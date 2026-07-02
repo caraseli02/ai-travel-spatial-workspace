@@ -7,7 +7,7 @@ Read this when editing files under `src/`.
 - `App.tsx`: route composition for Landing Page, Trip List, and Trip Workspace.
 - `components/`: user-facing React surfaces and UI composition.
 - `components/ui/`: owned shadcn primitives.
-- `models/`: domain schemas, Trip Repository interface, repository implementation, and pure Trip Workspace behavior.
+- `models/`: domain schemas, Trip Repository interface, repository implementation, and pure Trip Workspace behavior (`tripWorkspaceInbox`, `tripWorkspaceCanvas`, `tripWorkspaceAi`, `tripWorkspaceReducer`; barrel `tripWorkspaceModel.ts`).
 - `hooks/`: React coordination for Trip Workspace state, Spatial Canvas viewport behavior, and Linking Session state.
 - `data/`: Demo Trip fixtures and factories.
 - `utils/`: small helpers with focused tests.
