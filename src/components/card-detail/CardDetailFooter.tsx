@@ -1,4 +1,4 @@
-import { Calendar, ExternalLink, Link, Trash2 } from "lucide-react";
+import { ExternalLink, Link, Trash2 } from "lucide-react";
 import type { CardSourceMemory } from "../../models/tripMaterialMemory";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -38,28 +38,6 @@ export function CardDetailFooter({
         </Button>
       )}
 
-      <div className="grid grid-cols-2 gap-2">
-        {showDeleteButton && onDelete && (
-          <Button
-            variant="outline"
-            onClick={onDelete}
-            className={cn(
-              "text-xs font-semibold border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive",
-              confirmDelete &&
-                "animate-pulse border-destructive bg-destructive text-destructive-foreground hover:bg-destructive hover:text-destructive-foreground",
-            )}
-          >
-            <Trash2 className="size-3" />
-            {confirmDelete ? "Confirm delete" : "Delete Card"}
-          </Button>
-        )}
-
-        <Button variant="outline" className="text-xs font-semibold text-muted-foreground">
-          <Calendar className="size-3" />
-          Itinerary
-        </Button>
-      </div>
-
       {sourceMemory?.kind === "source-backed" && sourceMemory.sourceUrl && (
         <Button asChild className="w-full text-xs font-bold">
           <a href={sourceMemory.sourceUrl} target="_blank" rel="noopener noreferrer">
@@ -67,6 +45,26 @@ export function CardDetailFooter({
             Open original link
           </a>
         </Button>
+      )}
+
+      {showDeleteButton && onDelete && (
+        <div
+          className="border-t border-destructive/20 pt-2"
+          data-card-detail-footer-section="destructive"
+        >
+          <Button
+            variant="outline"
+            onClick={onDelete}
+            className={cn(
+              "w-full text-xs font-semibold border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive",
+              confirmDelete &&
+                "animate-pulse border-destructive bg-destructive text-destructive-foreground hover:bg-destructive hover:text-destructive-foreground",
+            )}
+          >
+            <Trash2 className="size-3" />
+            {confirmDelete ? "Confirm delete" : "Delete Card"}
+          </Button>
+        </div>
       )}
     </div>
   );
