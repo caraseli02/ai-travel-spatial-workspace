@@ -43,12 +43,6 @@
       "maxLines": 599,
       "issue": 70,
       "note": "Canvas and map view shells"
-    },
-    {
-      "path": "src/models/tripWorkspaceModel.ts",
-      "maxLines": 737,
-      "issue": 60,
-      "note": "Split Trip Workspace Model into focused modules"
     }
   ]
 }

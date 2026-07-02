@@ -1,22 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { canvasCards, connections, createDemoTrip, dayGroups, inboxItems } from '@/data/tripData';
+import { canvasCards, createDemoTrip, dayGroups } from '@/data/tripData';
 import { createEmptyTrip, type CanvasCard } from '@/models/trip';
 import {
-  applyAiPromptToTripWorkspace,
-  buildInboxItem,
-  buildProcessedCanvasCard,
   deleteCanvasCardFromWorkspace,
   dayLabelConfig,
-  getCardCenter,
   canConnectCards,
   connectCards,
   tripWorkspaceReducer,
   type TripWorkspaceState,
 } from '@/models/tripWorkspaceModel';
 import { resolveInboxItemDisplayState } from '@/models/tripMaterialMemory';
-
-const zeroRandom = () => 0.5;
-const fixedNow = () => 1_774_200_000_000;
 
 const createBaseWorkspaceState = (overrides: Partial<TripWorkspaceState> = {}): TripWorkspaceState => ({
   activeDay: null,
@@ -45,92 +38,6 @@ const createStickyCard = (overrides: Partial<CanvasCard> = {}): CanvasCard => ({
 });
 
 describe('Trip Workspace model', () => {
-  it('classifies new trip material into Inbox Items', () => {
-    expect(buildInboxItem('ANA flight SFO-KIX JL69', fixedNow)).toMatchObject({
-      id: 'i_spawn_1774200000000',
-      type: 'flight',
-      source: 'Flight Parser',
-      content: 'ANA flight SFO-KIX JL69',
-      timestamp: 'Just now',
-      processed: false,
-    });
-
-    expect(buildInboxItem('Mom says: buy matcha kit-kats', fixedNow)).toMatchObject({
-      type: 'whatsapp',
-      source: 'WhatsApp Sync',
-      avatar: '💬',
-    });
-  });
-
-  it('turns a processed Inbox Item into a day-associated Canvas Card and dynamic connection', () => {
-    const result = buildProcessedCanvasCard({
-      item: inboxItems.find(item => item.id === 'i7')!,
-      activeDay: null,
-      dayLabels: dayLabelConfig,
-      cards: canvasCards,
-      now: fixedNow,
-      random: zeroRandom,
-    });
-
-    expect(result.processedItem.processed).toBe(true);
-    expect(result.processedItem.resultingCardId).toBe('c_spawn_1774200000000');
-    expect(result.newCard).toMatchObject({
-      id: 'c_spawn_1774200000000',
-      type: 'article',
-      promotedFromInboxId: 'i7',
-      x: 218,
-      y: 285,
-      rotation: 0,
-      title: 'Mizai Restaurant',
-      subtitle: 'Michelin 3★ Kaiseki near Maruyama Park',
-      tag: 'Day 4 · Fine Dining',
-      tagColor: 'rose',
-      day: 4,
-      width: 250,
-    });
-    expect(result.connection).toEqual({
-      from: 'c4',
-      to: 'c_spawn_1774200000000',
-      label: 'dynamic-link',
-    });
-  });
-
-  it('applies the mocked Day 5 AI prompt as a cited planner reply without hardcoded card mutation', () => {
-    const result = applyAiPromptToTripWorkspace({
-      ...createBaseWorkspaceState({
-        activeDay: null,
-        days: dayGroups,
-        dayLabels: dayLabelConfig,
-        cards: canvasCards,
-        connections,
-        items: inboxItems,
-      }),
-      query: 'Plan Day 5',
-      trip: createDemoTrip(),
-      now: fixedNow,
-      random: zeroRandom,
-    });
-
-    expect(result.activeDay).toBe(5);
-    expect(result.days).toEqual(dayGroups);
-    expect(result.dayLabels).toEqual(dayLabelConfig);
-    expect(result.cards.some(card => card.id === 'c15')).toBe(false);
-    expect(result.cards.at(-1)).toMatchObject({
-      id: 'c_ai_response_1774200000000',
-      type: 'note',
-      title: 'AI Planner Reply',
-      subtitle: 'Day 5 already has Kikunoi Honten.',
-      day: 5,
-      details: ['Citations: Kikunoi Honten'],
-    });
-    expect(result.connections).toEqual(connections);
-  });
-
-  it('computes connection endpoints from Canvas Card dimensions', () => {
-    expect(getCardCenter({ ...canvasCards[0], width: 300 })).toEqual({ x: 180, y: 162 });
-    expect(getCardCenter(canvasCards[4])).toEqual({ x: 372.5, y: 350 });
-  });
-
   it('deletes a source-backed Canvas Card without deleting its source Inbox Item memory', () => {
     const sourceItem = {
       id: 'i_source',
