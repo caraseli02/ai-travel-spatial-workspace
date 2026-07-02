@@ -27,12 +27,6 @@
   ],
   "allowlist": [
     {
-      "path": "src/components/LandingPage.tsx",
-      "maxLines": 853,
-      "issue": 70,
-      "note": "Landing Page decomposition epic"
-    },
-    {
       "path": "src/components/TripWorkspaceViews.tsx",
       "maxLines": 599,
       "issue": 70,
