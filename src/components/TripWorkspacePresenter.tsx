@@ -3,9 +3,6 @@ import type { NavigateFunction } from "react-router-dom";
 import {
   Calendar,
   MapPin,
-  ZoomIn,
-  ZoomOut,
-  Maximize2,
   Clock,
   X,
 } from "lucide-react";
@@ -15,7 +12,6 @@ import CardDetailPanel from "./CardDetailPanel";
 import {
   TripCanvasKanbanView,
   TripMapView,
-  WorkspaceViewSwitcher,
   type WorkspaceView,
 } from "./TripWorkspaceViews";
 import type { CanvasCard, Trip } from "../models/trip";
@@ -35,6 +31,9 @@ import { AiPromptBar } from "./trip-workspace/AiPromptBar";
 import { CreateCardModal } from "./trip-workspace/CreateCardModal";
 import { AddDayModal } from "./trip-workspace/AddDayModal";
 import { TripWorkspaceHeaderChrome } from "./trip-workspace/TripWorkspaceHeaderChrome";
+import { WorkspaceCanvasToolbar } from "./trip-workspace/WorkspaceCanvasToolbar";
+import { WorkspaceOverlayChrome } from "./trip-workspace/WorkspaceOverlayChrome";
+import { WorkspaceTripStatsPill } from "./trip-workspace/WorkspaceTripStatsPill";
 import {
   WorkspaceActionFeedback,
   type WorkspaceFeedback,
@@ -44,7 +43,6 @@ import {
   buildOrganizedInboxItemFeedback,
   buildShareFeedback,
 } from "./trip-workspace/workspaceFeedbackMessages";
-import { StatItem, ToolBtn } from "./trip-workspace/WorkspaceToolbarPrimitives";
 
 export interface TripWorkspacePresenterProps {
   trip: Trip;
@@ -322,61 +320,36 @@ export default function TripWorkspacePresenter({
 
         <main className="relative flex-1 overflow-hidden">
           {!isMobile && !(isMobile && inboxOpen) && !selectedCard && (
-            <div className="absolute inset-x-3 top-3 z-[700] md:inset-x-0 md:px-3">
-              <div
-                className={cn(
-                  "flex w-full items-center gap-2",
-                  workspaceView === "canvas" ? "justify-between md:justify-start" : "justify-end",
-                )}
-              >
-                {workspaceView === "canvas" ? (
-                  <div className="hidden shrink-0 items-center gap-1 rounded-xl border border-border bg-card px-1 py-1 shadow-sm md:flex">
-                    <ToolBtn icon={<ZoomIn size={14} />} onClick={() => handleZoom("in")} title="Zoom in" />
-                    <span className="px-1 font-mono text-xs text-muted-foreground tabular-nums">
-                      {Math.round(kanbanZoom * 100)}%
-                    </span>
-                    <ToolBtn icon={<ZoomOut size={14} />} onClick={() => handleZoom("out")} title="Zoom out" />
-                    <div className="mx-0.5 hidden h-4 w-px bg-border sm:block" />
-                    <div className="hidden sm:contents">
-                      <ToolBtn icon={<Maximize2 size={14} />} onClick={handleReset} title="Reset view" />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="hidden shrink-0 md:block md:w-0" aria-hidden />
-                )}
-
-                <div
-                  className={cn(
-                    "shrink-0",
-                    workspaceView === "canvas"
-                      ? "md:flex md:min-w-0 md:flex-1 md:justify-center md:px-3"
-                      : "md:flex md:min-w-0 md:flex-1 md:justify-center",
-                  )}
-                >
-                  <WorkspaceViewSwitcher value={workspaceView} onValueChange={handleWorkspaceViewChange} />
-                </div>
-
-                {workspaceView !== "map" ? (
-                  <div className="hidden max-w-[min(100%,28rem)] shrink-0 select-none items-center gap-1.5 overflow-hidden rounded-xl border border-border bg-card px-2 py-1.5 shadow-sm md:flex md:gap-2 md:px-2.5 md:py-2 lg:max-w-none lg:gap-2.5 lg:px-3">
-                    <StatItem icon={<Calendar size={11} />} label={formatTripDates(trip.dates)} />
-                    <div className="h-3 w-px shrink-0 bg-border" />
-                    <StatItem icon={<MapPin size={11} />} label={trip.destination} />
-                    {trip.dates && (
-                      <>
-                        <div className="h-3 w-px shrink-0 bg-border" />
-                        <StatItem icon={<Clock size={11} />} label={formatTripDurationNights(trip.dates)} />
-                      </>
-                    )}
-                    <div className="hidden h-3 w-px shrink-0 bg-border lg:block" />
+            <WorkspaceOverlayChrome
+              className="z-[700]"
+              view={workspaceView}
+              onViewChange={handleWorkspaceViewChange}
+              toolbar={
+                <WorkspaceCanvasToolbar
+                  zoomPercent={Math.round(kanbanZoom * 100)}
+                  onZoomIn={() => handleZoom("in")}
+                  onZoomOut={() => handleZoom("out")}
+                  onReset={handleReset}
+                />
+              }
+              stats={
+                <WorkspaceTripStatsPill
+                  items={[
+                    { icon: <Calendar size={11} />, label: formatTripDates(trip.dates) },
+                    { icon: <MapPin size={11} />, label: trip.destination },
+                    ...(trip.dates
+                      ? [{ icon: <Clock size={11} />, label: formatTripDurationNights(trip.dates) }]
+                      : []),
+                  ]}
+                  trailing={
                     <span className="hidden text-xs text-muted-foreground lg:inline">
-                      Budget: <span className="font-semibold text-foreground">{deriveTripBudget(trip)}</span>
+                      Budget:{" "}
+                      <span className="font-semibold text-foreground">{deriveTripBudget(trip)}</span>
                     </span>
-                  </div>
-                ) : (
-                  <div className="hidden shrink-0 md:block md:w-0" aria-hidden />
-                )}
-              </div>
-            </div>
+                  }
+                />
+              }
+            />
           )}
 
           {linkingSession.isActive && (
