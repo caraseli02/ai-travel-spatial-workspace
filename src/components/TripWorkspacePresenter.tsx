@@ -35,6 +35,16 @@ import { AiPromptBar } from "./trip-workspace/AiPromptBar";
 import { CreateCardModal } from "./trip-workspace/CreateCardModal";
 import { AddDayModal } from "./trip-workspace/AddDayModal";
 import { TripWorkspaceHeaderChrome } from "./trip-workspace/TripWorkspaceHeaderChrome";
+import {
+  WorkspaceActionFeedback,
+  type WorkspaceFeedback,
+} from "./trip-workspace/WorkspaceActionFeedback";
+import {
+  buildExportFeedback,
+  buildOrganizedInboxItemFeedback,
+  buildShareFeedback,
+} from "./trip-workspace/workspaceFeedbackMessages";
+import { StatItem, ToolBtn } from "./trip-workspace/WorkspaceToolbarPrimitives";
 
 export interface TripWorkspacePresenterProps {
   trip: Trip;
@@ -55,6 +65,8 @@ export default function TripWorkspacePresenter({
 }: TripWorkspacePresenterProps) {
   const [kanbanZoom, setKanbanZoom] = useState(1);
   const [workspaceView, setWorkspaceView] = useState<WorkspaceView>("canvas");
+  const [workspaceFeedback, setWorkspaceFeedback] = useState<WorkspaceFeedback | null>(null);
+  const [pendingOrganizedItemId, setPendingOrganizedItemId] = useState<string | null>(null);
 
   const initialState = useMemo<TripWorkspaceState>(() => {
     return {
@@ -112,7 +124,10 @@ export default function TripWorkspacePresenter({
   });
 
   const handleAddItem = addInboxItem;
-  const handleProcessItem = processInboxItem;
+  const handleProcessItem = useCallback((id: string) => {
+    setPendingOrganizedItemId(id);
+    processInboxItem(id);
+  }, [processInboxItem]);
   const handleSendQuery = sendAiQuery;
   const handleUpdateCard = updateCard;
   const handleDeleteCard = deleteCard;
@@ -130,7 +145,11 @@ export default function TripWorkspacePresenter({
 
   const handleAddCustomDay = useCallback((dayNum: number, labelText: string) => {
     if (days.some((d) => d.day === dayNum)) {
-      alert(`Day ${dayNum} already exists!`);
+      setWorkspaceFeedback({
+        tone: "error",
+        title: "Day already exists",
+        message: `Day ${dayNum} is already in this Trip Workspace.`,
+      });
       return;
     }
     addCustomDay(dayNum, labelText);
@@ -143,6 +162,27 @@ export default function TripWorkspacePresenter({
       hookSetSelectedCard(cardOrFn);
     }
   }, [selectedCard, hookSetSelectedCard]);
+
+  useEffect(() => {
+    if (!pendingOrganizedItemId) return;
+
+    const organizedItem = items.find((item) => item.id === pendingOrganizedItemId && item.resultingCardId);
+    const resultingCard = organizedItem
+      ? cards.find((card) => card.id === organizedItem.resultingCardId)
+      : undefined;
+
+    if (!organizedItem || !resultingCard) return;
+
+    setSelectedCard(resultingCard);
+    setWorkspaceFeedback(
+      buildOrganizedInboxItemFeedback({
+        source: organizedItem.source,
+        cardTitle: resultingCard.title,
+        day: resultingCard.day,
+      }),
+    );
+    setPendingOrganizedItemId(null);
+  }, [cards, items, pendingOrganizedItemId, setSelectedCard]);
 
   const handleZoom = useCallback((direction: "in" | "out") => {
     setKanbanZoom((current) => {
@@ -193,27 +233,42 @@ export default function TripWorkspacePresenter({
     if (navigator.share) {
       try {
         await navigator.share({ title: trip.name, url });
+        setWorkspaceFeedback(buildShareFeedback("native-shared"));
         return;
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") return;
       }
     }
     try {
+      if (!navigator.clipboard) {
+        throw new Error("Clipboard API unavailable");
+      }
       await navigator.clipboard.writeText(url);
-      alert("Trip link copied to clipboard.");
+      setWorkspaceFeedback(buildShareFeedback("clipboard-copied"));
     } catch {
-      alert("Could not copy the trip link. Copy it from the address bar.");
+      setWorkspaceFeedback(buildShareFeedback("copy-failed"));
     }
   }, [trip.name]);
 
   const handleExportTrip = useCallback(() => {
-    const blob = new Blob([JSON.stringify(trip, null, 2)], { type: "application/json" });
-    const objectUrl = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = objectUrl;
-    anchor.download = `${trip.id}.json`;
-    anchor.click();
-    URL.revokeObjectURL(objectUrl);
+    const filename = `${trip.id}.json`;
+    let objectUrl: string | null = null;
+
+    try {
+      const blob = new Blob([JSON.stringify(trip, null, 2)], { type: "application/json" });
+      objectUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = objectUrl;
+      anchor.download = filename;
+      anchor.click();
+      setWorkspaceFeedback(buildExportFeedback("download-started", filename));
+    } catch {
+      setWorkspaceFeedback(buildExportFeedback("download-failed", filename));
+    } finally {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    }
   }, [trip]);
 
   return (
@@ -340,6 +395,11 @@ export default function TripWorkspacePresenter({
             </div>
           )}
 
+          <WorkspaceActionFeedback
+            feedback={workspaceFeedback}
+            onDismiss={() => setWorkspaceFeedback(null)}
+          />
+
           {workspaceView !== "map" && (
             <AiPromptBar
               onSendQuery={handleSendQuery}
@@ -403,39 +463,6 @@ export default function TripWorkspacePresenter({
         onSubmit={handleAddCustomDay}
         nextDayNum={days.length + 1}
       />
-    </div>
-  );
-}
-
-function ToolBtn({
-  icon,
-  onClick,
-  title,
-  active,
-}: {
-  icon: React.ReactNode;
-  onClick: () => void;
-  title: string;
-  active?: boolean;
-}) {
-  return (
-    <Button
-      variant={active ? "secondary" : "ghost"}
-      size="icon-sm"
-      onClick={onClick}
-      title={title}
-      className={cn("size-7", active && "border-amber-200 bg-amber-50 text-amber-900")}
-    >
-      {icon}
-    </Button>
-  );
-}
-
-function StatItem({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <div className="flex min-w-0 items-center gap-1 text-muted-foreground">
-      <span className="shrink-0">{icon}</span>
-      <span className="truncate text-xs">{label}</span>
     </div>
   );
 }
