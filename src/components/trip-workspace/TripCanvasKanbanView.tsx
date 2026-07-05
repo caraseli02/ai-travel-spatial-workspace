@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Plus } from "lucide-react";
 import { CanvasCardRenderer } from "@/components/CanvasCards";
 import type { CanvasCard, DayGroup } from "@/models/trip";
@@ -36,12 +36,23 @@ export function TripCanvasKanbanView({
 }) {
   const columns = useMemo(() => getKanbanCanvasColumns(days, cards), [cards, days]);
   const locatedCardCount = useMemo(() => getMappedCards(cards).length, [cards]);
+  const columnRefs = useRef(new Map<number, HTMLElement>());
   const displayColumns = useMemo(() => {
     if (isMobile && activeDay !== null) {
       return columns.filter((column) => column.day === activeDay);
     }
     return columns;
   }, [activeDay, columns, isMobile]);
+
+  useEffect(() => {
+    if (isMobile || activeDay === null) return;
+
+    columnRefs.current.get(activeDay)?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }, [activeDay, isMobile]);
 
   return (
     <div className="absolute inset-0 overflow-hidden bg-[#f5f3ef]">
@@ -69,6 +80,13 @@ export function TripCanvasKanbanView({
             return (
               <section
                 key={column.day}
+                ref={(element) => {
+                  if (element) {
+                    columnRefs.current.set(column.day, element);
+                  } else {
+                    columnRefs.current.delete(column.day);
+                  }
+                }}
                 className={cn(
                   "flex shrink-0 flex-col gap-2.5 rounded-xl border border-[#e7e3dc] bg-[#fefcf8] p-2.5 transition",
                   isMobile && activeDay === null && "w-[calc(100vw-2rem)] snap-center sm:w-[255px]",
