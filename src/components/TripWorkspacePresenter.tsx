@@ -417,13 +417,6 @@ export default function TripWorkspacePresenter({
             onDismiss={() => setWorkspaceFeedback(null)}
           />
 
-          <AiPromptBar
-            onSendQuery={handleSendQuery}
-            isThinking={isAiThinking}
-            dayCount={days.length}
-            isMobile={isMobile}
-          />
-
           {workspaceView === "canvas" && (
             <TripCanvasKanbanView
               days={days}
@@ -450,6 +443,14 @@ export default function TripWorkspacePresenter({
               onSelectCard={(card) => setSelectedCard(card)}
             />
           )}
+
+          <AiPromptBar
+            onSendQuery={handleSendQuery}
+            isThinking={isAiThinking}
+            dayCount={days.length}
+            isMobile={isMobile}
+            workspaceView={workspaceView}
+          />
 
           {showOnboardingToast && <OnboardingToast />}
 
