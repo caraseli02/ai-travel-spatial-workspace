@@ -1,12 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { canvasCards, dayGroups } from "../data/tripData";
 import {
   filterRedundantCardDetails,
   getKanbanCanvasColumns,
+  getKanbanScrollLeftToRevealColumn,
   getMappedCards,
   getRouteDay,
   groupRouteCardsByTimeOfDay,
   resolveKanbanCardTag,
+  scrollKanbanToActiveDayColumn,
   spreadMapMarkerPositions,
 } from "./tripWorkspaceViewHelpers";
 
@@ -93,5 +95,72 @@ describe("tripWorkspaceViewHelpers", () => {
   it("keeps card details when no price comparison is needed", () => {
     expect(filterRedundantCardDetails(undefined, "$10")).toEqual([]);
     expect(filterRedundantCardDetails(["Bring cash"], undefined)).toEqual(["Bring cash"]);
+  });
+
+  it("scrolls the kanban board right when an offscreen day column is selected", () => {
+    const columnWidth = 255;
+    const columnGap = 12;
+    const scrollerPaddingLeft = 40;
+    const daySevenOffsetLeft = scrollerPaddingLeft + 6 * (columnWidth + columnGap);
+
+    const scrollLeft = getKanbanScrollLeftToRevealColumn({
+      currentScrollLeft: 0,
+      columnOffsetLeft: daySevenOffsetLeft,
+      columnWidth,
+      scrollerClientWidth: 1000,
+      scrollerScrollWidth: 2500,
+    });
+
+    expect(scrollLeft).toBeGreaterThan(0);
+    expect(scrollLeft + 1000).toBeGreaterThanOrEqual(daySevenOffsetLeft + columnWidth);
+  });
+
+  it("keeps kanban scroll position when the selected day column is already visible", () => {
+    const scrollLeft = getKanbanScrollLeftToRevealColumn({
+      currentScrollLeft: 120,
+      columnOffsetLeft: 200,
+      columnWidth: 255,
+      scrollerClientWidth: 1000,
+      scrollerScrollWidth: 2500,
+    });
+
+    expect(scrollLeft).toBe(120);
+  });
+
+  it("scrolls the desktop kanban scroller when a day chip selects an offscreen column", () => {
+    const scrollTo = vi.fn();
+    const scroller = {
+      scrollLeft: 0,
+      clientWidth: 1000,
+      scrollWidth: 2500,
+      scrollTo,
+      getBoundingClientRect: () => ({ left: 0 }),
+    };
+    const column = {
+      getBoundingClientRect: () => ({ left: 1642, width: 255 }),
+    };
+
+    scrollKanbanToActiveDayColumn(scroller, column, 7, false);
+
+    expect(scrollTo).toHaveBeenCalledWith({ left: expect.any(Number), behavior: "smooth" });
+    expect(scrollTo.mock.calls[0]?.[0]?.left).toBeGreaterThan(0);
+  });
+
+  it("does not scroll the kanban board on mobile day focus", () => {
+    const scrollTo = vi.fn();
+    const scroller = {
+      scrollLeft: 0,
+      clientWidth: 390,
+      scrollWidth: 1200,
+      scrollTo,
+      getBoundingClientRect: () => ({ left: 0 }),
+    };
+    const column = {
+      getBoundingClientRect: () => ({ left: 800, width: 255 }),
+    };
+
+    scrollKanbanToActiveDayColumn(scroller, column, 3, true);
+
+    expect(scrollTo).not.toHaveBeenCalled();
   });
 });
