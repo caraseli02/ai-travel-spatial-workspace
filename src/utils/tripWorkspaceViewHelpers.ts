@@ -140,6 +140,67 @@ export function getRouteDay(activeDay: number | null) {
   return activeDay;
 }
 
+export function getKanbanScrollLeftToRevealColumn({
+  currentScrollLeft,
+  columnOffsetLeft,
+  columnWidth,
+  scrollerClientWidth,
+  scrollerScrollWidth,
+}: {
+  currentScrollLeft: number;
+  columnOffsetLeft: number;
+  columnWidth: number;
+  scrollerClientWidth: number;
+  scrollerScrollWidth: number;
+}): number {
+  const columnRight = columnOffsetLeft + columnWidth;
+  const visibleLeft = currentScrollLeft;
+  const visibleRight = currentScrollLeft + scrollerClientWidth;
+
+  if (columnOffsetLeft >= visibleLeft && columnRight <= visibleRight) {
+    return currentScrollLeft;
+  }
+
+  const targetScroll =
+    columnOffsetLeft < visibleLeft
+      ? columnOffsetLeft
+      : columnRight - scrollerClientWidth;
+
+  const maxScroll = Math.max(0, scrollerScrollWidth - scrollerClientWidth);
+  return Math.min(maxScroll, Math.max(0, targetScroll));
+}
+
+export function scrollKanbanToActiveDayColumn(
+  scroller: {
+    scrollLeft: number;
+    clientWidth: number;
+    scrollWidth: number;
+    scrollTo: (options: ScrollToOptions) => void;
+    getBoundingClientRect: () => Pick<DOMRect, "left">;
+  } | null,
+  column: {
+    getBoundingClientRect: () => Pick<DOMRect, "left" | "width">;
+  } | null,
+  activeDay: number | null,
+  isMobile: boolean,
+) {
+  if (isMobile || activeDay === null || !scroller || !column) return;
+
+  const scrollerRect = scroller.getBoundingClientRect();
+  const columnRect = column.getBoundingClientRect();
+  const columnOffsetLeft = columnRect.left - scrollerRect.left + scroller.scrollLeft;
+
+  const scrollLeft = getKanbanScrollLeftToRevealColumn({
+    currentScrollLeft: scroller.scrollLeft,
+    columnOffsetLeft,
+    columnWidth: columnRect.width,
+    scrollerClientWidth: scroller.clientWidth,
+    scrollerScrollWidth: scroller.scrollWidth,
+  });
+
+  scroller.scrollTo({ left: scrollLeft, behavior: "smooth" });
+}
+
 function sortCardsForWorkspaceViews(a: CanvasCard, b: CanvasCard) {
   const byType = cardTypeOrder[a.type] - cardTypeOrder[b.type];
   return byType || a.id.localeCompare(b.id);

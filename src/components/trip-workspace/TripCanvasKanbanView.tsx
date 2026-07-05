@@ -1,10 +1,14 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Plus } from "lucide-react";
 import { CanvasCardRenderer } from "@/components/CanvasCards";
 import type { CanvasCard, DayGroup } from "@/models/trip";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { getKanbanCanvasColumns, getMappedCards } from "@/utils/tripWorkspaceViewHelpers";
+import {
+  getKanbanCanvasColumns,
+  getMappedCards,
+  scrollKanbanToActiveDayColumn,
+} from "@/utils/tripWorkspaceViewHelpers";
 import { KanbanMiniMap } from "./KanbanMiniMap";
 
 export function TripCanvasKanbanView({
@@ -36,6 +40,8 @@ export function TripCanvasKanbanView({
 }) {
   const columns = useMemo(() => getKanbanCanvasColumns(days, cards), [cards, days]);
   const locatedCardCount = useMemo(() => getMappedCards(cards).length, [cards]);
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const columnRefs = useRef(new Map<number, HTMLElement>());
   const displayColumns = useMemo(() => {
     if (isMobile && activeDay !== null) {
       return columns.filter((column) => column.day === activeDay);
@@ -43,9 +49,17 @@ export function TripCanvasKanbanView({
     return columns;
   }, [activeDay, columns, isMobile]);
 
+  useEffect(() => {
+    if (activeDay === null) return;
+    const scroller = scrollerRef.current;
+    const column = columnRefs.current.get(activeDay) ?? null;
+    scrollKanbanToActiveDayColumn(scroller, column, activeDay, isMobile);
+  }, [activeDay, isMobile]);
+
   return (
     <div className="absolute inset-0 overflow-hidden bg-[#f5f3ef]">
       <div
+        ref={scrollerRef}
         className={cn(
           "absolute inset-x-0 bottom-[calc(7rem+env(safe-area-inset-bottom))] md:bottom-32 md:top-14",
           isMobile && activeDay !== null && "top-0 overflow-x-hidden overflow-y-auto",
@@ -69,6 +83,13 @@ export function TripCanvasKanbanView({
             return (
               <section
                 key={column.day}
+                ref={(element) => {
+                  if (element) {
+                    columnRefs.current.set(column.day, element);
+                  } else {
+                    columnRefs.current.delete(column.day);
+                  }
+                }}
                 className={cn(
                   "flex shrink-0 flex-col gap-2.5 rounded-xl border border-[#e7e3dc] bg-[#fefcf8] p-2.5 transition",
                   isMobile && activeDay === null && "w-[calc(100vw-2rem)] snap-center sm:w-[255px]",
