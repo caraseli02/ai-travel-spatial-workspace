@@ -9,9 +9,16 @@ export interface AiPromptBarProps {
   isThinking: boolean;
   dayCount: number;
   isMobile: boolean;
+  workspaceView?: "canvas" | "map";
 }
 
-export function AiPromptBar({ onSendQuery, isThinking, dayCount, isMobile }: AiPromptBarProps) {
+export function AiPromptBar({
+  onSendQuery,
+  isThinking,
+  dayCount,
+  isMobile,
+  workspaceView = "canvas",
+}: AiPromptBarProps) {
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
   const nextDay = dayCount + 1;
@@ -34,11 +41,18 @@ export function AiPromptBar({ onSendQuery, isThinking, dayCount, isMobile }: AiP
   };
 
   return (
-    <div className="absolute bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-1/2 z-20 w-full max-w-lg -translate-x-1/2 select-none px-4 md:bottom-14">
+    <div
+      className={cn(
+        "pointer-events-none absolute left-1/2 z-[600] w-full max-w-lg -translate-x-1/2 select-none px-4",
+        workspaceView === "map"
+          ? "bottom-[calc(42vh+1rem)] md:bottom-14"
+          : "bottom-[max(1.5rem,env(safe-area-inset-bottom))] md:bottom-14",
+      )}
+    >
       <form
         onSubmit={handleSubmit}
         className={cn(
-          "rounded-xl border bg-card transition-all duration-200",
+          "pointer-events-auto rounded-xl border bg-card transition-all duration-200",
           focused ? "border-amber-300 shadow-lg" : "border-border shadow-sm",
         )}
       >

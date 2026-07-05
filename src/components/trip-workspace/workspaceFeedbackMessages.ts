@@ -16,6 +16,30 @@ export function buildOrganizedInboxItemFeedback({
   };
 }
 
+export function buildAiPlannerInboxDraftFeedback({
+  draftLabel,
+}: {
+  draftLabel: string;
+}): WorkspaceFeedback {
+  return {
+    tone: "success",
+    title: "AI draft saved to Inbox",
+    message: `Review "${draftLabel}" in the Inbox before placing it on the Spatial Canvas.`,
+  };
+}
+
+export function buildAiCanvasReplyFeedback({
+  cardTitle,
+}: {
+  cardTitle: string;
+}): WorkspaceFeedback {
+  return {
+    tone: "success",
+    title: "AI reply added",
+    message: `Opened "${cardTitle}" on the Spatial Canvas.`,
+  };
+}
+
 export function buildShareFeedback(result: "native-shared" | "clipboard-copied" | "copy-failed"): WorkspaceFeedback {
   if (result === "copy-failed") {
     return {

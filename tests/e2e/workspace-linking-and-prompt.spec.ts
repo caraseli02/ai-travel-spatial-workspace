@@ -44,5 +44,14 @@ test("submits an AI Prompt and shows the planner reply", async ({ page }) => {
   await promptInput.press("Enter");
 
   await expect(page.getByPlaceholder("AI is thinking...")).toBeVisible();
-  await expect(page.getByText("AI Planner Reply")).toBeVisible({ timeout: 5000 });
+  await expect(page.getByRole("status")).toContainText("AI reply added", { timeout: 5000 });
+  await expect(page.getByRole("heading", { name: "AI Planner Reply" })).toBeVisible();
+});
+
+test("keeps the AI prompt bar available in Map view", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/trips/demo-kyoto");
+
+  await page.getByRole("button", { name: "Map view" }).first().click();
+  await expect(page.getByPlaceholder(/Ask AI/i)).toBeVisible();
 });
