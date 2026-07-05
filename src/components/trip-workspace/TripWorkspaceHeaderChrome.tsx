@@ -65,7 +65,7 @@ export function TripWorkspaceHeaderChrome({
 
   return (
     <header className="z-40 shrink-0 border-b border-border bg-card">
-      <div className="flex h-[52px] items-center gap-2 px-4">
+      <div className="flex h-[52px] items-center gap-1.5 overflow-hidden px-3 max-md:gap-1 max-md:px-2">
         <Button
           variant="ghost"
           size="sm"
@@ -80,9 +80,9 @@ export function TripWorkspaceHeaderChrome({
 
         <div className="h-5 w-px shrink-0 bg-border" />
 
-        <div className="flex shrink-0 items-center gap-2">
-          <div className="flex size-6 items-center justify-center rounded text-sm">{trip.emoji}</div>
-          <h1 className="text-[14px] font-semibold text-foreground">{trip.name}</h1>
+        <div className="flex min-w-0 items-center gap-1.5 max-md:flex-1 md:shrink-0 md:gap-2">
+          <div className="flex size-6 shrink-0 items-center justify-center rounded text-sm">{trip.emoji}</div>
+          <h1 className="truncate text-[14px] font-semibold text-foreground">{trip.name}</h1>
           <Badge
             variant="outline"
             className={cn(
@@ -136,8 +136,6 @@ export function TripWorkspaceHeaderChrome({
           </Button>
         </div>
 
-        <div className="flex-1 md:hidden" />
-
         <div className="hidden shrink-0 items-center gap-1 md:flex">
           <div className="-space-x-2 mr-1 flex items-center">
             {Array.from({ length: Math.min(travelerCount, 3) }).map((_, i) => {
@@ -165,86 +163,88 @@ export function TripWorkspaceHeaderChrome({
           </Button>
         </div>
 
-        <div className="relative md:hidden">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => onToggleOverflow()}
-            aria-label="More workspace actions"
-            aria-expanded={showOverflow}
-            className="max-md:size-11"
-          >
-            <MoreHorizontal className="size-4" />
-          </Button>
-          {showOverflow && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => onToggleOverflow(false)} />
-              <div className="fixed inset-x-4 bottom-6 z-50 rounded-xl border border-border bg-card py-1.5 shadow-xl max-md:left-4 max-md:right-4 md:absolute md:inset-x-auto md:top-full md:right-0 md:bottom-auto md:mt-1 md:min-w-[160px]">
-                <div className="flex items-center gap-2 border-b border-border px-3 py-2">
-                  <div className="-space-x-1.5 flex items-center">
-                    {Array.from({ length: Math.min(travelerCount, 3) }).map((_, i) => {
-                      const avatars = ["🧑", "👩", "🧔"];
-                      return (
-                        <div
-                          key={i}
-                          className="flex size-5 items-center justify-center rounded-full bg-muted text-[11px] ring-2 ring-card select-none"
-                        >
-                          {avatars[i % avatars.length]}
-                        </div>
-                      );
-                    })}
+        <div className="flex shrink-0 items-center gap-0.5 max-md:gap-0">
+          <div className="relative md:hidden">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => onToggleOverflow()}
+              aria-label="More workspace actions"
+              aria-expanded={showOverflow}
+              className="max-md:size-11"
+            >
+              <MoreHorizontal className="size-4" />
+            </Button>
+            {showOverflow && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => onToggleOverflow(false)} />
+                <div className="fixed inset-x-4 bottom-6 z-50 rounded-xl border border-border bg-card py-1.5 shadow-xl max-md:left-4 max-md:right-4 md:absolute md:inset-x-auto md:top-full md:right-0 md:bottom-auto md:mt-1 md:min-w-[160px]">
+                  <div className="flex items-center gap-2 border-b border-border px-3 py-2">
+                    <div className="-space-x-1.5 flex items-center">
+                      {Array.from({ length: Math.min(travelerCount, 3) }).map((_, i) => {
+                        const avatars = ["🧑", "👩", "🧔"];
+                        return (
+                          <div
+                            key={i}
+                            className="flex size-5 items-center justify-center rounded-full bg-muted text-[11px] ring-2 ring-card select-none"
+                          >
+                            {avatars[i % avatars.length]}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {travelerCount} {travelerCount === 1 ? "traveler" : "travelers"}
+                    </span>
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {travelerCount} {travelerCount === 1 ? "traveler" : "travelers"}
-                  </span>
+                  <Button
+                    variant="ghost"
+                    className="h-auto w-full justify-start gap-2.5 rounded-none px-3 py-2.5"
+                    onClick={() => {
+                      void onShareTrip();
+                      onToggleOverflow(false);
+                    }}
+                  >
+                    <Share2 className="size-3.5" />
+                    <span className="text-sm">Share</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="h-auto w-full justify-start gap-2.5 rounded-none px-3 py-2.5"
+                    onClick={() => {
+                      onExportTrip();
+                      onToggleOverflow(false);
+                    }}
+                  >
+                    <Download className="size-3.5" />
+                    <span className="text-sm">Export</span>
+                  </Button>
                 </div>
-                <Button
-                  variant="ghost"
-                  className="h-auto w-full justify-start gap-2.5 rounded-none px-3 py-2.5"
-                  onClick={() => {
-                    void onShareTrip();
-                    onToggleOverflow(false);
-                  }}
-                >
-                  <Share2 className="size-3.5" />
-                  <span className="text-sm">Share</span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="h-auto w-full justify-start gap-2.5 rounded-none px-3 py-2.5"
-                  onClick={() => {
-                    onExportTrip();
-                    onToggleOverflow(false);
-                  }}
-                >
-                  <Download className="size-3.5" />
-                  <span className="text-sm">Export</span>
-                </Button>
-              </div>
-            </>
-          )}
-        </div>
+              </>
+            )}
+          </div>
 
-        <Button
-          variant={inboxOpen ? "secondary" : "ghost"}
-          size="sm"
-          onClick={onToggleInbox}
-          aria-label={`${inboxOpen ? "Close" : "Open"} inbox${
-            unprocessedCount > 0 ? `, ${unprocessedCount} items to organize` : ""
-          }`}
-          className={cn(
-            "h-auto shrink-0 gap-1 px-2.5 py-1.5 text-xs font-medium max-md:size-11",
-            inboxOpen && "border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-50",
-          )}
-        >
-          {inboxOpen ? <PanelLeftClose className="size-3.5" /> : <PanelLeftOpen className="size-3.5" />}
-          <span className="hidden sm:block">Inbox</span>
-          {unprocessedCount > 0 && (
-            <Badge variant="destructive" className="size-4 justify-center p-0 text-[10px]">
-              {unprocessedCount}
-            </Badge>
-          )}
-        </Button>
+          <Button
+            variant={inboxOpen ? "secondary" : "ghost"}
+            size="sm"
+            onClick={onToggleInbox}
+            aria-label={`${inboxOpen ? "Close" : "Open"} inbox${
+              unprocessedCount > 0 ? `, ${unprocessedCount} items to organize` : ""
+            }`}
+            className={cn(
+              "h-auto shrink-0 gap-1 px-2.5 py-1.5 text-xs font-medium max-md:size-11 max-md:px-2",
+              inboxOpen && "border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-50",
+            )}
+          >
+            {inboxOpen ? <PanelLeftClose className="size-3.5" /> : <PanelLeftOpen className="size-3.5" />}
+            <span className="hidden sm:block">Inbox</span>
+            {unprocessedCount > 0 && (
+              <Badge variant="destructive" className="size-4 shrink-0 justify-center p-0 text-[10px]">
+                {unprocessedCount}
+              </Badge>
+            )}
+          </Button>
+        </div>
       </div>
 
       <div className="relative md:hidden">
