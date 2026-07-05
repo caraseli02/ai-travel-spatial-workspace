@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import type { NavigateFunction } from "react-router-dom";
 import {
   Calendar,
@@ -42,7 +42,10 @@ import {
   buildExportFeedback,
   buildOrganizedInboxItemFeedback,
   buildShareFeedback,
+  buildAiPlannerInboxDraftFeedback,
+  buildAiCanvasReplyFeedback,
 } from "./trip-workspace/workspaceFeedbackMessages";
+import { resolveAiPromptOutcome } from "./trip-workspace/resolveAiPromptOutcome";
 
 export interface TripWorkspacePresenterProps {
   trip: Trip;
@@ -65,6 +68,11 @@ export default function TripWorkspacePresenter({
   const [workspaceView, setWorkspaceView] = useState<WorkspaceView>("canvas");
   const [workspaceFeedback, setWorkspaceFeedback] = useState<WorkspaceFeedback | null>(null);
   const [pendingOrganizedItemId, setPendingOrganizedItemId] = useState<string | null>(null);
+  const [pendingAiPrompt, setPendingAiPrompt] = useState(false);
+  const aiPromptSnapshotRef = useRef<{
+    itemIds: Set<string>;
+    cardIds: Set<string>;
+  } | null>(null);
 
   const initialState = useMemo<TripWorkspaceState>(() => {
     return {
@@ -126,7 +134,15 @@ export default function TripWorkspacePresenter({
     setPendingOrganizedItemId(id);
     processInboxItem(id);
   }, [processInboxItem]);
-  const handleSendQuery = sendAiQuery;
+  const handleSendQuery = useCallback((query: string) => {
+    if (!query.trim()) return;
+    aiPromptSnapshotRef.current = {
+      itemIds: new Set(items.map((item) => item.id)),
+      cardIds: new Set(cards.map((card) => card.id)),
+    };
+    setPendingAiPrompt(true);
+    sendAiQuery(query);
+  }, [items, cards, sendAiQuery]);
   const handleUpdateCard = updateCard;
   const handleDeleteCard = deleteCard;
   const handleStartLinking = linkingSession.start;
@@ -181,6 +197,34 @@ export default function TripWorkspacePresenter({
     );
     setPendingOrganizedItemId(null);
   }, [cards, items, pendingOrganizedItemId, setSelectedCard]);
+
+  useEffect(() => {
+    if (!pendingAiPrompt || isAiThinking || !aiPromptSnapshotRef.current) return;
+
+    const snapshot = aiPromptSnapshotRef.current;
+    const outcome = resolveAiPromptOutcome({
+      previousItemIds: snapshot.itemIds,
+      previousCardIds: snapshot.cardIds,
+      items,
+      cards,
+    });
+
+    if (!outcome) return;
+
+    if (outcome.kind === "inbox-draft") {
+      setWorkspaceFeedback(buildAiPlannerInboxDraftFeedback({ draftLabel: outcome.draftLabel }));
+      setInboxOpen(true);
+    } else {
+      const newCard = cards.find((card) => !snapshot.cardIds.has(card.id));
+      if (newCard) {
+        setSelectedCard(newCard);
+      }
+      setWorkspaceFeedback(buildAiCanvasReplyFeedback({ cardTitle: outcome.cardTitle }));
+    }
+
+    setPendingAiPrompt(false);
+    aiPromptSnapshotRef.current = null;
+  }, [pendingAiPrompt, isAiThinking, items, cards, setInboxOpen, setSelectedCard]);
 
   const handleZoom = useCallback((direction: "in" | "out") => {
     setKanbanZoom((current) => {
@@ -373,14 +417,12 @@ export default function TripWorkspacePresenter({
             onDismiss={() => setWorkspaceFeedback(null)}
           />
 
-          {workspaceView !== "map" && (
-            <AiPromptBar
-              onSendQuery={handleSendQuery}
-              isThinking={isAiThinking}
-              dayCount={days.length}
-              isMobile={isMobile}
-            />
-          )}
+          <AiPromptBar
+            onSendQuery={handleSendQuery}
+            isThinking={isAiThinking}
+            dayCount={days.length}
+            isMobile={isMobile}
+          />
 
           {workspaceView === "canvas" && (
             <TripCanvasKanbanView
