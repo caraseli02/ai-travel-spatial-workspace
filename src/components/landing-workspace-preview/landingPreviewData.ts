@@ -1,4 +1,5 @@
 import type { CanvasCard } from "@/models/trip";
+import { getLandingPreviewHotelCardCues } from "./landingPreviewDemoCues";
 import { previewId } from "./previewId";
 
 export type KanbanPreviewColumn = {
@@ -7,6 +8,8 @@ export type KanbanPreviewColumn = {
   cardCount: string;
   cards: CanvasCard[];
 };
+
+const landingPreviewHotelCues = getLandingPreviewHotelCardCues();
 
 export const kanbanColumns: KanbanPreviewColumn[] = [
   {
@@ -34,10 +37,10 @@ export const kanbanColumns: KanbanPreviewColumn[] = [
         y: 0,
         rotation: 0,
         title: "Hiiragiya Ryokan",
-        subtitle: "Dec 14–17 · ¥45,000/night · 4.9★",
+        subtitle: landingPreviewHotelCues.subtitle,
         image: "/images/ryokan.jpg",
-        tag: "Stay",
-        tagColor: "amber",
+        tag: landingPreviewHotelCues.tag,
+        tagColor: landingPreviewHotelCues.tagColor,
         day: 1,
       },
       {

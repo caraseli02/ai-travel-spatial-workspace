@@ -1,5 +1,6 @@
 import { Lock, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LANDING_PREVIEW_TRIP_ROUTE } from "./landingPreviewDemoCues";
 
 export function BrowserChrome({ compact = false }: { compact?: boolean }) {
   return (
@@ -22,7 +23,7 @@ export function BrowserChrome({ compact = false }: { compact?: boolean }) {
       >
         <Lock className="size-2.5 shrink-0 text-muted-foreground" />
         <span className="truncate text-[11px] text-muted-foreground md:text-xs">
-          wayfarer.app/trips/kyoto
+          {LANDING_PREVIEW_TRIP_ROUTE}
         </span>
       </div>
       {!compact && (
