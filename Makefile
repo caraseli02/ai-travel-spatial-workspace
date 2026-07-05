@@ -1,6 +1,6 @@
 NPM ?= npm
 
-.PHONY: setup dev test test-coverage build lint typecheck e2e doctor fresh-session-test file-size-check check status debt-next debt-prompt debt-agent
+.PHONY: setup dev test test-coverage build lint typecheck e2e doctor fresh-session-test file-size-check check status debt-next debt-prompt debt-agent triage-multitask triage-prompt
 
 setup:
 	$(NPM) ci
@@ -66,3 +66,9 @@ debt-prompt:
 
 debt-agent:
 	@node scripts/run-next-tech-debt-agent.mjs
+
+triage-multitask:
+	@bash scripts/triage-bug-prompt.sh --multitask
+
+triage-prompt:
+	@bash scripts/triage-bug-prompt.sh --issue $(ISSUE)
