@@ -1,6 +1,6 @@
 ---
 name: pencil-design
-description: Design UIs in Pencil (.pen) + generate production code. Use for .pen files, Pencil MCP, design-to-code, UI design in Pencil.
+description: Design UIs in Pencil (.pen files) and generate production code from them. Use when working with .pen files, designing screens or components in Pencil, or generating code from Pencil designs. Triggers on tasks involving Pencil, .pen files, design-to-code workflows, or UI design with the Pencil MCP tools.
 metadata:
   author: Nyasha Chiroro
   version: "1.0"
@@ -8,97 +8,97 @@ metadata:
 
 # Pencil Design Skill
 
-Design production UIs in Pencil. Generate clean code. Enforce DS reuse, tokens, layout, visual verify, design-to-code.
+Design production-quality UIs in Pencil and generate clean, maintainable code from them. This skill enforces best practices for design system reuse, variable usage, layout correctness, visual verification, and design-to-code workflows.
 
 ## When to Use This Skill
 
-- Screens, pages, components in `.pen` file
-- Code from Pencil (React, Next.js, Vue, Svelte, HTML/CSS)
-- Build/extend design system in Pencil
-- Sync tokens Pencil ↔ code (Tailwind v4 `@theme`, shadcn/ui)
-- Import code into Pencil
-- Any Pencil MCP (`pencil_batch_design`, `pencil_batch_get`, etc.)
+- Designing screens, pages, or components in a `.pen` file
+- Generating code (React, Next.js, Vue, Svelte, HTML/CSS) from Pencil designs
+- Building or extending a design system in Pencil
+- Syncing design tokens between Pencil and code (Tailwind v4 `@theme`, shadcn/ui tokens)
+- Importing existing code into Pencil designs
+- Working with any Pencil MCP tools (`pencil_batch_design`, `pencil_batch_get`, etc.)
 
 ## Critical Rules
 
-Common agent mistakes. Break rules → inconsistent design, bad code.
+These rules address the most common agent mistakes. Violating them produces designs that are inconsistent, hard to maintain, and generate poor code.
 
 ### Rule 1: Always Reuse Design System Components
 
-**NEVER recreate component when one exists.**
+**NEVER recreate a component from scratch when one already exists in the design file.**
 
-Before insert:
-1. `pencil_batch_get` with `patterns: [{ reusable: true }]` — list reusables
-2. Find match (button, card, input, nav, etc.)
-3. Insert as `ref`: `I(parent, { type: "ref", ref: "<componentId>" })`
-4. Customize descendants: `U(instanceId + "/childId", { ... })`
-5. New component only if no match
+Before inserting any element, you MUST:
+1. Call `pencil_batch_get` with `patterns: [{ reusable: true }]` to list all available reusable components
+2. Search the results for a component that matches what you need (button, card, input, nav, etc.)
+3. If a match exists, insert it as a `ref` instance using `I(parent, { type: "ref", ref: "<componentId>" })`
+4. Customize the instance by updating its descendants with `U(instanceId + "/childId", { ... })`
+5. Only create a new component from scratch if no suitable reusable component exists
 
-See [references/design-system-components.md](references/design-system-components.md).
+See [references/design-system-components.md](references/design-system-components.md) for detailed workflow.
 
 ### Rule 2: Always Use Variables Instead of Hardcoded Values
 
-**NEVER hardcode color, radius, spacing, typography when variables exist.**
+**NEVER hardcode colors, border radius, spacing, or typography values when variables exist.**
 
-Before style:
-1. `pencil_get_variables` — read tokens
-2. Map to variables (`primary` not `#3b82f6`, `radius-md` not `6`)
-3. Apply variable refs, not raw values
-4. Code: Tailwind v4 semantic classes (`bg-primary`, `text-foreground`, `rounded-md`). NEVER arbitrary (`bg-[#3b82f6]`, `text-[var(--primary)]`, `rounded-[6px]`)
+Before applying any style value, you MUST:
+1. Call `pencil_get_variables` to read all defined design tokens
+2. Map your intended values to existing variables (e.g., use `primary` not `#3b82f6`, use `radius-md` not `6`)
+3. Apply values using variable references, not raw values
+4. When generating code, use Tailwind v4 semantic utility classes (e.g., `bg-primary`, `text-foreground`, `rounded-md`). NEVER use arbitrary value syntax (`bg-[#3b82f6]`, `text-[var(--primary)]`, `rounded-[6px]`)
 
-See [references/variables-and-tokens.md](references/variables-and-tokens.md).
+See [references/variables-and-tokens.md](references/variables-and-tokens.md) for detailed workflow.
 
 ### Rule 3: Prevent Text and Content Overflow
 
-**NEVER let text/children overflow parent or artboard.**
+**NEVER allow text or child elements to overflow their parent or the artboard.**
 
-Every text + container:
-1. Wrap + truncate text
-2. Constrain width to parent — mobile ~375px
-3. `"fill_container"` width on text in auto-layout frames
-4. After insert: `pencil_snapshot_layout` with `problemsOnly: true`
-5. Fix issues before continue
+For every text element and container:
+1. Set appropriate text wrapping and truncation
+2. Constrain widths to parent bounds, especially on mobile screens (typically 375px wide)
+3. Use `"fill_container"` for width on text elements inside auto-layout frames
+4. After inserting content, call `pencil_snapshot_layout` with `problemsOnly: true` to detect clipping/overflow
+5. Fix any reported issues before proceeding
 
-See [references/layout-and-text-overflow.md](references/layout-and-text-overflow.md).
+See [references/layout-and-text-overflow.md](references/layout-and-text-overflow.md) for detailed workflow.
 
 ### Rule 4: Visually Verify Every Section
 
-**NEVER skip visual verify after section/screen.**
+**NEVER skip visual verification after building a section or screen.**
 
-After each section (header, hero, sidebar, form, card grid, etc.):
-1. `pencil_get_screenshot` on section or full screen
-2. Check screenshot: alignment, spacing, overflow, glitches, missing content
-3. `pencil_snapshot_layout(problemsOnly: true)` — clip/overlap
-4. Fix before next section
-5. Final full-screen screenshot when done
+After completing each logical section (header, hero, sidebar, form, card grid, etc.):
+1. Call `pencil_get_screenshot` on the section or full screen node
+2. Analyze the screenshot for: alignment issues, spacing inconsistencies, text overflow, visual glitches, missing content
+3. Call `pencil_snapshot_layout` with `problemsOnly: true` to catch clipping and overlap
+4. Fix any issues found before moving to the next section
+5. Take a final full-screen screenshot when the entire design is complete
 
-See [references/visual-verification.md](references/visual-verification.md).
+See [references/visual-verification.md](references/visual-verification.md) for detailed workflow.
 
 ### Rule 5: Reuse Existing Assets (Logos, Icons, Images)
 
-**NEVER generate new logo or duplicate asset in document.**
+**NEVER generate a new logo or duplicate asset when one already exists in the document.**
 
-Before generate image/logo:
-1. `pencil_batch_get` — search `patterns: [{ name: "logo|brand|icon" }]`
-2. Match elsewhere → copy with `C()` (Copy)
-3. `G()` (Generate) only for genuinely new images
-4. Logos: always copy existing instance, never regenerate
+Before generating any image or logo:
+1. Call `pencil_batch_get` and search for existing image/logo nodes by name pattern (e.g., `patterns: [{ name: "logo|brand|icon" }]`)
+2. If a matching asset exists elsewhere in the document (another artboard/screen), copy it using the `C()` (Copy) operation
+3. Only use the `G()` (Generate) operation for genuinely new images that don't exist anywhere in the document
+4. For logos specifically: always copy from an existing instance, never regenerate
 
-See [references/asset-reuse.md](references/asset-reuse.md).
+See [references/asset-reuse.md](references/asset-reuse.md) for detailed workflow.
 
 ### Rule 6: Always Load the `frontend-design` Skill
 
-**NEVER design in Pencil or codegen without `frontend-design` skill first.**
+**NEVER design in Pencil or generate code from Pencil without first loading the `frontend-design` skill.**
 
-`frontend-design` = aesthetic direction, anti-generic UI. MUST:
-1. Load at start of any Pencil design or codegen task
-2. Design thinking: purpose, bold aesthetic, differentiation
-3. Apply typography, color, motion, spatial composition, visual detail — Pencil + codegen
-4. No generic AI aesthetics (overused fonts, cliché palettes, predictable layouts)
+The `frontend-design` skill provides the aesthetic direction and design quality standards that prevent generic, cookie-cutter UI. You MUST:
+1. Load the `frontend-design` skill at the start of any Pencil design or code generation task
+2. Follow its design thinking process: understand purpose, commit to a bold aesthetic direction, consider differentiation
+3. Apply its guidelines on typography, color, motion, spatial composition, and visual details — both when designing in Pencil and when generating code from Pencil designs
+4. Never produce generic AI aesthetics (overused fonts, cliched color schemes, predictable layouts)
 
-Both directions:
-- **Pencil design**: skill guides layout, type, color, composition in `.pen`
-- **Codegen from Pencil**: distinctive type, intentional color, motion, polish — not mechanical tree dump
+This applies to both directions:
+- **Pencil design tasks**: Use the skill's aesthetic guidelines to inform layout, typography, color, and composition choices in the .pen file
+- **Code generation from Pencil**: Use the skill's guidelines to ensure the generated code includes distinctive typography, intentional color themes, motion/animations, and polished visual details — not just a mechanical translation of the design tree
 
 ## Design Workflow
 
@@ -120,29 +120,29 @@ Both directions:
 
 ### Building Section by Section
 
-Each screen section (header, content, footer, sidebar, etc.):
+For each section of a screen (header, content area, footer, sidebar, etc.):
 
-1. **Plan** — which DS components to reuse
-2. **Build** — `ref` instances + variables
-3. **Verify** — screenshot + layout problems
-4. **Fix** — overflow, alignment, spacing
-5. **Proceed** — next section only after verify passes
+1. **Plan** - Identify which design system components to reuse
+2. **Build** - Insert components as `ref` instances, apply variables for styles
+3. **Verify** - Screenshot the section + check layout for problems
+4. **Fix** - Address any overflow, alignment, or spacing issues
+5. **Proceed** - Move to the next section only after verification passes
 
 ### Design-to-Code Workflow
 
-[references/design-to-code-workflow.md](references/design-to-code-workflow.md) — full workflow.
-[references/tailwind-shadcn-mapping.md](references/tailwind-shadcn-mapping.md) — Pencil→Tailwind table.
-[references/responsive-breakpoints.md](references/responsive-breakpoints.md) — multi-artboard codegen.
+See [references/design-to-code-workflow.md](references/design-to-code-workflow.md) for the complete workflow.
+See [references/tailwind-shadcn-mapping.md](references/tailwind-shadcn-mapping.md) for the full Pencil-to-Tailwind mapping table.
+See [references/responsive-breakpoints.md](references/responsive-breakpoints.md) for multi-artboard responsive code generation.
 
 Summary:
-1. Load `frontend-design`
-2. `pencil_get_guidelines` topics `"code"` + `"tailwind"`
-3. `pencil_get_variables` → Tailwind `@theme`
-4. `pencil_batch_get` — design tree
-5. Map Pencil reusables → shadcn/ui (Button, Card, Input, etc.)
-6. Semantic Tailwind (`bg-primary`, `rounded-md`) — no arbitrary values
-7. `frontend-design`: distinctive type, color, motion, composition
-8. CVA variants, `cn()` merge, Lucide icons
+1. Load the `frontend-design` skill for aesthetic direction
+2. Call `pencil_get_guidelines` with topic `"code"` and `"tailwind"`
+3. Call `pencil_get_variables` to map design tokens to Tailwind `@theme` declarations
+4. Read the design tree with `pencil_batch_get`
+5. Map reusable Pencil components to shadcn/ui components (Button, Card, Input, etc.)
+6. Generate code using semantic Tailwind classes (`bg-primary`, `rounded-md`), never arbitrary values
+7. Apply `frontend-design` guidelines: distinctive typography, intentional color, motion, spatial composition
+8. Use CVA for custom component variants, `cn()` for class merging, Lucide for icons
 
 ## MCP Tool Quick Reference
 

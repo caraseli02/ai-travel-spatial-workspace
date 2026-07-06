@@ -17,24 +17,26 @@ This skill helps AI agents work effectively with Pencil (`.pen` files) — a vec
 ### Via opencode CLI
 
 ```bash
-npx skills add chiroro-jr/skills --path pencil-design
+npx skills add chiroro-jr/pencil-design-skill
 ```
 
 ### Manual Installation
 
 1. Clone this repository into your skills directory:
 ```bash
-git clone https://github.com/chiroro-jr/skills.git /tmp/chiroro-jr-skills
-cp -R /tmp/chiroro-jr-skills/pencil-design ~/.agents/skills/pencil-design
+git clone https://github.com/chiroro-jr/pencil-design-skill.git ~/.agents/skills/pencil-design
 ```
 
-2. Register the skill in `skills-lock.json`:
+2. Register the skill in `.skill-lock.json`:
 ```json
 "pencil-design": {
-  "source": "chiroro-jr/skills",
+  "source": "chiroro-jr/pencil-design-skill",
   "sourceType": "github",
-  "skillPath": "pencil-design/SKILL.md",
-  "computedHash": "<computed-skill-hash>"
+  "sourceUrl": "https://github.com/chiroro-jr/pencil-design-skill.git",
+  "skillPath": "SKILL.md",
+  "skillFolderHash": "<latest-commit-hash>",
+  "installedAt": "<timestamp>",
+  "updatedAt": "<timestamp>"
 }
 ```
 
