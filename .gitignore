@@ -16,6 +16,7 @@ coverage/
 # Local verification screenshots
 mobile_*.png
 option_c_*.png
+audit-artifacts/
 
 # Local env files
 .env*.local
