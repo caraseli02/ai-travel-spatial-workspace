@@ -18,7 +18,7 @@ export function KanbanMiniMap({
   onOpenMap: () => void;
 }) {
   return (
-    <Card className="absolute bottom-5 right-5 z-20 h-[152px] w-[224px] overflow-hidden rounded-[14px] border-[#e7e3dc] bg-[#f2efe9] p-0 shadow-xl">
+    <Card className="absolute bottom-24 right-5 z-20 h-[152px] w-[224px] overflow-hidden rounded-[14px] border-[#e7e3dc] bg-[#f2efe9] p-0 shadow-xl md:bottom-5">
       <div className="absolute -left-6 top-[84px] h-[72px] w-24 rounded-full bg-emerald-200/70" />
       <div className="absolute -top-5 right-[-26px] h-16 w-24 rounded-full bg-emerald-200/70" />
       <div className="absolute left-[118px] top-[-22px] h-[210px] w-3 rotate-12 rounded-full bg-sky-200/90" />

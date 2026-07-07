@@ -86,7 +86,7 @@ export function TripWorkspaceHeaderChrome({
           <Badge
             variant="outline"
             className={cn(
-              "hidden shrink-0 gap-1 rounded-full px-2 py-0.5 text-xs md:flex",
+              "shrink-0 gap-1 rounded-full px-2 py-0.5 text-[10px] md:text-xs",
               statusCfg.className,
             )}
           >
@@ -248,12 +248,12 @@ export function TripWorkspaceHeaderChrome({
       </div>
 
       <div className="relative md:hidden">
-        <div className="scrollbar-none flex flex-nowrap items-center gap-1.5 overflow-x-auto px-4 pb-2.5">
+        <div className="scrollbar-none flex flex-nowrap items-center gap-1.5 overflow-x-auto px-4 pb-2.5 snap-x snap-mandatory">
           <Button
             variant={activeDay === null ? "default" : "secondary"}
             size="sm"
             onClick={() => onActiveDayChange(null)}
-            className="h-8 shrink-0 rounded-full px-3 text-xs"
+            className="h-8 shrink-0 snap-start rounded-full px-3 text-xs"
           >
             All
           </Button>
@@ -263,7 +263,7 @@ export function TripWorkspaceHeaderChrome({
               variant={activeDay === d.day ? "default" : "secondary"}
               size="sm"
               onClick={() => onActiveDayChange(activeDay === d.day ? null : d.day)}
-              className="h-8 shrink-0 gap-1 rounded-full px-3 text-xs"
+              className="h-8 shrink-0 snap-start gap-1 rounded-full px-3 text-xs"
               style={activeDay === d.day ? { backgroundColor: d.color, borderColor: d.color } : undefined}
             >
               <span

@@ -1,11 +1,14 @@
-import { AlertCircle, CheckCircle2, X } from "lucide-react";
+import { useState } from "react";
+import { AlertCircle, CheckCircle2, Copy, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 export interface WorkspaceFeedback {
   tone: "success" | "error";
   title: string;
   message: string;
+  copyUrl?: string;
 }
 
 interface WorkspaceActionFeedbackProps {
@@ -14,13 +17,41 @@ interface WorkspaceActionFeedbackProps {
 }
 
 export function WorkspaceActionFeedback({ feedback, onDismiss }: WorkspaceActionFeedbackProps) {
+  const [copied, setCopied] = useState(false);
+
   if (!feedback) return null;
 
   const isError = feedback.tone === "error";
   const Icon = isError ? AlertCircle : CheckCircle2;
 
+  async function handleManualCopy() {
+    if (!feedback?.copyUrl) return;
+    try {
+      await navigator.clipboard.writeText(feedback.copyUrl);
+      setCopied(true);
+      return;
+    } catch {
+      // fall through to legacy copy
+    }
+
+    const textarea = document.createElement("textarea");
+    textarea.value = feedback.copyUrl;
+    textarea.style.position = "fixed";
+    textarea.style.left = "-9999px";
+    document.body.appendChild(textarea);
+    textarea.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(textarea);
+    if (ok) setCopied(true);
+  }
+
   return (
-    <div className="pointer-events-none absolute inset-x-3 top-3 z-[740] flex justify-center md:inset-x-auto md:right-3">
+    <div
+      className={cn(
+        "pointer-events-none absolute inset-x-3 z-[740] flex justify-center",
+        "bottom-[calc(5.5rem+env(safe-area-inset-bottom))] md:inset-x-auto md:right-3 md:top-3 md:bottom-auto",
+      )}
+    >
       <div
         role={isError ? "alert" : "status"}
         aria-live={isError ? "assertive" : "polite"}
@@ -33,6 +64,30 @@ export function WorkspaceActionFeedback({ feedback, onDismiss }: WorkspaceAction
         <div className="min-w-0 flex-1">
           <p className="font-semibold text-foreground">{feedback.title}</p>
           <p className="mt-0.5 text-xs leading-snug text-muted-foreground">{feedback.message}</p>
+          {feedback.copyUrl ? (
+            <div className="mt-2 flex items-center gap-1.5">
+              <Input
+                readOnly
+                value={feedback.copyUrl}
+                aria-label="Trip link"
+                className="h-8 flex-1 text-xs text-foreground"
+                onFocus={(event) => event.currentTarget.select()}
+              />
+              <Button
+                type="button"
+                size="icon-sm"
+                variant="outline"
+                className="size-8 shrink-0"
+                onClick={() => void handleManualCopy()}
+                aria-label="Copy trip link"
+              >
+                <Copy className="size-3.5" />
+              </Button>
+            </div>
+          ) : null}
+          {copied ? (
+            <p className="mt-1 text-xs font-medium text-emerald-700">Link copied.</p>
+          ) : null}
         </div>
         <Button
           variant="ghost"

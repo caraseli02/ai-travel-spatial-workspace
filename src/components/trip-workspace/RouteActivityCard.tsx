@@ -1,7 +1,7 @@
 import { Star } from "lucide-react";
 import type { CanvasCard } from "@/models/trip";
 import { cn } from "@/lib/utils";
-import { getRouteTimeSlot } from "@/utils/tripWorkspaceViewHelpers";
+import { getRouteTimeSlotForCard } from "@/utils/tripWorkspaceViewHelpers";
 
 function getRouteCardRating(card: CanvasCard) {
   return card.rating ? card.rating.toFixed(1) : null;
@@ -46,7 +46,7 @@ export function RouteActivityCard({
       </div>
       <div className="min-w-0">
         <p className="text-[11px] font-medium uppercase tracking-normal text-muted-foreground">
-          {getRouteTimeSlot(index)}
+          {getRouteTimeSlotForCard(card, index)}
         </p>
         <p className="mt-1 line-clamp-2 text-sm font-semibold text-foreground">{card.title}</p>
         {!compact && ratingLabel && (

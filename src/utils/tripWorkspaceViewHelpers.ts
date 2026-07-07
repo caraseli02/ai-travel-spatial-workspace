@@ -37,14 +37,42 @@ export interface RouteTimeSection {
 const routeTimeSlots = ["8:30 AM", "10:45 AM", "1:30 PM", "4:15 PM", "7:00 PM"] as const;
 const routeTimeOfDayLabels: RouteTimeOfDay[] = ["Morning", "Morning", "Afternoon", "Afternoon", "Evening"];
 
+function routeCardHaystack(card: CanvasCard) {
+  return [card.title, card.subtitle, card.tag].filter(Boolean).join(" ").toLowerCase();
+}
+
+export function inferRouteTimeOfDay(card: CanvasCard, fallbackIndex = 0): RouteTimeOfDay {
+  const haystack = routeCardHaystack(card);
+  if (/\b(dinner|dusk|evening|kaiseki|night)\b/.test(haystack)) return "Evening";
+  if (/\bafternoon\b/.test(haystack)) return "Afternoon";
+  if (/\b(5am|morning|early|beat the crowds|arrival|flight)\b/.test(haystack)) return "Morning";
+  if (/\b(hotel|ryokan)\b/.test(haystack)) return "Morning";
+  return routeTimeOfDayLabels[fallbackIndex % routeTimeOfDayLabels.length];
+}
+
 export function getRouteTimeSlot(index: number) {
   return routeTimeSlots[index % routeTimeSlots.length];
+}
+
+export function getRouteTimeSlotForCard(card: CanvasCard, fallbackIndex: number) {
+  const haystack = routeCardHaystack(card);
+  if (/\b5am\b/.test(haystack)) return "5:00 AM";
+  if (/\bearly morning\b/.test(haystack)) return "7:00 AM";
+  if (/\bdusk\b/.test(haystack)) return "6:30 PM";
+  if (/\bdinner\b/.test(haystack)) return "7:00 PM";
+  if (/\bafternoon\b/.test(haystack)) return "1:30 PM";
+  if (/\b(hotel|ryokan|flight)\b/.test(haystack)) return "8:30 AM";
+
+  const timeOfDay = inferRouteTimeOfDay(card, fallbackIndex);
+  if (timeOfDay === "Evening") return "7:00 PM";
+  if (timeOfDay === "Afternoon") return "1:30 PM";
+  return "8:30 AM";
 }
 
 export function groupRouteCardsByTimeOfDay(cards: CanvasCard[]): RouteTimeSection[] {
   const sections = new Map<RouteTimeOfDay, CanvasCard[]>();
   cards.forEach((card, index) => {
-    const label = routeTimeOfDayLabels[index % routeTimeOfDayLabels.length];
+    const label = inferRouteTimeOfDay(card, index);
     if (!sections.has(label)) sections.set(label, []);
     sections.get(label)?.push(card);
   });

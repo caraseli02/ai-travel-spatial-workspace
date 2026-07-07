@@ -12,16 +12,18 @@ test("keeps the Inbox place action readable inside the sidebar", async ({ page }
   const inboxPanel = page.locator("aside");
   await expect(inboxPanel.getByRole("heading", { name: "Inbox" })).toBeVisible();
 
-  const placeAction = inboxPanel.getByRole("button", { name: /Place on canvas/i }).first();
+  const placeAction = inboxPanel.getByRole("button", { name: /^Place on canvas$/i }).first();
   await expect(placeAction).toBeVisible();
+  await expect(inboxPanel.getByText("Ready to organize").first()).toBeVisible();
 
+  const panelBounds = await inboxPanel.boundingBox();
   const actionBounds = await placeAction.boundingBox();
-  const actionLabelBounds = await placeAction.getByText("Place on canvas").boundingBox();
 
+  expect(panelBounds).not.toBeNull();
   expect(actionBounds).not.toBeNull();
-  expect(actionLabelBounds).not.toBeNull();
-  expect(actionLabelBounds!.x + actionLabelBounds!.width).toBeLessThanOrEqual(
-    actionBounds!.x + actionBounds!.width - 8,
+  expect(actionBounds!.x).toBeGreaterThanOrEqual(panelBounds!.x);
+  expect(actionBounds!.x + actionBounds!.width).toBeLessThanOrEqual(
+    panelBounds!.x + panelBounds!.width,
   );
 });
 

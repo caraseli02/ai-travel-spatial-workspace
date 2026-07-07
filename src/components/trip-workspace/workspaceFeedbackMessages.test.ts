@@ -51,9 +51,10 @@ describe("workspaceFeedbackMessages", () => {
       tone: "success",
       title: "Trip link copied",
     });
-    expect(buildShareFeedback("copy-failed")).toMatchObject({
+    expect(buildShareFeedback("copy-failed", "https://example.com/trip")).toMatchObject({
       tone: "error",
-      title: "Could not copy link",
+      title: "Could not copy link automatically",
+      copyUrl: "https://example.com/trip",
     });
     expect(buildExportFeedback("download-started", "demo-kyoto.json")).toMatchObject({
       tone: "success",
