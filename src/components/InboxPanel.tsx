@@ -252,7 +252,7 @@ function InboxItemCard({
                   variant="ghost"
                   size="icon-sm"
                   onClick={() => onProcess(item.id)}
-                  className="size-7 shrink-0 text-muted-foreground opacity-100 transition-opacity hover:bg-transparent hover:text-emerald-500 md:opacity-0 md:group-hover:opacity-100"
+                  className="size-7 shrink-0 text-muted-foreground opacity-70 transition-opacity hover:bg-transparent hover:text-emerald-500 hover:opacity-100"
                   aria-label="Mark as organized"
                   title="Mark as organized"
                 >
@@ -269,21 +269,19 @@ function InboxItemCard({
           </p>
 
           {!dimmed ? (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => onProcess(item.id)}
-              className="mt-2.5 h-auto w-full min-w-0 justify-start gap-2 overflow-hidden px-3 py-2 text-left"
-            >
-              <span className="min-w-0 flex-1 truncate text-xs font-medium text-muted-foreground">
-                {displayState.label}
-              </span>
-              <span className="flex shrink-0 items-center gap-1 text-xs font-medium text-primary">
-                <Sparkles className="size-2.5" />
+            <div className="mt-2.5 space-y-2">
+              <p className="text-[11px] font-medium text-muted-foreground">{displayState.label}</p>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => onProcess(item.id)}
+                className="h-auto w-full justify-center gap-1.5 px-3 py-2 text-xs font-medium"
+              >
+                <Sparkles className="size-3" />
                 Place on canvas
-                <ChevronRight className="size-2.5" />
-              </span>
-            </Button>
+                <ChevronRight className="size-3" />
+              </Button>
+            </div>
           ) : (
             <div
               className={cn(

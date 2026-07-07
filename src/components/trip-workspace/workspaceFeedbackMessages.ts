@@ -40,12 +40,16 @@ export function buildAiCanvasReplyFeedback({
   };
 }
 
-export function buildShareFeedback(result: "native-shared" | "clipboard-copied" | "copy-failed"): WorkspaceFeedback {
+export function buildShareFeedback(
+  result: "native-shared" | "clipboard-copied" | "copy-failed",
+  url?: string,
+): WorkspaceFeedback {
   if (result === "copy-failed") {
     return {
       tone: "error",
-      title: "Could not copy link",
-      message: "Copy the trip link from the address bar instead.",
+      title: "Could not copy link automatically",
+      message: "Select the link below or use the copy button.",
+      copyUrl: url,
     };
   }
 

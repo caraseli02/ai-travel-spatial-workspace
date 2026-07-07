@@ -18,6 +18,6 @@ describe("WorkspaceActionFeedback", () => {
     expect(markup).toContain('role="status"');
     expect(markup).toContain("Placed on canvas");
     expect(markup).toContain('Reddit r/JapanTravel became &quot;Hidden Temples&quot; on Day 2.');
-    expect(markup).toContain("top-3");
+    expect(markup).toContain("md:top-3");
   });
 });

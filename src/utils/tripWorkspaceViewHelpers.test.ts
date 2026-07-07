@@ -58,6 +58,24 @@ describe("tripWorkspaceViewHelpers", () => {
     expect(sections[1]?.cards.map((card) => card.id)).toEqual(["c6"]);
   });
 
+  it("places dusk and dinner cards in the evening section", () => {
+    const routeCards = canvasCards.filter((card) => ["c10", "c11"].includes(card.id));
+    const sections = groupRouteCardsByTimeOfDay(routeCards);
+
+    expect(sections).toEqual([{ label: "Evening", cards: routeCards }]);
+  });
+
+  it("assigns route time slots from card content instead of list index", async () => {
+    const { getRouteTimeSlotForCard } = await import("./tripWorkspaceViewHelpers");
+    const gion = canvasCards.find((card) => card.id === "c10");
+    const fushimi = canvasCards.find((card) => card.id === "c4");
+    const market = canvasCards.find((card) => card.id === "c6");
+
+    expect(gion && getRouteTimeSlotForCard(gion, 0)).toBe("6:30 PM");
+    expect(fushimi && getRouteTimeSlotForCard(fushimi, 0)).toBe("5:00 AM");
+    expect(market && getRouteTimeSlotForCard(market, 0)).toBe("1:30 PM");
+  });
+
   it("wraps route time slots across long optimized sequences", async () => {
     const { getRouteTimeSlot } = await import("./tripWorkspaceViewHelpers");
 

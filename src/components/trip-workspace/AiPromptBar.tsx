@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Sparkles } from "lucide-react";
+import { Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -94,8 +94,8 @@ export function AiPromptBar({
             </div>
           ) : (
             value && (
-              <Button type="submit" size="icon-sm" className="size-6 shrink-0">
-                <Plus size={12} className="rotate-45" />
+              <Button type="submit" size="icon-sm" className="size-6 shrink-0" aria-label="Send AI prompt">
+                <Send size={12} />
               </Button>
             )
           )}

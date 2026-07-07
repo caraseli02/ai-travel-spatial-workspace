@@ -69,7 +69,7 @@ export function TripCanvasKanbanView({
       >
         <div
           className={cn(
-            "flex h-full min-w-max origin-top-left gap-3 p-3 pb-6 transition-[zoom] md:py-4 md:pr-[18rem] md:pl-10",
+            "flex h-full min-w-max origin-top-left gap-3 p-3 pb-6 transition-[zoom] md:py-4 md:pr-[18rem] md:pl-44",
             isMobile && activeDay === null && "[&>section]:snap-center",
             isMobile && activeDay !== null && "h-auto min-h-full w-full min-w-0 flex-col",
           )}
@@ -121,6 +121,12 @@ export function TripCanvasKanbanView({
                       : "scrollbar-thin max-h-[calc(100vh-260px)] overflow-y-auto md:max-h-[696px]",
                   )}
                 >
+                  {column.cards.length === 0 ? (
+                    <p className="rounded-lg border border-dashed border-stone-300/80 bg-stone-50/80 px-3 py-4 text-center text-xs leading-relaxed text-muted-foreground">
+                      No plans yet — add an activity, note, or booking for this day.
+                    </p>
+                  ) : null}
+
                   {column.cards.map((card) => (
                     <div
                       key={card.id}
@@ -147,7 +153,7 @@ export function TripCanvasKanbanView({
                     type="button"
                     variant="ghost"
                     onClick={onCreateCard}
-                    className="h-auto w-full justify-center gap-2 rounded-xl border-2 border-dashed border-stone-300/70 bg-transparent py-3 text-xs text-muted-foreground hover:border-stone-400 hover:bg-transparent hover:text-foreground"
+                    className="h-auto w-full shrink-0 justify-center gap-2 rounded-xl border-2 border-dashed border-stone-300/70 bg-transparent py-3 text-xs text-muted-foreground hover:border-stone-400 hover:bg-transparent hover:text-foreground"
                   >
                     <Plus className="size-3.5" />
                     Add card
