@@ -48,4 +48,4 @@ Re-run `/setup-matt-pocock-skills` only when switching issue trackers or restart
 
 ## Scope Surface
 
-Epics decompose via `/to-issues` into GitHub Issues with `Blocked by` links. Do not maintain a separate `feature_list.json` — issues are the scope surface.
+Epics decompose via `/to-tickets` into GitHub Issues with `Blocked by` links. Do not maintain a separate `feature_list.json` — issues are the scope surface.
