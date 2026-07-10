@@ -25,11 +25,11 @@ Source lectures ([Learn Harness Engineering](https://walkinglabs.github.io/learn
 | Layer | Role | Key locations |
 | --- | --- | --- |
 | Static harness | Always-on routing, verification, project state | `AGENTS.md`, `harness.md`, `PROGRESS.md`, `Makefile` |
-| Matt Pocock skills | Issue workflow and execution on demand | `triage`, `to-issues`, `implementation-workflow`, `tdd`, `diagnose` |
+| Matt Pocock skills | Issue workflow and execution on demand | `triage`, `to-tickets`, `implementation-workflow`, `tdd`, `diagnosing-bugs` |
 
 Skill configuration: `docs/agents/issue-tracker.md`, `triage-labels.md`, `domain.md`.
 
-Epics decompose via `/to-issues` into GitHub Issues — issues are the scope surface, not `feature_list.json`.
+Epics decompose via `/to-tickets` into GitHub Issues — issues are the scope surface, not `feature_list.json`.
 
 ## Scope Surface
 
@@ -153,7 +153,7 @@ Optional local scratch: `docs/agents/handoffs/*.md` is gitignored for rare mid-e
 ### Mixed Strategy
 
 - **Single `ready-for-agent` issue**: one session or multiple sessions tied to the issue/PR; issue + agent brief are the handoff.
-- **Epic or exploratory work**: update `PROGRESS.md` Operational Snapshot every clock-out; create GitHub issues via `/to-issues` when scope stabilizes.
+- **Epic or exploratory work**: update `PROGRESS.md` Operational Snapshot every clock-out; create GitHub issues via `/to-tickets` when scope stabilizes.
 - **Context pressure**: if a session is approaching context limits, clock out early with verification recorded rather than rushing an unverified finish.
 
 ### Clock In

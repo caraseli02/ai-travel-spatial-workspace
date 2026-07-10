@@ -9,8 +9,8 @@ A fresh implementation agent should be able to pick one issue, complete it in a
 branch, verify it, and open a PR without relying on chat history.
 
 This workflow is the Wayfarer glue between the static harness (`AGENTS.md`,
-`docs/agents/harness.md`) and Matt Pocock skills (`triage`, `to-issues`, `tdd`,
-`diagnose`). Epics decompose via `/to-issues`; each child issue is one scope
+`docs/agents/harness.md`) and Matt Pocock skills (`triage`, `to-tickets`, `tdd`,
+`diagnosing-bugs`). Epics decompose via `/to-tickets`; each child issue is one scope
 unit.
 
 For the tech-debt epic queue (#69–#73), use `docs/agents/tech-debt-queue.md` and
