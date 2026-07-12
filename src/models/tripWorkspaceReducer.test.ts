@@ -26,8 +26,9 @@ describe("tripWorkspaceReducer", () => {
 
     expect(nextState.items).toHaveLength(1);
     expect(nextState.items[0]).toMatchObject({
-      type: "flight",
+      type: "note",
       content: "ANA flight SFO-KIX",
+      rawContent: "ANA flight SFO-KIX",
       processed: false,
     });
   });

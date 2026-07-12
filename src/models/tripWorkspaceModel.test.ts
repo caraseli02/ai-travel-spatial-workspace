@@ -162,8 +162,9 @@ describe('Trip Workspace model', () => {
 
       expect(newState.items).toHaveLength(1);
       expect(newState.items[0]).toMatchObject({
-        type: 'flight',
+        type: 'note',
         content: 'ANA flight SFO-KIX',
+        rawContent: 'ANA flight SFO-KIX',
         processed: false,
       });
     });

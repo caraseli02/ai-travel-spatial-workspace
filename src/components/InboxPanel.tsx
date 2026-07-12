@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  Sparkles,
   MessageSquare,
   Link2,
   FileText,
@@ -11,6 +10,7 @@ import {
   Send,
   CheckCircle2,
   Circle,
+  ExternalLink,
 } from "lucide-react";
 import type { CanvasCard, InboxItem } from "../models/trip";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { resolveInboxItemDisplayState } from "../models/tripMaterialMemory";
+import {
+  extractSourceDomain,
+  formatInboxItemCaptureTime,
+} from "../models/tripWorkspaceInbox";
 
 interface InboxPanelProps {
   items: InboxItem[];
@@ -59,19 +63,14 @@ export default function InboxPanel({
 }: InboxPanelProps) {
   const [inputVal, setInputVal] = useState("");
   const [placeholder, setPlaceholder] = useState(0);
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const unprocessed = items.filter((i) => !i.processed);
   const processed = items.filter((i) => i.processed);
 
   function handleSend() {
     if (!inputVal.trim()) return;
-    setIsProcessing(true);
     onAddItem(inputVal);
-    setTimeout(() => {
-      setIsProcessing(false);
-      setInputVal("");
-    }, 1200);
+    setInputVal("");
   }
 
   function cyclePlaceholder() {
@@ -83,16 +82,12 @@ export default function InboxPanel({
       <div className="border-b border-border px-4 pt-4 pb-3">
         <div className="mb-1 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-foreground">Inbox</h2>
-          <Badge
-            variant="secondary"
-            className="gap-1 border-amber-200/80 bg-amber-50 text-amber-900"
-          >
-            <Sparkles className="size-2.5" />
-            AI active
+          <Badge variant="secondary" className="text-[10px]">
+            Saved capture
           </Badge>
         </div>
         <p className="text-xs leading-snug text-muted-foreground">
-          Paste links, messages, or notes — Wayfarer will organize them on the canvas.
+          Paste a link or note — Wayfarer saves what you provide for this Trip.
         </p>
       </div>
 
@@ -111,29 +106,19 @@ export default function InboxPanel({
           />
           <Button
             onClick={handleSend}
-            disabled={!inputVal.trim() || isProcessing}
+            disabled={!inputVal.trim()}
             size="icon-sm"
             className="absolute right-2.5 bottom-2.5 disabled:pointer-events-none disabled:opacity-40"
             aria-label="Submit inbox item"
           >
-            {isProcessing ? (
-              <div className="size-3 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-            ) : (
-              <Send className="size-3" />
-            )}
+            <Send className="size-3" />
           </Button>
         </div>
         <p id="inbox-input-hint" className="mt-1.5 text-xs font-medium text-muted-foreground">
           {inputVal.trim()
-            ? "Press ⌘ Enter or tap send to add this to your inbox."
+            ? "Press ⌘ Enter or tap send to save this in your inbox."
             : "Paste a link or note above to enable submit."}
         </p>
-        {isProcessing && (
-          <div className="mt-2 flex items-center gap-1.5 text-xs text-primary">
-            <Sparkles className="size-3" />
-            <span>Extracting details and placing on canvas…</span>
-          </div>
-        )}
       </div>
 
       <div className="scrollbar-thin flex-1 overflow-y-auto px-3 py-2">
@@ -215,6 +200,9 @@ function InboxItemCard({
   const colors = sourceColors[item.type] || sourceColors.note;
   const icon = sourceIcons[item.type] || sourceIcons.note;
   const displayState = resolveInboxItemDisplayState(item, cards);
+  const captureTime = formatInboxItemCaptureTime(item);
+  const sourceUrl = item.sourceUrl;
+  const sourceDomain = sourceUrl ? extractSourceDomain(sourceUrl) : undefined;
 
   return (
     <Card
@@ -246,7 +234,7 @@ function InboxItemCard({
               </span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="text-xs text-muted-foreground/60">{item.timestamp}</span>
+              <span className="text-xs text-muted-foreground/60">{captureTime}</span>
               {!dimmed ? (
                 <Button
                   variant="ghost"
@@ -265,19 +253,35 @@ function InboxItemCard({
           </div>
 
           <p className="line-clamp-3 text-xs leading-relaxed text-muted-foreground">
-            {item.content}
+            {item.rawContent ?? item.content}
           </p>
+
+          {sourceDomain && (
+            <p className="mt-1 text-[11px] text-muted-foreground/80">{sourceDomain}</p>
+          )}
 
           {!dimmed ? (
             <div className="mt-2.5 space-y-2">
               <p className="text-[11px] font-medium text-muted-foreground">{displayState.label}</p>
+              {sourceUrl && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className="h-auto w-full justify-center gap-1.5 px-3 py-2 text-xs font-medium"
+                >
+                  <a href={sourceUrl} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="size-3" />
+                    Open original source
+                  </a>
+                </Button>
+              )}
               <Button
                 variant="secondary"
                 size="sm"
                 onClick={() => onProcess(item.id)}
                 className="h-auto w-full justify-center gap-1.5 px-3 py-2 text-xs font-medium"
               >
-                <Sparkles className="size-3" />
                 Place on canvas
                 <ChevronRight className="size-3" />
               </Button>

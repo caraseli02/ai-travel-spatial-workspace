@@ -1,60 +1,91 @@
 import type { InboxItem } from "@/models/trip";
 
-export function buildInboxItem(content: string, now = Date.now): InboxItem {
-  let type: InboxItem["type"] = "note";
-  let source = "Inbox Clip";
-  let avatar: string | undefined = undefined;
+const urlPattern = /https?:\/\/[^\s"')]+/i;
 
-  const lower = content.toLowerCase();
-  if (
-    lower.includes("flight") ||
-    lower.includes("jl") ||
-    lower.includes("ana") ||
-    lower.includes("sfo-") ||
-    lower.includes("kix")
-  ) {
-    type = "flight";
-    source = "Flight Parser";
-  } else if (
-    lower.includes("hotel") ||
-    lower.includes("ryokan") ||
-    lower.includes("booking") ||
-    lower.includes("stay") ||
-    lower.includes("airbnb") ||
-    lower.includes("hoshinoya") ||
-    lower.includes("hostel")
-  ) {
-    type = "hotel";
-    source = "Hotel Scanner";
-  } else if (
-    lower.includes("http") ||
-    lower.includes(".com") ||
-    lower.includes("reddit") ||
-    lower.includes("eater") ||
-    lower.includes("blog")
-  ) {
-    type = "link";
-    source = "Web Parser";
-  } else if (
-    lower.includes("chat") ||
-    lower.includes("says") ||
-    lower.includes(":") ||
-    lower.includes("mom") ||
-    lower.includes("yuki") ||
-    lower.includes("friend")
-  ) {
-    type = "whatsapp";
-    source = "WhatsApp Sync";
-    avatar = "💬";
+export function extractSourceUrl(content: string): string | undefined {
+  return content.match(urlPattern)?.[0];
+}
+
+export function extractSourceDomain(sourceUrl: string): string {
+  try {
+    return new URL(sourceUrl).hostname.replace(/^www\./, "");
+  } catch {
+    return sourceUrl;
   }
+}
+
+function truncateLabel(value: string, maxLength = 60): string {
+  const trimmed = value.trim();
+  if (trimmed.length <= maxLength) {
+    return trimmed;
+  }
+  return `${trimmed.slice(0, maxLength - 3)}...`;
+}
+
+export function resolveInboxItemLabel(content: string, sourceUrl?: string): string {
+  if (!sourceUrl) {
+    return truncateLabel(content.split("\n")[0] ?? content);
+  }
+
+  const travelerNote = content.replace(sourceUrl, "").trim();
+  if (travelerNote) {
+    return truncateLabel(travelerNote.split("\n")[0] ?? travelerNote);
+  }
+
+  return extractSourceDomain(sourceUrl);
+}
+
+export function formatInboxCaptureTime(capturedAtIso: string, now = Date.now()): string {
+  const capturedMs = new Date(capturedAtIso).getTime();
+  const diffMs = now - capturedMs;
+
+  if (diffMs < 60_000) {
+    return "Just now";
+  }
+
+  if (diffMs < 3_600_000) {
+    const minutes = Math.floor(diffMs / 60_000);
+    return `${minutes} min ago`;
+  }
+
+  const capturedDate = new Date(capturedAtIso);
+  const nowDate = new Date(now);
+  if (capturedDate.toDateString() === nowDate.toDateString()) {
+    return `Today at ${capturedDate.toLocaleTimeString(undefined, {
+      hour: "numeric",
+      minute: "2-digit",
+    })}`;
+  }
+
+  return capturedDate.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+export function formatInboxItemCaptureTime(item: InboxItem, now = Date.now()): string {
+  if (item.capturedAt) {
+    return formatInboxCaptureTime(item.capturedAt, now);
+  }
+  return item.timestamp;
+}
+
+export function buildInboxItem(content: string, now = Date.now): InboxItem {
+  const trimmed = content.trim();
+  const sourceUrl = extractSourceUrl(trimmed);
+  const capturedAt = new Date(now()).toISOString();
 
   return {
     id: `i_spawn_${now()}`,
-    type,
-    source,
-    content,
-    timestamp: "Just now",
+    type: sourceUrl ? "link" : "note",
+    source: resolveInboxItemLabel(trimmed, sourceUrl),
+    content: trimmed,
+    rawContent: trimmed,
+    sourceUrl,
+    timestamp: formatInboxCaptureTime(capturedAt, now()),
+    capturedAt,
     processed: false,
-    avatar,
   };
 }
