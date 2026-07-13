@@ -1,6 +1,6 @@
 # PRD: Trip Material Capture-and-Return Loop
 
-**Status:** Review
+**Status:** Accepted
 
 **Related issues:** [Capture-and-return validation](https://github.com/caraseli02/ai-travel-spatial-workspace/issues/133), [full-lifecycle Trip Planner](https://github.com/caraseli02/ai-travel-spatial-workspace/issues/23), [Trip Material memory and agent planner foundation](https://github.com/caraseli02/ai-travel-spatial-workspace/issues/24)
 

@@ -4,6 +4,7 @@ export interface InboxItem {
   source: string;
   content: string;
   timestamp: string;
+  capturedAt?: string;
   processed: boolean;
   sourceUrl?: string;
   rawContent?: string;

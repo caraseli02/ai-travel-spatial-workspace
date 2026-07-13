@@ -144,6 +144,47 @@ describe('localTripRepository', () => {
     ).toHaveLength(0);
   });
 
+  it('preserves captured Trip Material source fields through save/load round-trip', () => {
+    const trip = createEmptyTrip('Capture Test', 'Kyoto, Japan', '⛩️');
+    trip.inboxItems = [
+      {
+        id: 'i_capture_url',
+        type: 'link',
+        source: 'example.com',
+        content: 'https://example.com/opaque-path-xyz123',
+        rawContent: 'https://example.com/opaque-path-xyz123',
+        sourceUrl: 'https://example.com/opaque-path-xyz123',
+        timestamp: 'Just now',
+        capturedAt: '2026-07-12T09:00:00.000Z',
+        processed: false,
+      },
+      {
+        id: 'i_capture_note',
+        type: 'note',
+        source: 'Tea ceremony near Gion',
+        content: 'Tea ceremony near Gion',
+        rawContent: 'Tea ceremony near Gion',
+        timestamp: 'Just now',
+        capturedAt: '2026-07-12T09:01:00.000Z',
+        processed: false,
+      },
+    ];
+
+    localTripRepository.save(trip);
+    const loaded = localTripRepository.load(trip.id);
+
+    expect(loaded!.inboxItems[0]).toMatchObject({
+      sourceUrl: 'https://example.com/opaque-path-xyz123',
+      rawContent: 'https://example.com/opaque-path-xyz123',
+      capturedAt: '2026-07-12T09:00:00.000Z',
+    });
+    expect(loaded!.inboxItems[1]).toMatchObject({
+      rawContent: 'Tea ceremony near Gion',
+      capturedAt: '2026-07-12T09:01:00.000Z',
+    });
+    expect(loaded!.inboxItems[1].sourceUrl).toBeUndefined();
+  });
+
   it('preserves domain data through save/load round-trip', () => {
     const trip = createEmptyTrip('Data Test', 'Testville', '🧪');
     trip.cards = [
