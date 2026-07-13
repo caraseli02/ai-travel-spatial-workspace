@@ -1,6 +1,6 @@
 NPM ?= npm
 
-.PHONY: setup dev test test-coverage build lint typecheck e2e doctor fresh-session-test file-size-check check status debt-next debt-prompt debt-agent
+.PHONY: setup dev test test-coverage build lint typecheck e2e doctor fresh-session-test file-size-check check status debt-next debt-prompt debt-agent loop-state loop-prompt loop-run
 
 setup:
 	$(NPM) ci
@@ -66,3 +66,12 @@ debt-prompt:
 
 debt-agent:
 	@node scripts/run-next-tech-debt-agent.mjs
+
+loop-state:
+	@bash scripts/loop-state.sh
+
+loop-prompt:
+	@bash scripts/loop-controller-prompt.sh
+
+loop-run:
+	@node scripts/run-loop-controller.mjs
