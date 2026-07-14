@@ -1,5 +1,17 @@
 import type { CanvasCard, Connection, DayGroup, DayLabel, InboxItem, Trip } from "@/models/trip";
 
+export type AiPromptEffect =
+  | {
+      kind: "inbox-draft";
+      itemId: string;
+      draftLabel: string;
+    }
+  | {
+      kind: "canvas-reply";
+      cardId: string;
+      cardTitle: string;
+    };
+
 export interface TripWorkspaceState {
   activeDay: number | null;
   days: DayGroup[];
@@ -13,6 +25,7 @@ export interface TripWorkspaceState {
   createModalCoords: { x: number; y: number } | null;
   showAddDayModal: boolean;
   showOverflow: boolean;
+  aiPromptEffect?: AiPromptEffect | null;
 }
 
 export type TripWorkspaceAction =
@@ -24,6 +37,7 @@ export type TripWorkspaceAction =
   | { type: "ADD_CUSTOM_DAY"; dayNum: number; label: string }
   | { type: "AI_PROMPT_START" }
   | { type: "AI_PROMPT_SUCCESS"; query: string; trip?: Trip }
+  | { type: "CLEAR_AI_PROMPT_EFFECT" }
   | { type: "SET_SELECTED_CARD"; card: CanvasCard | null }
   | { type: "OPEN_CREATE_MODAL"; coords: { x: number; y: number } | null }
   | { type: "CLOSE_CREATE_MODAL" }

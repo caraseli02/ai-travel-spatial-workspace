@@ -416,6 +416,66 @@ describe('Trip Workspace model', () => {
       expect(successState.items.slice(1)).toEqual(trip.inboxItems);
     });
 
+    it('returns an inbox-draft effect for AI Prompt drafts', () => {
+      const trip = createDemoTrip();
+      const state: TripWorkspaceState = {
+        ...createInitialState(),
+        days: trip.days,
+        dayLabels: trip.dayLabels,
+        cards: trip.cards,
+        connections: trip.connections,
+        items: trip.inboxItems,
+        isAiThinking: true,
+      };
+
+      const successState = tripWorkspaceReducer(state, {
+        type: 'AI_PROMPT_SUCCESS',
+        query: 'Find a restaurant near Gion',
+        trip,
+      });
+
+      expect(successState.aiPromptEffect).toEqual({
+        kind: 'inbox-draft',
+        itemId: successState.items[0].id,
+        draftLabel: 'Gion Sasaki',
+      });
+    });
+
+    it('returns a canvas-reply effect for AI Prompt replies', () => {
+      const trip = createEmptyTrip('Barcelona Weekend', 'Barcelona, Spain', '🇪🇸');
+      const state: TripWorkspaceState = {
+        ...createInitialState(),
+        isAiThinking: true,
+      };
+
+      const successState = tripWorkspaceReducer(state, {
+        type: 'AI_PROMPT_SUCCESS',
+        query: 'Find a restaurant near Gion',
+        trip,
+      });
+
+      expect(successState.aiPromptEffect).toEqual({
+        kind: 'canvas-reply',
+        cardId: successState.cards[0].id,
+        cardTitle: 'AI Planner Follow-up',
+      });
+    });
+
+    it('clears the latest AI Prompt effect after it is consumed', () => {
+      const state: TripWorkspaceState = {
+        ...createInitialState(),
+        aiPromptEffect: {
+          kind: 'canvas-reply',
+          cardId: 'c_ai_response_1',
+          cardTitle: 'AI Planner Reply',
+        },
+      };
+
+      const nextState = tripWorkspaceReducer(state, { type: 'CLEAR_AI_PROMPT_EFFECT' });
+
+      expect(nextState.aiPromptEffect).toBeNull();
+    });
+
     it('captures Demo Trip ryokan suggestions as planner drafts for the traveler to organize', () => {
       const trip = createDemoTrip();
       const state: TripWorkspaceState = {

@@ -105,6 +105,17 @@ function applyAgentPlannerOutcomeToTripWorkspace({
   random: () => number;
 }): TripWorkspaceState {
   if (outcome.type === "inbox-item-draft") {
+    const newItem: InboxItem = {
+      id: `i_ai_draft_${now()}`,
+      type: outcome.draft.type,
+      source: outcome.draft.source,
+      content: outcome.draft.content,
+      sourceUrl: outcome.draft.sourceUrl,
+      rawContent: buildPlannerDraftRawContent(outcome.rationale, outcome.citations),
+      timestamp: "Just now",
+      processed: false,
+    };
+
     return {
       ...rest,
       activeDay,
@@ -112,24 +123,27 @@ function applyAgentPlannerOutcomeToTripWorkspace({
       dayLabels,
       cards,
       connections,
-      items: [
-        {
-          id: `i_ai_draft_${now()}`,
-          type: outcome.draft.type,
-          source: outcome.draft.source,
-          content: outcome.draft.content,
-          sourceUrl: outcome.draft.sourceUrl,
-          rawContent: buildPlannerDraftRawContent(outcome.rationale, outcome.citations),
-          timestamp: "Just now",
-          processed: false,
-        },
-        ...items,
-      ],
+      items: [newItem, ...items],
       isAiThinking: false,
+      aiPromptEffect: {
+        kind: "inbox-draft",
+        itemId: newItem.id,
+        draftLabel: newItem.content,
+      },
     };
   }
 
   if (outcome.type === "canvas-card-draft") {
+    const newItem: InboxItem = {
+      id: `i_ai_card_draft_${now()}`,
+      type: inboxTypeForCanvasDraft(outcome.draft.type),
+      source: "AI Planner Draft",
+      content: formatCanvasDraftContent(outcome),
+      rawContent: buildPlannerDraftRawContent(outcome.rationale, outcome.citations),
+      timestamp: "Just now",
+      processed: false,
+    };
+
     return {
       ...rest,
       activeDay,
@@ -137,19 +151,13 @@ function applyAgentPlannerOutcomeToTripWorkspace({
       dayLabels,
       cards,
       connections,
-      items: [
-        {
-          id: `i_ai_card_draft_${now()}`,
-          type: inboxTypeForCanvasDraft(outcome.draft.type),
-          source: "AI Planner Draft",
-          content: formatCanvasDraftContent(outcome),
-          rawContent: buildPlannerDraftRawContent(outcome.rationale, outcome.citations),
-          timestamp: "Just now",
-          processed: false,
-        },
-        ...items,
-      ],
+      items: [newItem, ...items],
       isAiThinking: false,
+      aiPromptEffect: {
+        kind: "inbox-draft",
+        itemId: newItem.id,
+        draftLabel: outcome.draft.title,
+      },
     };
   }
 
@@ -182,6 +190,11 @@ function applyAgentPlannerOutcomeToTripWorkspace({
     connections,
     items,
     isAiThinking: false,
+    aiPromptEffect: {
+      kind: "canvas-reply",
+      cardId: responseCard.id,
+      cardTitle: responseCard.title,
+    },
   };
 }
 

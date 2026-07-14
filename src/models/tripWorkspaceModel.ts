@@ -18,11 +18,20 @@ import {
   connectCards,
   deleteCanvasCardFromWorkspace,
   tripWorkspaceReducer,
+  type AiPromptEffect,
   type TripWorkspaceAction,
   type TripWorkspaceState,
 } from "@/models/tripWorkspaceReducer";
 
-export type { Connection, DayGroup, DayLabel, CardType, TripWorkspaceAction, TripWorkspaceState };
+export type {
+  Connection,
+  DayGroup,
+  DayLabel,
+  CardType,
+  AiPromptEffect,
+  TripWorkspaceAction,
+  TripWorkspaceState,
+};
 export {
   dayLabelConfig,
   buildInboxItem,

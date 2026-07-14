@@ -40,6 +40,10 @@ export function useTripWorkspaceState(initialState: TripWorkspaceState, trip?: T
     }, 1200);
   }, [trip]);
 
+  const clearAiPromptEffect = useCallback(() => {
+    dispatch({ type: 'CLEAR_AI_PROMPT_EFFECT' });
+  }, []);
+
   const setSelectedCard = useCallback((card: CanvasCard | null) => {
     dispatch({ type: 'SET_SELECTED_CARD', card });
   }, []);
@@ -85,6 +89,7 @@ export function useTripWorkspaceState(initialState: TripWorkspaceState, trip?: T
     addConnection,
     addCustomDay,
     sendAiQuery,
+    clearAiPromptEffect,
     setSelectedCard,
     openCreateModal,
     closeCreateModal,
