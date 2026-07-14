@@ -16,6 +16,10 @@ unit.
 For the tech-debt epic queue (#69–#73), use `docs/agents/tech-debt-queue.md` and
 `make debt-next` / `make debt-prompt` (IDE) or `make debt-agent` (local SDK).
 
+For the autonomous controller loop (cron + evaluator), use `docs/agents/autonomous-workflow.md`,
+`bash scripts/loop-state.sh`, and `make loop-run` (local SDK). Do not manually pick issues
+when the loop is active — the controller decides the next action.
+
 ## Issue Readiness
 
 An issue is ready for agent work when it has:

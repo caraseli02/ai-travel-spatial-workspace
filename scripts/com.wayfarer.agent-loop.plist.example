@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Optional: run the local ready-for-agent SDK agent on a schedule.
+
+  Schedule is offset 30 minutes after the ECAS controller loop (9:00/12:00/15:00/18:00).
+
+  1. cp scripts/com.wayfarer.agent-loop.plist.example ~/Library/LaunchAgents/com.wayfarer.agent-loop.plist
+  2. Edit REPO_ROOT and CURSOR_API_KEY below
+  3. launchctl load ~/Library/LaunchAgents/com.wayfarer.agent-loop.plist
+
+  Prefer Cursor Automations (docs/agents/automation-queue.md) for cloud runs.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.wayfarer.agent-loop</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-lc</string>
+    <string>cd REPO_ROOT &amp;&amp; export CURSOR_API_KEY=YOUR_KEY &amp;&amp; make loop-run</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>REPO_ROOT</string>
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict>
+      <key>Hour</key>
+      <integer>9</integer>
+      <key>Minute</key>
+      <integer>30</integer>
+    </dict>
+    <dict>
+      <key>Hour</key>
+      <integer>12</integer>
+      <key>Minute</key>
+      <integer>30</integer>
+    </dict>
+    <dict>
+      <key>Hour</key>
+      <integer>15</integer>
+      <key>Minute</key>
+      <integer>30</integer>
+    </dict>
+    <dict>
+      <key>Hour</key>
+      <integer>18</integer>
+      <key>Minute</key>
+      <integer>30</integer>
+    </dict>
+  </array>
+  <key>StandardOutPath</key>
+  <string>/tmp/wayfarer-agent-loop.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/wayfarer-agent-loop.err</string>
+  <key>RunAtLoad</key>
+  <false/>
+</dict>
+</plist>

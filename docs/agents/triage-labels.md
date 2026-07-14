@@ -12,4 +12,16 @@ The skills speak in terms of five canonical triage roles. This file maps those r
 
 When a skill mentions a role, use the corresponding label string from this table.
 
-Edit the right-hand column to match whatever vocabulary you actually use.
+## Operational labels (not triage roles)
+
+- `in-progress` — claimed by the planner/generator loop; used by pickup rules in `issue-tracker.md`. If an open PR exists, WIP remains occupied until evaluator pass, blocker, or repair on that same PR.
+- `blocked` — concrete blocker found by generator or evaluator; include a comment with the repair instruction or human decision needed
+- `tech-debt` — technical debt remediation slice (optional queue filter via `make debt-next`)
+
+Optional future label:
+
+- `ready-for-evaluator` — use only if the repo adopts an explicit evaluator queue. Until then, evaluators scan every open non-draft PR, and evaluator failures repair the same issue/branch rather than re-entering `ready-for-agent`.
+
+## Rule
+
+Do not create duplicate labels with slightly different names. Reuse these exact strings.
