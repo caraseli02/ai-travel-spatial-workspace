@@ -1,0 +1,40 @@
+---
+description: Autonomous Wayfarer controller loop (cron/SDK). Do not manually pick issues.
+alwaysApply: false
+---
+
+# Wayfarer loop agent session
+
+Use when the user asks to run the **controller loop**, `/loop`, or when a Cursor Automation fires on the Wayfarer schedule.
+
+## Before coding
+
+1. Run `bash scripts/loop-state.sh` and follow the `action` field.
+2. Read `docs/agents/autonomous-workflow.md` and `docs/agents/issue-tracker.md`.
+3. Load `.agents/skills/tdd/SKILL.md` for implementation slices.
+
+## Session rules
+
+- **Do not ask which issue to pick** — the loop state machine decides.
+- **WIP=1** — only the claimed `in-progress` issue.
+- On `claim_new`: `bash scripts/claim-issue.sh <n> <branch>` before editing code.
+- On `repair`: fix the same branch/PR from the trusted FAIL comment whose marker matches the current head.
+- On `wait_evaluator` or `idle`: stop without coding.
+
+## Verification
+
+| Change type | Command |
+| --- | --- |
+| Models / utils only | `make test` |
+| UI, routing, persistence, E2E | `make check` |
+
+## PR
+
+- End with **PR ready for evaluator** — not "done".
+- Body: `Closes #<n>`, acceptance criteria, verification section.
+
+## Out of scope
+
+- Picking a second issue while WIP is occupied
+- Self-certifying evaluator PASS
+- Merging PRs (human review only)
