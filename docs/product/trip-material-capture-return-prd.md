@@ -106,6 +106,8 @@ Passing this test shows that the capture-and-return loop is understandable and d
 
 ## Validation Protocol
 
+Facilitator kit: [`trip-material-capture-return-usability-study.md`](./trip-material-capture-return-usability-study.md)
+
 1. Give each participant an existing Trip and one URL or text note relevant to that Trip.
 2. Ask them to save the material without step-by-step instruction.
 3. Have them reload Wayfarer or leave and reopen the Trip.

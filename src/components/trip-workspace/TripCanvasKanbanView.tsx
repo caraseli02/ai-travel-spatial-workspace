@@ -6,10 +6,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   getKanbanCanvasColumns,
-  getMappedCards,
+  resetKanbanScrollerPosition,
   scrollKanbanToActiveDayColumn,
 } from "@/utils/tripWorkspaceViewHelpers";
-import { KanbanMiniMap } from "./KanbanMiniMap";
 
 export function TripCanvasKanbanView({
   days,
@@ -19,11 +18,11 @@ export function TripCanvasKanbanView({
   isLinkingActive,
   linkingOriginId,
   zoom,
+  viewResetNonce = 0,
   isMobile = false,
   onActiveDayChange,
   onSelectCard,
   onCreateCard,
-  onOpenMap,
 }: {
   days: DayGroup[];
   cards: CanvasCard[];
@@ -32,14 +31,13 @@ export function TripCanvasKanbanView({
   isLinkingActive: boolean;
   linkingOriginId: string | null;
   zoom: number;
+  viewResetNonce?: number;
   isMobile?: boolean;
   onActiveDayChange: (day: number | null) => void;
   onSelectCard: (card: CanvasCard) => void;
   onCreateCard: () => void;
-  onOpenMap: () => void;
 }) {
   const columns = useMemo(() => getKanbanCanvasColumns(days, cards), [cards, days]);
-  const locatedCardCount = useMemo(() => getMappedCards(cards).length, [cards]);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const columnRefs = useRef(new Map<number, HTMLElement>());
   const displayColumns = useMemo(() => {
@@ -56,20 +54,28 @@ export function TripCanvasKanbanView({
     scrollKanbanToActiveDayColumn(scroller, column, activeDay, isMobile);
   }, [activeDay, isMobile]);
 
+  useEffect(() => {
+    if (viewResetNonce === 0) return;
+    resetKanbanScrollerPosition(scrollerRef.current);
+  }, [viewResetNonce]);
+
   return (
     <div className="absolute inset-0 overflow-hidden bg-[#f5f3ef]">
       <div
         ref={scrollerRef}
         className={cn(
-          "absolute inset-x-0 bottom-[calc(7rem+env(safe-area-inset-bottom))] md:bottom-32 md:top-14",
-          isMobile && activeDay !== null && "top-0 overflow-x-hidden overflow-y-auto",
-          isMobile && activeDay === null && "top-0 snap-x snap-mandatory scroll-pl-4 overflow-x-auto overflow-y-hidden",
-          !isMobile && "top-14 overflow-x-auto overflow-y-hidden",
+          "absolute inset-x-0 bottom-0",
+          isMobile ? "top-0" : "top-14",
+          isMobile && activeDay !== null && "overflow-x-hidden overflow-y-auto",
+          isMobile && activeDay === null && "snap-x snap-mandatory scroll-pl-4 overflow-x-auto overflow-y-hidden",
+          !isMobile && "overflow-x-auto overflow-y-hidden",
         )}
       >
         <div
           className={cn(
-            "flex h-full min-w-max origin-top-left gap-3 p-3 pb-6 transition-[zoom] md:py-4 md:pr-[18rem] md:pl-44",
+            "flex h-full origin-top-left gap-3 p-3 transition-[zoom] md:py-4 md:pl-44",
+            "pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-28",
+            isMobile ? "min-w-max" : "w-max min-w-full",
             isMobile && activeDay === null && "[&>section]:snap-center",
             isMobile && activeDay !== null && "h-auto min-h-full w-full min-w-0 flex-col",
           )}
@@ -91,10 +97,11 @@ export function TripCanvasKanbanView({
                   }
                 }}
                 className={cn(
-                  "flex shrink-0 flex-col gap-2.5 rounded-xl border border-[#e7e3dc] bg-[#fefcf8] p-2.5 transition",
-                  isMobile && activeDay === null && "w-[calc(100vw-2rem)] snap-center sm:w-[255px]",
+                  "flex flex-col gap-2.5 rounded-xl border border-[#e7e3dc] bg-[#fefcf8] p-2.5 transition",
+                  isMobile && "shrink-0",
+                  isMobile && activeDay === null && "h-full w-[calc(100vw-2rem)] snap-center sm:w-[255px]",
                   isMobile && activeDay !== null && "w-full max-w-none",
-                  !isMobile && "w-[255px]",
+                  !isMobile && "h-full min-w-[280px] max-w-[360px] flex-1 basis-[280px]",
                   isDimmed && "opacity-40",
                 )}
                 aria-label={column.label}
@@ -115,10 +122,10 @@ export function TripCanvasKanbanView({
 
                 <div
                   className={cn(
-                    "flex flex-col gap-2.5",
+                    "flex flex-col gap-2 md:gap-2.5",
                     isMobile && activeDay !== null
                       ? "overflow-visible"
-                      : "scrollbar-thin max-h-[calc(100vh-260px)] overflow-y-auto md:max-h-[696px]",
+                      : "scrollbar-thin min-h-0 flex-1 overflow-y-auto",
                   )}
                 >
                   {column.cards.length === 0 ? (
@@ -163,10 +170,6 @@ export function TripCanvasKanbanView({
             );
           })}
         </div>
-      </div>
-
-      <div className="hidden md:block">
-        <KanbanMiniMap locatedCardCount={locatedCardCount} onOpenMap={onOpenMap} />
       </div>
     </div>
   );

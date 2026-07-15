@@ -1,12 +1,22 @@
 import { ExternalLink, Link, Trash2 } from "lucide-react";
 import type { CardSourceMemory } from "../../models/tripMaterialMemory";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface CardDetailFooterProps {
   sourceMemory?: CardSourceMemory;
   isLinkingActive?: boolean;
-  confirmDelete: boolean;
   onStartLinking?: () => void;
   onDelete?: () => void;
   showLinkButton: boolean;
@@ -16,7 +26,6 @@ interface CardDetailFooterProps {
 export function CardDetailFooter({
   sourceMemory,
   isLinkingActive = false,
-  confirmDelete,
   onStartLinking,
   onDelete,
   showLinkButton,
@@ -52,18 +61,31 @@ export function CardDetailFooter({
           className="border-t border-destructive/20 pt-2"
           data-card-detail-footer-section="destructive"
         >
-          <Button
-            variant="outline"
-            onClick={onDelete}
-            className={cn(
-              "w-full text-xs font-semibold border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive",
-              confirmDelete &&
-                "animate-pulse border-destructive bg-destructive text-destructive-foreground hover:bg-destructive hover:text-destructive-foreground",
-            )}
-          >
-            <Trash2 className="size-3" />
-            {confirmDelete ? "Confirm delete" : "Delete Card"}
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full text-xs font-semibold border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              >
+                <Trash2 className="size-3" />
+                Delete Card
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete this card?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. The card will be removed from your trip workspace.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction variant="destructive" onClick={onDelete}>
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       )}
     </div>

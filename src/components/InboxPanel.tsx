@@ -30,6 +30,8 @@ interface InboxPanelProps {
   onProcessItem: (id: string) => void;
   onAddItem: (content: string) => void;
   onOpenAddManual?: () => void;
+  /** When false (desktop), capture happens via Ask AI; list-only Inbox. */
+  showCaptureInput?: boolean;
 }
 
 const sourceIcons: Record<string, React.ReactElement> = {
@@ -60,6 +62,7 @@ export default function InboxPanel({
   onProcessItem,
   onAddItem,
   onOpenAddManual,
+  showCaptureInput = true,
 }: InboxPanelProps) {
   const [inputVal, setInputVal] = useState("");
   const [placeholder, setPlaceholder] = useState(0);
@@ -87,39 +90,43 @@ export default function InboxPanel({
           </Badge>
         </div>
         <p className="text-xs leading-snug text-muted-foreground">
-          Paste a link or note — Wayfarer saves what you provide for this Trip.
+          {showCaptureInput
+            ? "Paste a link or note — Wayfarer saves what you provide for this Trip."
+            : "Saved Trip Material for this Trip. Paste a link or note in Ask AI below to capture more."}
         </p>
       </div>
 
-      <div className="border-b border-border/60 px-3 py-3">
-        <div className="relative">
-          <Textarea
-            className="min-h-[76px] resize-none border-border bg-muted/50 pr-10 text-xs text-foreground placeholder:text-muted-foreground/70"
-            placeholder={`Try: "${sampleInputs[placeholder]}"`}
-            value={inputVal}
-            onChange={(e) => setInputVal(e.target.value)}
-            onFocus={cyclePlaceholder}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && e.metaKey) handleSend();
-            }}
-            aria-describedby="inbox-input-hint"
-          />
-          <Button
-            onClick={handleSend}
-            disabled={!inputVal.trim()}
-            size="icon-sm"
-            className="absolute right-2.5 bottom-2.5 disabled:pointer-events-none disabled:opacity-40"
-            aria-label="Submit inbox item"
-          >
-            <Send className="size-3" />
-          </Button>
+      {showCaptureInput && (
+        <div className="border-b border-border/60 px-3 py-3" data-testid="inbox-capture-input">
+          <div className="relative">
+            <Textarea
+              className="min-h-[76px] resize-none border-border bg-muted/50 pr-10 text-xs text-foreground placeholder:text-muted-foreground/70"
+              placeholder={`Try: "${sampleInputs[placeholder]}"`}
+              value={inputVal}
+              onChange={(e) => setInputVal(e.target.value)}
+              onFocus={cyclePlaceholder}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && e.metaKey) handleSend();
+              }}
+              aria-describedby="inbox-input-hint"
+            />
+            <Button
+              onClick={handleSend}
+              disabled={!inputVal.trim()}
+              size="icon-sm"
+              className="absolute right-2.5 bottom-2.5 disabled:pointer-events-none disabled:opacity-40"
+              aria-label="Submit inbox item"
+            >
+              <Send className="size-3" />
+            </Button>
+          </div>
+          <p id="inbox-input-hint" className="mt-1.5 text-xs font-medium text-muted-foreground">
+            {inputVal.trim()
+              ? "Press ⌘ Enter or tap send to save this in your inbox."
+              : "Paste a link or note above to enable submit."}
+          </p>
         </div>
-        <p id="inbox-input-hint" className="mt-1.5 text-xs font-medium text-muted-foreground">
-          {inputVal.trim()
-            ? "Press ⌘ Enter or tap send to save this in your inbox."
-            : "Paste a link or note above to enable submit."}
-        </p>
-      </div>
+      )}
 
       <div className="scrollbar-thin flex-1 overflow-y-auto px-3 py-2">
         {unprocessed.length > 0 && (

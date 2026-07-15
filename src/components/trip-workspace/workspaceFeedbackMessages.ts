@@ -16,6 +16,18 @@ export function buildOrganizedInboxItemFeedback({
   };
 }
 
+export function buildInboxCaptureFeedback({
+  label,
+}: {
+  label: string;
+}): WorkspaceFeedback {
+  return {
+    tone: "success",
+    title: "Saved to Inbox",
+    message: `"${label}" is in your Inbox. Open it anytime to continue your research.`,
+  };
+}
+
 export function buildAiPlannerInboxDraftFeedback({
   draftLabel,
 }: {

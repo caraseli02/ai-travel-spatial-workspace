@@ -14,8 +14,6 @@ export function useCardDetailEditState(
   const [editDetails, setEditDetails] = useState<string[]>([]);
   const [editPrice, setEditPrice] = useState("");
   const [editRating, setEditRating] = useState(4.5);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-
   useEffect(() => {
     if (!card) return;
     setEditTitle(card.title);
@@ -26,7 +24,6 @@ export function useCardDetailEditState(
     setEditPrice(card.price || "");
     setEditRating(card.rating || 4.5);
     setIsEditing(false);
-    setConfirmDelete(false);
   }, [card?.id]);
 
   const handleFieldChange = (updates: Partial<CanvasCard>) => {
@@ -91,8 +88,6 @@ export function useCardDetailEditState(
   return {
     isEditing,
     setIsEditing,
-    confirmDelete,
-    setConfirmDelete,
     editState,
     handlers,
   };

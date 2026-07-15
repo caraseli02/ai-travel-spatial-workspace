@@ -3,10 +3,25 @@ import { Star, Plane, MapPin, Wifi } from "lucide-react";
 import type { CanvasCard } from "../models/trip";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import {
   filterRedundantCardDetails,
   resolveKanbanCardTag,
 } from "../utils/tripWorkspaceViewHelpers";
+
+/** Kanban (embedded) cards: compact below md, full size at md+. */
+function kanbanContentPad(embedded?: boolean, desktop = "p-3.5") {
+  if (!embedded) return desktop;
+  return desktop === "p-4" ? "p-2.5 md:p-4" : "p-2.5 md:p-3.5";
+}
+
+function kanbanImageHeight(
+  embedded: boolean | undefined,
+  embeddedClasses: string,
+  desktopClasses: string,
+) {
+  return embedded ? embeddedClasses : desktopClasses;
+}
 
 export interface CardRendererProps {
   card: CanvasCard;
@@ -79,12 +94,15 @@ function CanvasCardShell({
   );
 }
 
-function TagPill({ tag, color }: { tag: string; color: string }) {
+function TagPill({ tag, color, compact }: { tag: string; color: string; compact?: boolean }) {
   const c = tagColorMap[color] || tagColorMap.slate;
   return (
     <Badge
       variant="outline"
-      className="max-w-full shrink-0 whitespace-normal rounded-full px-2 py-0.5 text-center text-xs leading-tight font-medium"
+      className={cn(
+        "max-w-full shrink-0 whitespace-normal rounded-full py-0.5 text-center leading-tight font-medium",
+        compact ? "px-1.5 text-[10px] md:px-2 md:text-xs" : "px-2 text-xs",
+      )}
       style={{ backgroundColor: c.bg, color: c.text, borderColor: c.border }}
     >
       {tag}
@@ -103,7 +121,7 @@ function CardTag({
 }) {
   const displayTag = embedded ? resolveKanbanCardTag(tag) : tag;
   if (!displayTag) return null;
-  return <TagPill tag={displayTag} color={color} />;
+  return <TagPill tag={displayTag} color={color} compact={embedded} />;
 }
 
 function StarRating({ rating }: { rating: number }) {
@@ -128,13 +146,21 @@ export function PolaroidCard({
   return (
     <CanvasCardShell card={card} embedded={embedded} isDragging={isDragging} onMouseDown={onMouseDown} defaultWidth={220}>
       <Card
-        className={`rounded-lg bg-card transition-all duration-200 ring-0 ${
-          isDragging ? "shadow-2xl ring-2 ring-amber-500/20" : "polaroid-shadow group-hover:polaroid-shadow-hover"
-        }`}
-        style={{ padding: "10px 10px 14px 10px" }}
+        className={cn(
+          "rounded-lg bg-card transition-all duration-200 ring-0",
+          isDragging ? "shadow-2xl ring-2 ring-amber-500/20" : "polaroid-shadow group-hover:polaroid-shadow-hover",
+          embedded ? "p-2 md:p-2.5" : undefined,
+        )}
+        style={embedded ? undefined : { padding: "10px 10px 14px 10px" }}
       >
         {/* Image */}
-        <div className="mb-3 h-[140px] w-full overflow-hidden rounded bg-muted">
+        <div
+          className={cn(
+            "w-full overflow-hidden rounded bg-muted",
+            kanbanImageHeight(embedded, "h-[100px] md:h-[140px]", "h-[140px]"),
+            embedded ? "mb-2 md:mb-3" : "mb-3",
+          )}
+        >
           {card.image && (
             <img src={card.image} alt={card.title}
               className="w-full h-full object-cover" />
@@ -143,7 +169,14 @@ export function PolaroidCard({
         {/* Content */}
         <div className="px-1">
           <CardTag tag={card.tag} color={card.tagColor || "slate"} embedded={embedded} />
-          <p className="mt-1.5 text-sm leading-tight font-semibold text-foreground">{card.title}</p>
+          <p
+            className={cn(
+              "mt-1.5 leading-tight font-semibold text-foreground",
+              embedded ? "text-xs md:text-sm" : "text-sm",
+            )}
+          >
+            {card.title}
+          </p>
           {card.subtitle && (
             <p className="mt-0.5 text-xs leading-snug text-muted-foreground">{card.subtitle}</p>
           )}
@@ -171,16 +204,31 @@ export function StickyCard({
   const colors = stickyColors[card.color || '#fef3c7'] || stickyColors['#fef3c7'];
   return (
     <CanvasCardShell card={card} embedded={embedded} isDragging={isDragging} onMouseDown={onMouseDown} defaultWidth={200}>
-      <Card className={`relative overflow-hidden rounded-lg py-0 transition-all duration-200 ring-0 ${
-        isDragging ? 'shadow-2xl ring-2 ring-amber-500/20' : 'sticky-shadow group-hover:shadow-lg'
-      }`}
-        style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}`, padding: '14px' }}>
+      <Card
+        className={cn(
+          "relative overflow-hidden rounded-lg py-0 transition-all duration-200 ring-0",
+          isDragging ? "shadow-2xl ring-2 ring-amber-500/20" : "sticky-shadow group-hover:shadow-lg",
+          embedded ? "p-2.5 md:p-3.5" : undefined,
+        )}
+        style={
+          embedded
+            ? { backgroundColor: colors.bg, border: `1px solid ${colors.border}` }
+            : { backgroundColor: colors.bg, border: `1px solid ${colors.border}`, padding: "14px" }
+        }
+      >
         {/* Fold corner */}
         <div className="absolute top-0 right-0 w-5 h-5"
           style={{
             background: `linear-gradient(225deg, white 50%, ${colors.fold} 50%)`,
           }} />
-        <p className="mb-1.5 text-sm leading-tight font-semibold text-foreground">{card.title}</p>
+        <p
+          className={cn(
+            "mb-1.5 leading-tight font-semibold text-foreground",
+            embedded ? "text-xs md:text-sm" : "text-sm",
+          )}
+        >
+          {card.title}
+        </p>
         {card.subtitle && (
           <p className="text-xs leading-relaxed text-muted-foreground">{card.subtitle}</p>
         )}
@@ -205,18 +253,25 @@ export function ArticleCard({
       >
         {/* Image strip */}
         {card.image && (
-          <div className="h-[110px] w-full overflow-hidden bg-muted">
+          <div className={cn("w-full overflow-hidden bg-muted", kanbanImageHeight(embedded, "h-[80px] md:h-[110px]", "h-[110px]"))}>
             <img src={card.image} alt={card.title} className="w-full h-full object-cover" />
           </div>
         )}
-        <div className="p-3.5">
+        <div className={kanbanContentPad(embedded)}>
           <CardTag tag={card.tag} color={card.tagColor || "slate"} embedded={embedded} />
-          <p className="mt-2 text-sm leading-tight font-semibold text-foreground">{card.title}</p>
+          <p
+            className={cn(
+              "mt-2 leading-tight font-semibold text-foreground",
+              embedded ? "text-xs md:text-sm" : "text-sm",
+            )}
+          >
+            {card.title}
+          </p>
           {card.subtitle && (
             <p className="mt-1 text-xs leading-snug text-muted-foreground">{card.subtitle}</p>
           )}
           {card.details && card.details.length > 0 && (
-            <ul className="mt-2.5 space-y-1">
+            <ul className={cn(embedded ? "mt-1.5 space-y-0.5 md:mt-2.5 md:space-y-1" : "mt-2.5 space-y-1")}>
               {card.details.map((d, i) => (
                 <li key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <span className="size-1 shrink-0 rounded-full bg-muted-foreground/30" />
@@ -248,36 +303,62 @@ export function FlightCard({
         }`}
       >
         {/* Header strip */}
-        <div className="flex items-center justify-between rounded-t-xl border-b border-amber-200 bg-amber-50 px-4 py-2.5">
-          <div className="flex items-center gap-2">
+        <div
+          className={cn(
+            "flex items-center justify-between rounded-t-xl border-b border-amber-200 bg-amber-50",
+            embedded ? "px-2.5 py-1.5 md:px-4 md:py-2.5" : "px-4 py-2.5",
+          )}
+        >
+          <div className="flex items-center gap-1.5 md:gap-2">
             <Plane size={13} className="text-primary" />
             <span className="text-xs font-semibold text-primary">Flight</span>
           </div>
           <CardTag tag={card.tag} color={card.tagColor || "amber"} embedded={embedded} />
         </div>
 
-        <div className="p-4">
+        <div className={kanbanContentPad(embedded, "p-4")}>
           {/* Route */}
-          <div className="mb-3 flex items-center justify-between">
+          <div className={cn("flex items-center justify-between", embedded ? "mb-2 md:mb-3" : "mb-3")}>
             <div className="min-w-0">
-              <p className="text-lg font-bold text-foreground sm:text-xl">SFO</p>
-              <p className="text-xs text-muted-foreground">San Francisco</p>
+              <p
+                className={cn(
+                  "font-bold text-foreground",
+                  embedded ? "text-base md:text-xl" : "text-lg sm:text-xl",
+                )}
+              >
+                SFO
+              </p>
+              <p className="text-[11px] text-muted-foreground md:text-xs">San Francisco</p>
             </div>
-            <div className="flex flex-1 items-center justify-center gap-1 px-2 sm:px-3">
+            <div className="flex flex-1 items-center justify-center gap-1 px-1.5 md:px-3">
               <div className="h-px flex-1 bg-border" />
-              <Plane size={14} className="shrink-0 text-muted-foreground/50" />
+              <Plane className="size-3 shrink-0 text-muted-foreground/50 md:size-3.5" />
               <div className="h-px flex-1 bg-border" />
             </div>
             <div className="min-w-0 text-right">
-              <p className="text-lg font-bold text-foreground sm:text-xl">KIX</p>
-              <p className="text-xs text-muted-foreground">Osaka/Kyoto</p>
+              <p
+                className={cn(
+                  "font-bold text-foreground",
+                  embedded ? "text-base md:text-xl" : "text-lg sm:text-xl",
+                )}
+              >
+                KIX
+              </p>
+              <p className="text-[11px] text-muted-foreground md:text-xs">Osaka/Kyoto</p>
             </div>
           </div>
 
           {/* Details */}
-          <p className="mb-2.5 text-xs leading-relaxed text-muted-foreground">{card.subtitle}</p>
+          <p
+            className={cn(
+              "text-xs leading-relaxed text-muted-foreground",
+              embedded ? "mb-1.5 md:mb-2.5" : "mb-2.5",
+            )}
+          >
+            {card.subtitle}
+          </p>
           {displayDetails.length > 0 && (
-            <div className="space-y-1">
+            <div className={cn(embedded ? "space-y-0.5 md:space-y-1" : "space-y-1")}>
               {displayDetails.map((d, i) => (
                 <div key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <span className="size-1 rounded-full bg-muted-foreground/30" />
@@ -287,8 +368,23 @@ export function FlightCard({
             </div>
           )}
           {card.price && (
-            <div className={displayDetails.length > 0 ? "mt-3 border-t border-border pt-3" : "mt-1"}>
-              <span className="text-lg font-bold text-foreground">{card.price}</span>
+            <div
+              className={cn(
+                displayDetails.length > 0
+                  ? embedded
+                    ? "mt-2 border-t border-border pt-2 md:mt-3 md:pt-3"
+                    : "mt-3 border-t border-border pt-3"
+                  : "mt-1",
+              )}
+            >
+              <span
+                className={cn(
+                  "font-bold text-foreground",
+                  embedded ? "text-base md:text-lg" : "text-lg",
+                )}
+              >
+                {card.price}
+              </span>
               <span className="ml-1 text-xs text-muted-foreground">total</span>
             </div>
           )}
@@ -314,22 +410,29 @@ export function HotelCard({
       >
         {/* Image */}
         {card.image && (
-          <div className="h-[120px] w-full overflow-hidden bg-muted">
+          <div className={cn("w-full overflow-hidden bg-muted", kanbanImageHeight(embedded, "h-[72px] md:h-[120px]", "h-[120px]"))}>
             <img src={card.image} alt={card.title} className="w-full h-full object-cover" />
           </div>
         )}
-        <div className="p-3.5">
-          <div className="flex items-start justify-between gap-2 mb-1">
-            <p className="text-sm leading-tight font-semibold text-foreground">{card.title}</p>
+        <div className={kanbanContentPad(embedded)}>
+          <div className={cn("flex items-start justify-between gap-2", embedded ? "mb-0.5 md:mb-1" : "mb-1")}>
+            <p
+              className={cn(
+                "leading-tight font-semibold text-foreground",
+                embedded ? "text-xs md:text-sm" : "text-sm",
+              )}
+            >
+              {card.title}
+            </p>
             <CardTag tag={card.tag} color={card.tagColor || "amber"} embedded={embedded} />
           </div>
-          <div className="flex items-center gap-1.5 mb-2">
+          <div className={cn("flex items-center gap-1.5", embedded ? "mb-1 md:mb-2" : "mb-2")}>
             <MapPin size={11} className="text-muted-foreground" />
             <p className="text-xs text-muted-foreground">{card.subtitle}</p>
           </div>
           {card.rating && <StarRating rating={card.rating} />}
           {card.details && (
-            <ul className="mt-2.5 space-y-1">
+            <ul className={cn(embedded ? "mt-1.5 space-y-0.5 md:mt-2.5 md:space-y-1" : "mt-2.5 space-y-1")}>
               {card.details.map((d, i) => (
                 <li key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <span className="size-1 shrink-0 rounded-full bg-muted-foreground/30" />
@@ -354,15 +457,24 @@ export function NoteCard({
   return (
     <CanvasCardShell card={card} embedded={embedded} isDragging={isDragging} onMouseDown={onMouseDown} defaultWidth={210}>
       <Card
-        className={`rounded-xl border border-border bg-card p-3.5 transition-all duration-200 ring-0 ${
-          isDragging ? "shadow-2xl ring-2 ring-amber-500/20" : "polaroid-shadow group-hover:polaroid-shadow-hover"
-        }`}
+        className={cn(
+          "rounded-xl border border-border bg-card transition-all duration-200 ring-0",
+          kanbanContentPad(embedded),
+          isDragging ? "shadow-2xl ring-2 ring-amber-500/20" : "polaroid-shadow group-hover:polaroid-shadow-hover",
+        )}
       >
-        <div className="mb-2 flex items-center justify-between">
+        <div className={cn("flex items-center justify-between", embedded ? "mb-1.5 md:mb-2" : "mb-2")}>
           <CardTag tag={card.tag} color={card.tagColor || "slate"} embedded={embedded} />
           <Wifi size={13} className="text-muted-foreground/50" />
         </div>
-        <p className="mb-1 text-sm font-semibold text-foreground">{card.title}</p>
+        <p
+          className={cn(
+            "mb-1 font-semibold text-foreground",
+            embedded ? "text-xs md:text-sm" : "text-sm",
+          )}
+        >
+          {card.title}
+        </p>
         <p className="text-xs leading-relaxed text-muted-foreground">{card.subtitle}</p>
       </Card>
     </CanvasCardShell>

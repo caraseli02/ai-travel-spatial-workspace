@@ -1,6 +1,6 @@
 import type { Connection, DayGroup, DayLabel } from "@/models/trip";
 import { dayLabelConfig } from "@/models/trip";
-import { buildInboxItem } from "@/models/tripWorkspaceInbox";
+import { buildInboxItem, isTripMaterialCaptureInput, shouldCaptureViaPromptBar } from "@/models/tripWorkspaceInbox";
 import {
   buildCustomDay,
   buildManualCanvasCard,
@@ -26,6 +26,8 @@ export type { Connection, DayGroup, DayLabel, CardType, TripWorkspaceAction, Tri
 export {
   dayLabelConfig,
   buildInboxItem,
+  isTripMaterialCaptureInput,
+  shouldCaptureViaPromptBar,
   cardTypeOptions,
   dayColorPresets,
   cardDimensions,

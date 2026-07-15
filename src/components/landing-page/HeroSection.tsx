@@ -1,6 +1,5 @@
 import { ArrowUp, Sparkles } from "lucide-react";
 import LandingWorkspacePreview from "@/components/LandingWorkspacePreview";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -48,14 +47,6 @@ export function HeroSection({ onEnterDemo }: { onEnterDemo: () => void }) {
   return (
     <section className="px-4 pt-24 pb-10 md:px-12 md:pt-28 md:pb-14">
       <div className="mx-auto flex max-w-7xl flex-col items-center gap-7 text-center md:gap-7">
-        <Badge
-          variant="outline"
-          className="gap-2 border-primary/20 bg-primary/5 px-3 py-1.5 text-primary"
-        >
-          <Sparkles className="size-3.5" />
-          AI-native trip planning
-        </Badge>
-
         <h1 className="max-w-4xl font-serif text-[32px] leading-[1.05] font-semibold md:text-[64px]">
           Plan trips you can
           <br />

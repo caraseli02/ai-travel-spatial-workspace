@@ -15,7 +15,6 @@ import {
 export const navLinks = [
   { label: "Features", href: "#features" },
   { label: "How it works", href: "#how-it-works" },
-  { label: "Pricing", href: "#pricing" },
   { label: "Stories", href: "#stories" },
 ] as const;
 
@@ -165,14 +164,13 @@ export const testimonials = [
 ] as const;
 
 export const footerLinks = {
-  Product: ["Features", "Pricing", "Spatial canvas", "Changelog"],
+  Product: ["Features", "Spatial canvas", "Changelog"],
   Company: ["About", "Blog", "Careers"],
   Legal: ["Privacy", "Terms"],
 } as const;
 
 export const footerLinkHrefs: Partial<Record<string, string>> = {
   Features: "#features",
-  Pricing: "#pricing",
   "Spatial canvas": "#features",
 };
 

@@ -229,6 +229,14 @@ export function scrollKanbanToActiveDayColumn(
   scroller.scrollTo({ left: scrollLeft, behavior: "smooth" });
 }
 
+export function resetKanbanScrollerPosition(
+  scroller: {
+    scrollTo: (options: ScrollToOptions) => void;
+  } | null,
+) {
+  scroller?.scrollTo({ left: 0, top: 0, behavior: "auto" });
+}
+
 function sortCardsForWorkspaceViews(a: CanvasCard, b: CanvasCard) {
   const byType = cardTypeOrder[a.type] - cardTypeOrder[b.type];
   return byType || a.id.localeCompare(b.id);

@@ -50,7 +50,7 @@ test("keeps the Add Day dialog above the AI prompt with its footer inside", asyn
   const dialog = page.locator('[data-slot="dialog-content"]');
   const overlay = page.locator('[data-slot="dialog-overlay"]');
   const footer = page.locator('[data-slot="dialog-footer"]');
-  const aiPrompt = page.getByPlaceholder(/Ask AI:/).locator("xpath=ancestor::form[1]");
+  const aiPrompt = page.getByPlaceholder(/paste a link or note to save/i).locator("xpath=ancestor::form[1]");
 
   await expect(dialog).toBeVisible();
   const overlayZ = await overlay.evaluate((element) => Number(getComputedStyle(element).zIndex));

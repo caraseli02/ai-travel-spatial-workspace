@@ -2,6 +2,34 @@ import type { InboxItem } from "@/models/trip";
 
 const urlPattern = /https?:\/\/[^\s"')]+/i;
 
+const aiIntentPrefix =
+  /^(plan|suggest|find|recommend|help|show|tell|what|where|when|how|why|who|which|can|could|should|would|is|are|do|does)\b/i;
+
+export function isTripMaterialCaptureInput(content: string): boolean {
+  const trimmed = content.trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  if (extractSourceUrl(trimmed)) {
+    return true;
+  }
+
+  if (trimmed.endsWith("?")) {
+    return false;
+  }
+
+  if (aiIntentPrefix.test(trimmed)) {
+    return false;
+  }
+
+  return true;
+}
+
+export function shouldCaptureViaPromptBar(input: string, isMobile: boolean): boolean {
+  return !isMobile && isTripMaterialCaptureInput(input);
+}
+
 export function extractSourceUrl(content: string): string | undefined {
   return content.match(urlPattern)?.[0];
 }

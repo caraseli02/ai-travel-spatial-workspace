@@ -18,6 +18,6 @@ describe("AiPromptBar", () => {
     const shell = container.firstElementChild;
     expect(shell).toHaveClass("z-[600]");
     expect(shell).toHaveClass("bottom-[calc(42vh+1rem)]");
-    expect(screen.getByPlaceholderText(/Ask AI:/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/paste a link or note to save/i)).toBeInTheDocument();
   });
 });

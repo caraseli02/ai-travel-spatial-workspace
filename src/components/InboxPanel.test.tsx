@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { InboxItem } from "@/models/trip";
 import InboxPanel from "./InboxPanel";
 
@@ -30,6 +30,10 @@ const inboxItems: InboxItem[] = [
 ];
 
 describe("InboxPanel", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   it("renders captured Inbox Items with honest copy and source recovery actions", async () => {
     const user = userEvent.setup();
     const onAddItem = vi.fn();
@@ -53,5 +57,23 @@ describe("InboxPanel", () => {
     await user.click(screen.getAllByRole("button", { name: /place on canvas/i })[0]);
 
     expect(onProcessItem).toHaveBeenCalledWith("inbox-ramen-tip");
+  });
+
+  it("hides the capture input on desktop while keeping the inbox list", () => {
+    render(
+      <InboxPanel
+        items={inboxItems}
+        onAddItem={vi.fn()}
+        onProcessItem={vi.fn()}
+        showCaptureInput={false}
+      />,
+    );
+
+    expect(screen.queryByTestId("inbox-capture-input")).toBeNull();
+    expect(screen.queryByRole("textbox")).toBeNull();
+    expect(
+      screen.getByText(/paste a link or note in ask ai below to capture more/i),
+    ).toBeTruthy();
+    expect(screen.getAllByText("Try Menya Inoichi near Nishiki Market.").length).toBeGreaterThan(0);
   });
 });

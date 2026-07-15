@@ -17,6 +17,7 @@ import {
 import type { CanvasCard, Trip } from "../models/trip";
 import { resolveCardSourceMemory } from "../models/tripMaterialMemory";
 import type { TripWorkspaceState } from "../models/tripWorkspaceModel";
+import { buildInboxItem, shouldCaptureViaPromptBar } from "../models/tripWorkspaceInbox";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTripWorkspaceState } from "../hooks/useTripWorkspaceState";
@@ -44,6 +45,7 @@ import {
   buildShareFeedback,
   buildAiPlannerInboxDraftFeedback,
   buildAiCanvasReplyFeedback,
+  buildInboxCaptureFeedback,
 } from "./trip-workspace/workspaceFeedbackMessages";
 import { resolveAiPromptOutcome } from "./trip-workspace/resolveAiPromptOutcome";
 
@@ -65,6 +67,7 @@ export default function TripWorkspacePresenter({
   showOnboardingToast,
 }: TripWorkspacePresenterProps) {
   const [kanbanZoom, setKanbanZoom] = useState(1);
+  const [kanbanViewResetNonce, setKanbanViewResetNonce] = useState(0);
   const [workspaceView, setWorkspaceView] = useState<WorkspaceView>("canvas");
   const [workspaceFeedback, setWorkspaceFeedback] = useState<WorkspaceFeedback | null>(null);
   const [pendingOrganizedItemId, setPendingOrganizedItemId] = useState<string | null>(null);
@@ -136,13 +139,22 @@ export default function TripWorkspacePresenter({
   }, [processInboxItem]);
   const handleSendQuery = useCallback((query: string) => {
     if (!query.trim()) return;
+
+    if (shouldCaptureViaPromptBar(query, isMobile)) {
+      const capturedItem = buildInboxItem(query);
+      addInboxItem(query);
+      setWorkspaceFeedback(buildInboxCaptureFeedback({ label: capturedItem.source }));
+      setInboxOpen(true);
+      return;
+    }
+
     aiPromptSnapshotRef.current = {
       itemIds: new Set(items.map((item) => item.id)),
       cardIds: new Set(cards.map((card) => card.id)),
     };
     setPendingAiPrompt(true);
     sendAiQuery(query);
-  }, [items, cards, sendAiQuery]);
+  }, [isMobile, items, cards, addInboxItem, sendAiQuery, setInboxOpen]);
   const handleUpdateCard = updateCard;
   const handleDeleteCard = deleteCard;
   const handleStartLinking = linkingSession.start;
@@ -232,7 +244,10 @@ export default function TripWorkspacePresenter({
       return Math.min(1.4, Math.max(0.8, Number(next.toFixed(2))));
     });
   }, []);
-  const handleReset = useCallback(() => setKanbanZoom(1), []);
+  const handleReset = useCallback(() => {
+    setKanbanZoom(1);
+    setKanbanViewResetNonce((nonce) => nonce + 1);
+  }, []);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -362,6 +377,7 @@ export default function TripWorkspacePresenter({
               <InboxPanel
                 items={items}
                 cards={cards}
+                showCaptureInput={isMobile}
                 onProcessItem={(id) => {
                   handleProcessItem(id);
                   if (isMobile) {
@@ -440,11 +456,11 @@ export default function TripWorkspacePresenter({
               isLinkingActive={linkingSession.isActive}
               linkingOriginId={linkingSession.originId}
               zoom={kanbanZoom}
+              viewResetNonce={kanbanViewResetNonce}
               isMobile={isMobile}
               onActiveDayChange={setActiveDay}
               onSelectCard={handleCanvasCardSelect}
               onCreateCard={() => handleOpenCreateModal(900, 680)}
-              onOpenMap={() => handleWorkspaceViewChange("map")}
             />
           )}
 
