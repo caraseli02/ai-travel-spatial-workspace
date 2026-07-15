@@ -1,7 +1,6 @@
 import { useReducer, useCallback } from 'react';
 import {
-  applyAiPromptToTripWorkspace,
-  tripWorkspaceReducer,
+  reduceTripWorkspaceWithEffects,
   type AiPromptEffect,
   type TripWorkspaceAction,
   type TripWorkspaceState
@@ -28,22 +27,12 @@ function tripWorkspaceHookReducer(
     };
   }
 
-  if (action.type === 'AI_PROMPT_SUCCESS') {
-    const result = applyAiPromptToTripWorkspace({
-      ...current.workspace,
-      query: action.query,
-      trip: action.trip,
-    });
-
-    return {
-      workspace: result.nextState,
-      aiPromptEffect: result.effects[0] ?? null,
-    };
-  }
+  const result = reduceTripWorkspaceWithEffects(current.workspace, action);
 
   return {
-    workspace: tripWorkspaceReducer(current.workspace, action),
-    aiPromptEffect: action.type === 'AI_PROMPT_START' ? null : current.aiPromptEffect,
+    workspace: result.nextState,
+    aiPromptEffect:
+      result.effects[0] ?? (action.type === 'AI_PROMPT_START' ? null : current.aiPromptEffect),
   };
 }
 

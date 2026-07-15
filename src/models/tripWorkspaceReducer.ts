@@ -78,9 +78,39 @@ export function deleteCanvasCardFromWorkspace(
   };
 }
 
+type StateOnlyTripWorkspaceAction = Exclude<
+  TripWorkspaceAction,
+  { type: "AI_PROMPT_SUCCESS" }
+>;
+
+export function reduceTripWorkspaceWithEffects(
+  state: TripWorkspaceState,
+  action: TripWorkspaceAction,
+): AiPromptResult {
+  if (action.type === "AI_PROMPT_SUCCESS") {
+    return applyAiPromptToTripWorkspace({
+      ...state,
+      query: action.query,
+      trip: action.trip,
+    });
+  }
+
+  return {
+    nextState: reduceTripWorkspaceState(state, action),
+    effects: [],
+  };
+}
+
 export function tripWorkspaceReducer(
   state: TripWorkspaceState,
   action: TripWorkspaceAction,
+): TripWorkspaceState {
+  return reduceTripWorkspaceWithEffects(state, action).nextState;
+}
+
+function reduceTripWorkspaceState(
+  state: TripWorkspaceState,
+  action: StateOnlyTripWorkspaceAction,
 ): TripWorkspaceState {
   switch (action.type) {
     case "ADD_INBOX_ITEM": {
@@ -164,18 +194,6 @@ export function tripWorkspaceReducer(
         ...state,
         isAiThinking: true,
       };
-    case "AI_PROMPT_SUCCESS": {
-      const { nextState } = applyAiPromptToTripWorkspace({
-        ...state,
-        query: action.query,
-        trip: action.trip,
-      });
-      return {
-        ...state,
-        ...nextState,
-        isAiThinking: false,
-      };
-    }
     case "SET_SELECTED_CARD":
       return {
         ...state,

@@ -17,6 +17,7 @@ import {
   canConnectCards,
   connectCards,
   deleteCanvasCardFromWorkspace,
+  reduceTripWorkspaceWithEffects,
   tripWorkspaceReducer,
   type AiPromptEffect,
   type AiPromptResult,
@@ -49,5 +50,6 @@ export {
   canConnectCards,
   connectCards,
   deleteCanvasCardFromWorkspace,
+  reduceTripWorkspaceWithEffects,
   tripWorkspaceReducer,
 };
