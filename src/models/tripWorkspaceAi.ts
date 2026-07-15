@@ -1,7 +1,7 @@
 import type { CanvasCard, Connection, DayGroup, DayLabel, InboxItem, Trip } from "@/models/trip";
 import { buildTripAgentContext } from "@/models/tripAgentContext";
 import { mockAgentPlanner, type AgentPlannerOutcome } from "@/models/tripAgentPlanner";
-import type { TripWorkspaceState } from "@/models/tripWorkspaceTypes";
+import type { AiPromptResult, TripWorkspaceState } from "@/models/tripWorkspaceTypes";
 
 export function applyAiPromptToTripWorkspace({
   query,
@@ -20,7 +20,7 @@ export function applyAiPromptToTripWorkspace({
   trip?: Trip;
   now?: () => number;
   random?: () => number;
-}): TripWorkspaceState {
+}): AiPromptResult {
   const plannerTrip = buildPlannerTrip({
     trip,
     cards,
@@ -103,53 +103,65 @@ function applyAgentPlannerOutcomeToTripWorkspace({
   query: string;
   now: () => number;
   random: () => number;
-}): TripWorkspaceState {
+}): AiPromptResult {
   if (outcome.type === "inbox-item-draft") {
+    const newItem: InboxItem = {
+      id: `i_ai_draft_${now()}`,
+      type: outcome.draft.type,
+      source: outcome.draft.source,
+      content: outcome.draft.content,
+      sourceUrl: outcome.draft.sourceUrl,
+      rawContent: buildPlannerDraftRawContent(outcome.rationale, outcome.citations),
+      timestamp: "Just now",
+      processed: false,
+    };
+
     return {
-      ...rest,
-      activeDay,
-      days,
-      dayLabels,
-      cards,
-      connections,
-      items: [
-        {
-          id: `i_ai_draft_${now()}`,
-          type: outcome.draft.type,
-          source: outcome.draft.source,
-          content: outcome.draft.content,
-          sourceUrl: outcome.draft.sourceUrl,
-          rawContent: buildPlannerDraftRawContent(outcome.rationale, outcome.citations),
-          timestamp: "Just now",
-          processed: false,
-        },
-        ...items,
-      ],
-      isAiThinking: false,
+      nextState: {
+        ...rest,
+        activeDay,
+        days,
+        dayLabels,
+        cards,
+        connections,
+        items: [newItem, ...items],
+        isAiThinking: false,
+      },
+      effects: [{
+        kind: "inbox-draft",
+        itemId: newItem.id,
+        draftLabel: newItem.content,
+      }],
     };
   }
 
   if (outcome.type === "canvas-card-draft") {
+    const newItem: InboxItem = {
+      id: `i_ai_card_draft_${now()}`,
+      type: inboxTypeForCanvasDraft(outcome.draft.type),
+      source: "AI Planner Draft",
+      content: formatCanvasDraftContent(outcome),
+      rawContent: buildPlannerDraftRawContent(outcome.rationale, outcome.citations),
+      timestamp: "Just now",
+      processed: false,
+    };
+
     return {
-      ...rest,
-      activeDay,
-      days,
-      dayLabels,
-      cards,
-      connections,
-      items: [
-        {
-          id: `i_ai_card_draft_${now()}`,
-          type: inboxTypeForCanvasDraft(outcome.draft.type),
-          source: "AI Planner Draft",
-          content: formatCanvasDraftContent(outcome),
-          rawContent: buildPlannerDraftRawContent(outcome.rationale, outcome.citations),
-          timestamp: "Just now",
-          processed: false,
-        },
-        ...items,
-      ],
-      isAiThinking: false,
+      nextState: {
+        ...rest,
+        activeDay,
+        days,
+        dayLabels,
+        cards,
+        connections,
+        items: [newItem, ...items],
+        isAiThinking: false,
+      },
+      effects: [{
+        kind: "inbox-draft",
+        itemId: newItem.id,
+        draftLabel: outcome.draft.title,
+      }],
     };
   }
 
@@ -173,15 +185,22 @@ function applyAgentPlannerOutcomeToTripWorkspace({
   };
 
   return {
-    ...rest,
-    activeDay:
-      requestedDay && days.some((day) => day.day === requestedDay) ? requestedDay : activeDay,
-    days,
-    dayLabels,
-    cards: [...cards, responseCard],
-    connections,
-    items,
-    isAiThinking: false,
+    nextState: {
+      ...rest,
+      activeDay:
+        requestedDay && days.some((day) => day.day === requestedDay) ? requestedDay : activeDay,
+      days,
+      dayLabels,
+      cards: [...cards, responseCard],
+      connections,
+      items,
+      isAiThinking: false,
+    },
+    effects: [{
+      kind: "canvas-reply",
+      cardId: responseCard.id,
+      cardTitle: responseCard.title,
+    }],
   };
 }
 

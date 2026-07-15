@@ -40,11 +40,11 @@ describe("tripWorkspaceAi", () => {
       random: zeroRandom,
     });
 
-    expect(result.activeDay).toBe(5);
-    expect(result.days).toEqual(dayGroups);
-    expect(result.dayLabels).toEqual(dayLabelConfig);
-    expect(result.cards.some((card) => card.id === "c15")).toBe(false);
-    expect(result.cards.at(-1)).toMatchObject({
+    expect(result.nextState.activeDay).toBe(5);
+    expect(result.nextState.days).toEqual(dayGroups);
+    expect(result.nextState.dayLabels).toEqual(dayLabelConfig);
+    expect(result.nextState.cards.some((card) => card.id === "c15")).toBe(false);
+    expect(result.nextState.cards.at(-1)).toMatchObject({
       id: "c_ai_response_1774200000000",
       type: "note",
       title: "AI Planner Reply",
@@ -52,6 +52,42 @@ describe("tripWorkspaceAi", () => {
       day: 5,
       details: ["Citations: Kikunoi Honten"],
     });
-    expect(result.connections).toEqual(connections);
+    expect(result.nextState.connections).toEqual(connections);
+    expect(result.effects).toEqual([
+      {
+        kind: "canvas-reply",
+        cardId: "c_ai_response_1774200000000",
+        cardTitle: "AI Planner Reply",
+      },
+    ]);
+  });
+
+  it("returns an Inbox draft effect separately from the next workspace state", () => {
+    const result = applyAiPromptToTripWorkspace({
+      ...createBaseWorkspaceState({
+        days: dayGroups,
+        dayLabels: dayLabelConfig,
+        cards: canvasCards,
+        connections,
+        items: inboxItems,
+      }),
+      query: "Find a restaurant near Gion",
+      trip: createDemoTrip(),
+      now: fixedNow,
+      random: zeroRandom,
+    });
+
+    expect(result.nextState.items[0]).toMatchObject({
+      id: "i_ai_card_draft_1774200000000",
+      source: "AI Planner Draft",
+      content: expect.stringContaining("Draft Canvas Card: Gion Sasaki"),
+    });
+    expect(result.effects).toEqual([
+      {
+        kind: "inbox-draft",
+        itemId: "i_ai_card_draft_1774200000000",
+        draftLabel: "Gion Sasaki",
+      },
+    ]);
   });
 });

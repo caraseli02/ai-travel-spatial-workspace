@@ -119,6 +119,17 @@ describe('useTripWorkspaceState', () => {
           title: 'AI Planner Follow-up',
         }),
       ]);
+      expect(result.current.aiPromptEffect).toEqual({
+        kind: 'canvas-reply',
+        cardId: result.current.state.cards[0].id,
+        cardTitle: 'AI Planner Follow-up',
+      });
+
+      act(() => {
+        result.current.clearAiPromptEffect();
+      });
+
+      expect(result.current.aiPromptEffect).toBeNull();
     });
 
     it('can complete AI prompts with an injected zero-delay executor', () => {

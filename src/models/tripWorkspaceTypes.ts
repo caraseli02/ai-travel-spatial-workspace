@@ -1,5 +1,22 @@
 import type { CanvasCard, Connection, DayGroup, DayLabel, InboxItem, Trip } from "@/models/trip";
 
+export type AiPromptEffect =
+  | {
+      kind: "inbox-draft";
+      itemId: string;
+      draftLabel: string;
+    }
+  | {
+      kind: "canvas-reply";
+      cardId: string;
+      cardTitle: string;
+    };
+
+export interface AiPromptResult {
+  nextState: TripWorkspaceState;
+  effects: AiPromptEffect[];
+}
+
 export interface TripWorkspaceState {
   activeDay: number | null;
   days: DayGroup[];
