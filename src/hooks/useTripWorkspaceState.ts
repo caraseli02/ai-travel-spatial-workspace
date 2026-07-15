@@ -4,8 +4,16 @@ import {
   type TripWorkspaceState
 } from '@/models/tripWorkspaceModel';
 import type { CanvasCard, Trip } from '@/models/trip';
+import {
+  delayedAiPromptExecutor,
+  type AiPromptExecutor,
+} from '@/hooks/aiPromptExecutor';
 
-export function useTripWorkspaceState(initialState: TripWorkspaceState, trip?: Trip) {
+export function useTripWorkspaceState(
+  initialState: TripWorkspaceState,
+  trip?: Trip,
+  aiPromptExecutor: AiPromptExecutor = delayedAiPromptExecutor,
+) {
   const [state, dispatch] = useReducer(tripWorkspaceReducer, initialState);
 
   const addInboxItem = useCallback((content: string) => {
@@ -35,10 +43,10 @@ export function useTripWorkspaceState(initialState: TripWorkspaceState, trip?: T
   const sendAiQuery = useCallback((query: string) => {
     if (!query.trim()) return;
     dispatch({ type: 'AI_PROMPT_START' });
-    setTimeout(() => {
+    aiPromptExecutor.execute(() => {
       dispatch({ type: 'AI_PROMPT_SUCCESS', query, trip });
-    }, 1200);
-  }, [trip]);
+    });
+  }, [aiPromptExecutor, trip]);
 
   const setSelectedCard = useCallback((card: CanvasCard | null) => {
     dispatch({ type: 'SET_SELECTED_CARD', card });
