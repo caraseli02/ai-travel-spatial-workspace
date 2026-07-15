@@ -145,6 +145,44 @@ function evaluatorComment({
 }
 
 describe("loop-state public JSON contract", () => {
+  test("an in-progress issue continues before the ready queue is considered", async () => {
+    const state = await runLoopState({
+      inProgressIssues: [
+        {
+          number: 141,
+          title: "Extract shared Trip Material parser",
+          url: "https://example.test/issues/141",
+        },
+      ],
+      openPullRequests: [],
+      readyIssues: [
+        {
+          body: "## Blocked by\n\nNone - can start immediately",
+          number: 143,
+          title: "Next issue",
+          url: "https://example.test/issues/143",
+        },
+      ],
+    });
+
+    expect(state).toMatchObject({
+      action: "continue",
+      issue: 141,
+      title: "Extract shared Trip Material parser",
+    });
+  });
+
+  test("an empty queue is idle when no PR or in-progress issue exists", async () => {
+    const state = await runLoopState({
+      openPullRequests: [],
+    });
+
+    expect(state).toEqual({
+      action: "idle",
+      reason: "no eligible ready-for-agent issues",
+    });
+  });
+
   test("a draft PR does not occupy WIP, so the next eligible issue is claimed", async () => {
     const state = await runLoopState({
       issue: linkedIssue,
