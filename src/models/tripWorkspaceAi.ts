@@ -1,7 +1,7 @@
 import type { CanvasCard, Connection, DayGroup, DayLabel, InboxItem, Trip } from "@/models/trip";
 import { buildTripAgentContext } from "@/models/tripAgentContext";
 import { mockAgentPlanner, type AgentPlannerOutcome } from "@/models/tripAgentPlanner";
-import type { TripWorkspaceState } from "@/models/tripWorkspaceTypes";
+import type { AiPromptResult, TripWorkspaceState } from "@/models/tripWorkspaceTypes";
 
 export function applyAiPromptToTripWorkspace({
   query,
@@ -20,7 +20,7 @@ export function applyAiPromptToTripWorkspace({
   trip?: Trip;
   now?: () => number;
   random?: () => number;
-}): TripWorkspaceState {
+}): AiPromptResult {
   const plannerTrip = buildPlannerTrip({
     trip,
     cards,
@@ -103,7 +103,7 @@ function applyAgentPlannerOutcomeToTripWorkspace({
   query: string;
   now: () => number;
   random: () => number;
-}): TripWorkspaceState {
+}): AiPromptResult {
   if (outcome.type === "inbox-item-draft") {
     const newItem: InboxItem = {
       id: `i_ai_draft_${now()}`,
@@ -117,19 +117,21 @@ function applyAgentPlannerOutcomeToTripWorkspace({
     };
 
     return {
-      ...rest,
-      activeDay,
-      days,
-      dayLabels,
-      cards,
-      connections,
-      items: [newItem, ...items],
-      isAiThinking: false,
-      aiPromptEffect: {
+      nextState: {
+        ...rest,
+        activeDay,
+        days,
+        dayLabels,
+        cards,
+        connections,
+        items: [newItem, ...items],
+        isAiThinking: false,
+      },
+      effects: [{
         kind: "inbox-draft",
         itemId: newItem.id,
         draftLabel: newItem.content,
-      },
+      }],
     };
   }
 
@@ -145,19 +147,21 @@ function applyAgentPlannerOutcomeToTripWorkspace({
     };
 
     return {
-      ...rest,
-      activeDay,
-      days,
-      dayLabels,
-      cards,
-      connections,
-      items: [newItem, ...items],
-      isAiThinking: false,
-      aiPromptEffect: {
+      nextState: {
+        ...rest,
+        activeDay,
+        days,
+        dayLabels,
+        cards,
+        connections,
+        items: [newItem, ...items],
+        isAiThinking: false,
+      },
+      effects: [{
         kind: "inbox-draft",
         itemId: newItem.id,
         draftLabel: outcome.draft.title,
-      },
+      }],
     };
   }
 
@@ -181,20 +185,22 @@ function applyAgentPlannerOutcomeToTripWorkspace({
   };
 
   return {
-    ...rest,
-    activeDay:
-      requestedDay && days.some((day) => day.day === requestedDay) ? requestedDay : activeDay,
-    days,
-    dayLabels,
-    cards: [...cards, responseCard],
-    connections,
-    items,
-    isAiThinking: false,
-    aiPromptEffect: {
+    nextState: {
+      ...rest,
+      activeDay:
+        requestedDay && days.some((day) => day.day === requestedDay) ? requestedDay : activeDay,
+      days,
+      dayLabels,
+      cards: [...cards, responseCard],
+      connections,
+      items,
+      isAiThinking: false,
+    },
+    effects: [{
       kind: "canvas-reply",
       cardId: responseCard.id,
       cardTitle: responseCard.title,
-    },
+    }],
   };
 }
 

@@ -1,12 +1,60 @@
 import { useReducer, useCallback } from 'react';
 import {
+  applyAiPromptToTripWorkspace,
   tripWorkspaceReducer,
+  type AiPromptEffect,
+  type TripWorkspaceAction,
   type TripWorkspaceState
 } from '@/models/tripWorkspaceModel';
 import type { CanvasCard, Trip } from '@/models/trip';
 
+interface TripWorkspaceHookState {
+  workspace: TripWorkspaceState;
+  aiPromptEffect: AiPromptEffect | null;
+}
+
+type TripWorkspaceHookAction =
+  | TripWorkspaceAction
+  | { type: 'CLEAR_AI_PROMPT_EFFECT' };
+
+function tripWorkspaceHookReducer(
+  current: TripWorkspaceHookState,
+  action: TripWorkspaceHookAction,
+): TripWorkspaceHookState {
+  if (action.type === 'CLEAR_AI_PROMPT_EFFECT') {
+    return {
+      ...current,
+      aiPromptEffect: null,
+    };
+  }
+
+  if (action.type === 'AI_PROMPT_SUCCESS') {
+    const result = applyAiPromptToTripWorkspace({
+      ...current.workspace,
+      query: action.query,
+      trip: action.trip,
+    });
+
+    return {
+      workspace: result.nextState,
+      aiPromptEffect: result.effects[0] ?? null,
+    };
+  }
+
+  return {
+    workspace: tripWorkspaceReducer(current.workspace, action),
+    aiPromptEffect: action.type === 'AI_PROMPT_START' ? null : current.aiPromptEffect,
+  };
+}
+
 export function useTripWorkspaceState(initialState: TripWorkspaceState, trip?: Trip) {
-  const [state, dispatch] = useReducer(tripWorkspaceReducer, initialState);
+  const [{ workspace: state, aiPromptEffect }, dispatch] = useReducer(
+    tripWorkspaceHookReducer,
+    {
+      workspace: initialState,
+      aiPromptEffect: null,
+    },
+  );
 
   const addInboxItem = useCallback((content: string) => {
     dispatch({ type: 'ADD_INBOX_ITEM', content });
@@ -82,6 +130,7 @@ export function useTripWorkspaceState(initialState: TripWorkspaceState, trip?: T
 
   return {
     state,
+    aiPromptEffect,
     addInboxItem,
     processInboxItem,
     deleteCard,

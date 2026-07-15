@@ -19,6 +19,7 @@ import {
   deleteCanvasCardFromWorkspace,
   tripWorkspaceReducer,
   type AiPromptEffect,
+  type AiPromptResult,
   type TripWorkspaceAction,
   type TripWorkspaceState,
 } from "@/models/tripWorkspaceReducer";
@@ -29,6 +30,7 @@ export type {
   DayLabel,
   CardType,
   AiPromptEffect,
+  AiPromptResult,
   TripWorkspaceAction,
   TripWorkspaceState,
 };

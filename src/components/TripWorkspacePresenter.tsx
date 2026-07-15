@@ -94,6 +94,7 @@ export default function TripWorkspacePresenter({
     addConnection,
     addCustomDay,
     sendAiQuery,
+    aiPromptEffect,
     clearAiPromptEffect,
     setSelectedCard: hookSetSelectedCard,
     openCreateModal,
@@ -117,7 +118,6 @@ export default function TripWorkspacePresenter({
     showOverflow,
     items,
     isAiThinking,
-    aiPromptEffect,
   } = state;
 
   const linkingSession = useLinkingSession({

@@ -8,11 +8,12 @@ import {
 import { applyAiPromptToTripWorkspace } from "@/models/tripWorkspaceAi";
 import type {
   AiPromptEffect,
+  AiPromptResult,
   TripWorkspaceAction,
   TripWorkspaceState,
 } from "@/models/tripWorkspaceTypes";
 
-export type { AiPromptEffect, TripWorkspaceAction, TripWorkspaceState };
+export type { AiPromptEffect, AiPromptResult, TripWorkspaceAction, TripWorkspaceState };
 
 function mergeCanvasCardUpdate(existingCard: CanvasCard, updatedCard: CanvasCard): CanvasCard {
   return {
@@ -162,25 +163,19 @@ export function tripWorkspaceReducer(
       return {
         ...state,
         isAiThinking: true,
-        aiPromptEffect: null,
       };
     case "AI_PROMPT_SUCCESS": {
-      const updatedState = applyAiPromptToTripWorkspace({
+      const { nextState } = applyAiPromptToTripWorkspace({
         ...state,
         query: action.query,
         trip: action.trip,
       });
       return {
         ...state,
-        ...updatedState,
+        ...nextState,
         isAiThinking: false,
       };
     }
-    case "CLEAR_AI_PROMPT_EFFECT":
-      return {
-        ...state,
-        aiPromptEffect: null,
-      };
     case "SET_SELECTED_CARD":
       return {
         ...state,
