@@ -1,25 +1,21 @@
-import { useEffect, type MutableRefObject, type Dispatch, type SetStateAction } from "react";
+import { useEffect, type Dispatch, type SetStateAction } from "react";
+import type { AiPromptEffect } from "@/models/tripWorkspaceModel";
 import type { CanvasCard, InboxItem } from "../../models/trip";
 import {
   buildAiCanvasReplyFeedback,
   buildAiPlannerInboxDraftFeedback,
   buildOrganizedInboxItemFeedback,
 } from "./workspaceFeedbackMessages";
-import { resolveAiPromptOutcome } from "./resolveAiPromptOutcome";
 import type { WorkspaceFeedback } from "./WorkspaceActionFeedback";
 
 interface TripWorkspaceFeedbackEffectsOptions {
   pendingOrganizedItemId: string | null;
   setPendingOrganizedItemId: (id: string | null) => void;
-  pendingAiPrompt: boolean;
-  setPendingAiPrompt: (pending: boolean) => void;
   isAiThinking: boolean;
+  aiPromptEffect: AiPromptEffect | null;
+  clearAiPromptEffect: () => void;
   items: InboxItem[];
   cards: CanvasCard[];
-  aiPromptSnapshotRef: MutableRefObject<{
-    itemIds: Set<string>;
-    cardIds: Set<string>;
-  } | null>;
   setSelectedCard: (card: CanvasCard | null) => void;
   setWorkspaceFeedback: (feedback: WorkspaceFeedback | null) => void;
   setInboxOpen: Dispatch<SetStateAction<boolean>>;
@@ -28,12 +24,11 @@ interface TripWorkspaceFeedbackEffectsOptions {
 export function useTripWorkspaceFeedbackEffects({
   pendingOrganizedItemId,
   setPendingOrganizedItemId,
-  pendingAiPrompt,
-  setPendingAiPrompt,
   isAiThinking,
+  aiPromptEffect,
+  clearAiPromptEffect,
   items,
   cards,
-  aiPromptSnapshotRef,
   setSelectedCard,
   setWorkspaceFeedback,
   setInboxOpen,
@@ -60,40 +55,26 @@ export function useTripWorkspaceFeedbackEffects({
   }, [cards, items, pendingOrganizedItemId, setPendingOrganizedItemId, setSelectedCard, setWorkspaceFeedback]);
 
   useEffect(() => {
-    if (!pendingAiPrompt || isAiThinking || !aiPromptSnapshotRef.current) return;
+    if (isAiThinking || !aiPromptEffect) return;
 
-    const snapshot = aiPromptSnapshotRef.current;
-    const outcome = resolveAiPromptOutcome({
-      previousItemIds: snapshot.itemIds,
-      previousCardIds: snapshot.cardIds,
-      items,
-      cards,
-    });
-
-    if (!outcome) return;
-
-    if (outcome.kind === "inbox-draft") {
-      setWorkspaceFeedback(buildAiPlannerInboxDraftFeedback({ draftLabel: outcome.draftLabel }));
+    if (aiPromptEffect.kind === "inbox-draft") {
+      setWorkspaceFeedback(buildAiPlannerInboxDraftFeedback({ draftLabel: aiPromptEffect.draftLabel }));
       setInboxOpen(true);
     } else {
-      const newCard = cards.find((card) => !snapshot.cardIds.has(card.id));
+      const newCard = cards.find((card) => card.id === aiPromptEffect.cardId);
       if (newCard) {
         setSelectedCard(newCard);
       }
-      setWorkspaceFeedback(buildAiCanvasReplyFeedback({ cardTitle: outcome.cardTitle }));
+      setWorkspaceFeedback(buildAiCanvasReplyFeedback({ cardTitle: aiPromptEffect.cardTitle }));
     }
-
-    setPendingAiPrompt(false);
-    aiPromptSnapshotRef.current = null;
+    clearAiPromptEffect();
   }, [
-    pendingAiPrompt,
+    aiPromptEffect,
     isAiThinking,
-    items,
     cards,
     setInboxOpen,
     setSelectedCard,
-    setPendingAiPrompt,
+    clearAiPromptEffect,
     setWorkspaceFeedback,
-    aiPromptSnapshotRef,
   ]);
 }

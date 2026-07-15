@@ -48,6 +48,26 @@ test("submits an AI Prompt and shows the planner reply", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "AI Planner Reply" })).toBeVisible();
 });
 
+test("saves an AI Prompt draft to the Inbox for review", async ({ page }) => {
+  await page.goto("/trips/demo-kyoto");
+  await expect(page.getByRole("heading", { name: "7 Days in Kyoto" })).toBeVisible();
+
+  await page.getByRole("button", { name: /Close inbox/i }).click();
+  await expect(page.getByRole("heading", { name: "Inbox" })).toBeHidden();
+
+  const promptInput = page.getByPlaceholder(/Ask AI/i);
+  await promptInput.fill("Find a restaurant near Gion");
+  await promptInput.press("Enter");
+
+  await expect(page.getByPlaceholder("AI is thinking...")).toBeVisible();
+  await expect(page.getByRole("status")).toContainText("AI draft saved to Inbox", {
+    timeout: 5000,
+  });
+  await expect(page.getByRole("status")).toContainText("Gion Sasaki");
+  await expect(page.getByRole("heading", { name: "Inbox" })).toBeVisible();
+  await expect(page.getByText("AI Planner Draft").first()).toBeVisible();
+});
+
 test("keeps the AI prompt bar available in Map view", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/trips/demo-kyoto");

@@ -6,9 +6,14 @@ import {
   buildProcessedCanvasCard,
 } from "@/models/tripWorkspaceCanvas";
 import { applyAiPromptToTripWorkspace } from "@/models/tripWorkspaceAi";
-import type { TripWorkspaceAction, TripWorkspaceState } from "@/models/tripWorkspaceTypes";
+import type {
+  AiPromptEffect,
+  AiPromptResult,
+  TripWorkspaceAction,
+  TripWorkspaceState,
+} from "@/models/tripWorkspaceTypes";
 
-export type { TripWorkspaceAction, TripWorkspaceState };
+export type { AiPromptEffect, AiPromptResult, TripWorkspaceAction, TripWorkspaceState };
 
 function mergeCanvasCardUpdate(existingCard: CanvasCard, updatedCard: CanvasCard): CanvasCard {
   return {
@@ -73,9 +78,39 @@ export function deleteCanvasCardFromWorkspace(
   };
 }
 
+type StateOnlyTripWorkspaceAction = Exclude<
+  TripWorkspaceAction,
+  { type: "AI_PROMPT_SUCCESS" }
+>;
+
+export function reduceTripWorkspaceWithEffects(
+  state: TripWorkspaceState,
+  action: TripWorkspaceAction,
+): AiPromptResult {
+  if (action.type === "AI_PROMPT_SUCCESS") {
+    return applyAiPromptToTripWorkspace({
+      ...state,
+      query: action.query,
+      trip: action.trip,
+    });
+  }
+
+  return {
+    nextState: reduceTripWorkspaceState(state, action),
+    effects: [],
+  };
+}
+
 export function tripWorkspaceReducer(
   state: TripWorkspaceState,
   action: TripWorkspaceAction,
+): TripWorkspaceState {
+  return reduceTripWorkspaceWithEffects(state, action).nextState;
+}
+
+function reduceTripWorkspaceState(
+  state: TripWorkspaceState,
+  action: StateOnlyTripWorkspaceAction,
 ): TripWorkspaceState {
   switch (action.type) {
     case "ADD_INBOX_ITEM": {
@@ -159,18 +194,6 @@ export function tripWorkspaceReducer(
         ...state,
         isAiThinking: true,
       };
-    case "AI_PROMPT_SUCCESS": {
-      const updatedState = applyAiPromptToTripWorkspace({
-        ...state,
-        query: action.query,
-        trip: action.trip,
-      });
-      return {
-        ...state,
-        ...updatedState,
-        isAiThinking: false,
-      };
-    }
     case "SET_SELECTED_CARD":
       return {
         ...state,

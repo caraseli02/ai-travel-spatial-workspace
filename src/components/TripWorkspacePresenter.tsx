@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import type { NavigateFunction } from "react-router-dom";
 import {
   Calendar,
@@ -68,11 +68,6 @@ export default function TripWorkspacePresenter({
   const [workspaceView, setWorkspaceView] = useState<WorkspaceView>("canvas");
   const [workspaceFeedback, setWorkspaceFeedback] = useState<WorkspaceFeedback | null>(null);
   const [pendingOrganizedItemId, setPendingOrganizedItemId] = useState<string | null>(null);
-  const [pendingAiPrompt, setPendingAiPrompt] = useState(false);
-  const aiPromptSnapshotRef = useRef<{
-    itemIds: Set<string>;
-    cardIds: Set<string>;
-  } | null>(null);
 
   const initialState = useMemo<TripWorkspaceState>(() => {
     return {
@@ -100,6 +95,8 @@ export default function TripWorkspacePresenter({
     addConnection,
     addCustomDay,
     sendAiQuery,
+    aiPromptEffect,
+    clearAiPromptEffect,
     setSelectedCard: hookSetSelectedCard,
     openCreateModal,
     closeCreateModal,
@@ -145,13 +142,8 @@ export default function TripWorkspacePresenter({
       return;
     }
 
-    aiPromptSnapshotRef.current = {
-      itemIds: new Set(items.map((item) => item.id)),
-      cardIds: new Set(cards.map((card) => card.id)),
-    };
-    setPendingAiPrompt(true);
     sendAiQuery(query);
-  }, [isMobile, items, cards, addInboxItem, sendAiQuery, setInboxOpen]);
+  }, [isMobile, addInboxItem, sendAiQuery, setInboxOpen]);
   const handleUpdateCard = updateCard;
   const handleDeleteCard = deleteCard;
   const handleStartLinking = linkingSession.start;
@@ -189,12 +181,11 @@ export default function TripWorkspacePresenter({
   useTripWorkspaceFeedbackEffects({
     pendingOrganizedItemId,
     setPendingOrganizedItemId,
-    pendingAiPrompt,
-    setPendingAiPrompt,
     isAiThinking,
+    aiPromptEffect,
+    clearAiPromptEffect,
     items,
     cards,
-    aiPromptSnapshotRef,
     setSelectedCard,
     setWorkspaceFeedback,
     setInboxOpen,

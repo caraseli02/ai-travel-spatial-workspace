@@ -1,6 +1,8 @@
 import { useReducer, useCallback } from 'react';
 import {
-  tripWorkspaceReducer,
+  reduceTripWorkspaceWithEffects,
+  type AiPromptEffect,
+  type TripWorkspaceAction,
   type TripWorkspaceState
 } from '@/models/tripWorkspaceModel';
 import type { CanvasCard, Trip } from '@/models/trip';
@@ -9,12 +11,47 @@ import {
   type AiPromptExecutor,
 } from '@/hooks/aiPromptExecutor';
 
+interface TripWorkspaceHookState {
+  workspace: TripWorkspaceState;
+  aiPromptEffect: AiPromptEffect | null;
+}
+
+type TripWorkspaceHookAction =
+  | TripWorkspaceAction
+  | { type: 'CLEAR_AI_PROMPT_EFFECT' };
+
+function tripWorkspaceHookReducer(
+  current: TripWorkspaceHookState,
+  action: TripWorkspaceHookAction,
+): TripWorkspaceHookState {
+  if (action.type === 'CLEAR_AI_PROMPT_EFFECT') {
+    return {
+      ...current,
+      aiPromptEffect: null,
+    };
+  }
+
+  const result = reduceTripWorkspaceWithEffects(current.workspace, action);
+
+  return {
+    workspace: result.nextState,
+    aiPromptEffect:
+      result.effects[0] ?? (action.type === 'AI_PROMPT_START' ? null : current.aiPromptEffect),
+  };
+}
+
 export function useTripWorkspaceState(
   initialState: TripWorkspaceState,
   trip?: Trip,
   aiPromptExecutor: AiPromptExecutor = delayedAiPromptExecutor,
 ) {
-  const [state, dispatch] = useReducer(tripWorkspaceReducer, initialState);
+  const [{ workspace: state, aiPromptEffect }, dispatch] = useReducer(
+    tripWorkspaceHookReducer,
+    {
+      workspace: initialState,
+      aiPromptEffect: null,
+    },
+  );
 
   const addInboxItem = useCallback((content: string) => {
     dispatch({ type: 'ADD_INBOX_ITEM', content });
@@ -47,6 +84,10 @@ export function useTripWorkspaceState(
       dispatch({ type: 'AI_PROMPT_SUCCESS', query, trip });
     });
   }, [aiPromptExecutor, trip]);
+
+  const clearAiPromptEffect = useCallback(() => {
+    dispatch({ type: 'CLEAR_AI_PROMPT_EFFECT' });
+  }, []);
 
   const setSelectedCard = useCallback((card: CanvasCard | null) => {
     dispatch({ type: 'SET_SELECTED_CARD', card });
@@ -86,6 +127,7 @@ export function useTripWorkspaceState(
 
   return {
     state,
+    aiPromptEffect,
     addInboxItem,
     processInboxItem,
     deleteCard,
@@ -93,6 +135,7 @@ export function useTripWorkspaceState(
     addConnection,
     addCustomDay,
     sendAiQuery,
+    clearAiPromptEffect,
     setSelectedCard,
     openCreateModal,
     closeCreateModal,
