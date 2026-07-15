@@ -43,10 +43,10 @@ export function AiPromptBar({
   return (
     <div
       className={cn(
-        "pointer-events-none absolute left-1/2 z-[600] w-full max-w-lg -translate-x-1/2 select-none px-4",
+        "pointer-events-none absolute left-1/2 z-[600] w-full max-w-lg -translate-x-1/2 select-none px-3 md:px-4",
         workspaceView === "map"
           ? "bottom-[calc(42vh+1rem)] md:bottom-14"
-          : "bottom-[max(1.5rem,env(safe-area-inset-bottom))] md:bottom-14",
+          : "bottom-[max(0.75rem,env(safe-area-inset-bottom))] md:bottom-14",
       )}
     >
       <form
@@ -56,7 +56,7 @@ export function AiPromptBar({
           focused ? "border-amber-300 shadow-lg" : "border-border shadow-sm",
         )}
       >
-        <div className="flex items-center gap-2 px-3 py-2.5">
+        <div className="flex items-center gap-2 px-2.5 py-2 md:px-3 md:py-2.5">
           {isThinking ? (
             <Sparkles size={14} className="animate-spin text-amber-500" />
           ) : (
@@ -69,7 +69,7 @@ export function AiPromptBar({
                 ? "AI is thinking..."
                 : isMobile
                   ? "Ask AI about this trip…"
-                  : `Ask AI: "${placeholderExample}" or "Suggest a ryokan in Arashiyama"`
+                  : `Paste a link or note to save, or ask AI to plan — e.g. "${placeholderExample}"`
             }
             value={value}
             onChange={(e) => setValue(e.target.value)}
@@ -102,7 +102,7 @@ export function AiPromptBar({
         </div>
 
         {focused && !value && !isThinking && (
-          <div className="flex animate-in flex-wrap gap-1.5 px-3 pb-2.5 fade-in slide-in-from-bottom-1">
+          <div className="flex animate-in flex-wrap gap-1.5 px-2.5 pb-2 fade-in slide-in-from-bottom-1 md:px-3 md:pb-2.5">
             {suggestions.map((s, i) => (
               <Button
                 key={i}

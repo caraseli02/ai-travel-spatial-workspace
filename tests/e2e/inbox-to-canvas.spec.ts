@@ -10,14 +10,17 @@ test("pastes Trip Material into the inbox, processes it, and shows a Canvas Card
 }) => {
   const inboxContent = "E2E inbox paste: matcha workshop in Uji";
 
+  await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/trips/demo-kyoto");
   await expect(page.getByRole("heading", { name: "7 Days in Kyoto" })).toBeVisible();
 
   const inboxPanel = page.locator("aside");
   await expect(inboxPanel.getByRole("heading", { name: "Inbox" })).toBeVisible();
+  await expect(inboxPanel.getByTestId("inbox-capture-input")).toHaveCount(0);
 
-  await inboxPanel.getByRole("textbox").fill(inboxContent);
-  await inboxPanel.getByRole("button", { name: "Submit inbox item" }).click();
+  const promptInput = page.getByPlaceholder(/paste a link or note to save/i);
+  await promptInput.fill(inboxContent);
+  await page.getByRole("button", { name: "Send AI prompt" }).click();
 
   const inboxItemCard = inboxPanel.locator("div.group").filter({ hasText: inboxContent });
   await expect(inboxItemCard).toBeVisible();

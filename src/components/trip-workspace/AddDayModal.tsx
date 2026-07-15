@@ -71,7 +71,7 @@ export function AddDayModal({ isOpen, onClose, onSubmit, nextDayNum }: AddDayMod
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="px-5 py-4">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>

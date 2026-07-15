@@ -39,7 +39,7 @@ test("submits an AI Prompt and shows the planner reply", async ({ page }) => {
   await page.goto("/trips/demo-kyoto");
   await expect(page.getByRole("heading", { name: "7 Days in Kyoto" })).toBeVisible();
 
-  const promptInput = page.getByPlaceholder(/Ask AI/i);
+  const promptInput = page.getByPlaceholder(/paste a link or note to save|Ask AI about this trip/i);
   await promptInput.fill("Plan Day 8");
   await promptInput.press("Enter");
 
@@ -73,5 +73,5 @@ test("keeps the AI prompt bar available in Map view", async ({ page }) => {
   await page.goto("/trips/demo-kyoto");
 
   await page.getByRole("button", { name: "Map view" }).first().click();
-  await expect(page.getByPlaceholder(/Ask AI/i)).toBeVisible();
+  await expect(page.getByPlaceholder(/paste a link or note to save|Ask AI about this trip/i)).toBeVisible();
 });

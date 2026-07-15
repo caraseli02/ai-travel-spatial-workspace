@@ -8,6 +8,7 @@ import {
   getRouteDay,
   groupRouteCardsByTimeOfDay,
   resolveKanbanCardTag,
+  resetKanbanScrollerPosition,
   scrollKanbanToActiveDayColumn,
   spreadMapMarkerPositions,
 } from "./tripWorkspaceViewHelpers";
@@ -180,5 +181,17 @@ describe("tripWorkspaceViewHelpers", () => {
     scrollKanbanToActiveDayColumn(scroller, column, 3, true);
 
     expect(scrollTo).not.toHaveBeenCalled();
+  });
+
+  it("scrolls the kanban scroller back to the origin on reset", () => {
+    const scrollTo = vi.fn();
+
+    resetKanbanScrollerPosition({ scrollTo });
+
+    expect(scrollTo).toHaveBeenCalledWith({ left: 0, top: 0, behavior: "auto" });
+  });
+
+  it("ignores reset when the kanban scroller is unavailable", () => {
+    expect(() => resetKanbanScrollerPosition(null)).not.toThrow();
   });
 });

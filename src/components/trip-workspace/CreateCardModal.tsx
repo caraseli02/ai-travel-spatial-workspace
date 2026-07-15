@@ -199,7 +199,7 @@ export function CreateCardModal({ isOpen, onClose, onSubmit, days }: CreateCardM
             </div>
           </div>
 
-          <DialogFooter className="shrink-0">
+          <DialogFooter className="shrink-0 border-t border-border bg-muted/50 px-5 py-4">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>

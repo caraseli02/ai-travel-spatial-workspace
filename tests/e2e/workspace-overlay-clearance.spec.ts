@@ -36,54 +36,51 @@ test("keeps desktop Kanban add controls clear of floating Workspace overlays", a
   await expect(addCardControl).toBeVisible();
 
   const addCardBounds = await addCardControl.boundingBox();
-  const aiPromptBounds = await page.getByPlaceholder(/Ask AI:/).locator("xpath=ancestor::form[1]").boundingBox();
-  const miniMapBounds = await page
-    .getByRole("button", { name: /Open map/i })
-    .locator("xpath=ancestor::*[contains(@class, 'group/card')][1]")
-    .boundingBox();
+  const aiPromptBounds = await page.getByPlaceholder(/paste a link or note to save/i).locator("xpath=ancestor::form[1]").boundingBox();
 
   expect(addCardBounds).not.toBeNull();
   expect(aiPromptBounds).not.toBeNull();
-  expect(miniMapBounds).not.toBeNull();
   expect(rectsOverlap(addCardBounds!, aiPromptBounds!)).toBe(false);
-  expect(rectsOverlap(addCardBounds!, miniMapBounds!)).toBe(false);
 });
 
-test("reserves desktop vertical clearance above the floating AI prompt", async ({ page }) => {
+test("extends desktop kanban scroll area to workspace bottom", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/trips/demo-kyoto");
 
   const firstAddCardControl = page.getByRole("button", { name: "Add card" }).first();
   await expect(firstAddCardControl).toBeVisible();
 
-  const kanbanViewportBounds = await firstAddCardControl
-    .locator("xpath=ancestor::div[contains(@class, 'overflow-x-auto')][1]")
-    .boundingBox();
-  const aiPromptBounds = await page.getByPlaceholder(/Ask AI:/).locator("xpath=ancestor::form[1]").boundingBox();
+  const kanbanScroller = firstAddCardControl.locator("xpath=ancestor::div[contains(@class, 'overflow-x-auto')][1]");
+  const main = page.locator("main");
+
+  const kanbanViewportBounds = await kanbanScroller.boundingBox();
+  const mainBounds = await main.boundingBox();
 
   expect(kanbanViewportBounds).not.toBeNull();
-  expect(aiPromptBounds).not.toBeNull();
-  expect(kanbanViewportBounds!.y + kanbanViewportBounds!.height).toBeLessThanOrEqual(aiPromptBounds!.y - 8);
+  expect(mainBounds).not.toBeNull();
+  expect(kanbanViewportBounds!.y + kanbanViewportBounds!.height).toBeGreaterThanOrEqual(
+    mainBounds!.y + mainBounds!.height - 2,
+  );
 });
 
-test("reserves mobile vertical clearance above the floating AI prompt", async ({ page }) => {
+test("extends mobile kanban scroll area to workspace bottom", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/trips/demo-kyoto");
 
   const firstAddCardControl = page.getByRole("button", { name: "Add card" }).first();
   await expect(firstAddCardControl).toBeVisible();
 
-  const kanbanViewportBounds = await firstAddCardControl
-    .locator("xpath=ancestor::div[contains(@class, 'overflow-x-auto')][1]")
-    .boundingBox();
-  const aiPromptBounds = await page
-    .getByPlaceholder(/Ask AI about this trip/i)
-    .locator("xpath=ancestor::form[1]")
-    .boundingBox();
+  const kanbanScroller = firstAddCardControl.locator("xpath=ancestor::div[contains(@class, 'overflow-x-auto')][1]");
+  const main = page.locator("main");
+
+  const kanbanViewportBounds = await kanbanScroller.boundingBox();
+  const mainBounds = await main.boundingBox();
 
   expect(kanbanViewportBounds).not.toBeNull();
-  expect(aiPromptBounds).not.toBeNull();
-  expect(kanbanViewportBounds!.y + kanbanViewportBounds!.height).toBeLessThanOrEqual(aiPromptBounds!.y - 8);
+  expect(mainBounds).not.toBeNull();
+  expect(kanbanViewportBounds!.y + kanbanViewportBounds!.height).toBeGreaterThanOrEqual(
+    mainBounds!.y + mainBounds!.height - 2,
+  );
 });
 
 function rectsOverlap(

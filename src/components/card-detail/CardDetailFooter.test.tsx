@@ -14,7 +14,6 @@ describe("CardDetailFooter", () => {
           sourceUrl: "https://example.com/kyoto-guide",
           inboxItemId: "inbox-kyoto-guide",
         }}
-        confirmDelete={false}
         onStartLinking={vi.fn()}
         onDelete={vi.fn()}
         showLinkButton
@@ -25,6 +24,7 @@ describe("CardDetailFooter", () => {
     expect(markup).toContain("Link with another card");
     expect(markup).toContain("Open original link");
     expect(markup).toContain("Delete Card");
+    expect(markup).not.toContain("Confirm delete");
     expect(markup).not.toContain("Itinerary");
     expect(markup).toContain('data-card-detail-footer-section="destructive"');
   });

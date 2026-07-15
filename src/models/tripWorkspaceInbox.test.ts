@@ -4,7 +4,9 @@ import {
   extractSourceDomain,
   formatInboxCaptureTime,
   formatInboxItemCaptureTime,
+  isTripMaterialCaptureInput,
   resolveInboxItemLabel,
+  shouldCaptureViaPromptBar,
 } from "@/models/tripWorkspaceInbox";
 
 const fixedNow = () => 1_774_200_000_000;
@@ -58,5 +60,27 @@ describe("tripWorkspaceInbox", () => {
     const longNote = `${"A".repeat(80)} near Gion`;
     expect(resolveInboxItemLabel(longNote).endsWith("...")).toBe(true);
     expect(extractSourceDomain("not-a-valid-url")).toBe("not-a-valid-url");
+  });
+
+  describe("isTripMaterialCaptureInput", () => {
+    it("treats URLs and plain notes as capture input", () => {
+      expect(isTripMaterialCaptureInput("https://example.com/opaque-path")).toBe(true);
+      expect(isTripMaterialCaptureInput("Try Junsei near Nanzenji! — Yuki")).toBe(true);
+      expect(isTripMaterialCaptureInput("Book a tea ceremony in Gion")).toBe(true);
+    });
+
+    it("treats questions and AI planning prompts as non-capture input", () => {
+      expect(isTripMaterialCaptureInput("Find a restaurant near Gion")).toBe(false);
+      expect(isTripMaterialCaptureInput("Plan Day 8")).toBe(false);
+      expect(isTripMaterialCaptureInput("Hiiragiya Ryokan availability?")).toBe(false);
+    });
+  });
+
+  describe("shouldCaptureViaPromptBar", () => {
+    it("captures on desktop only when input looks like Trip Material", () => {
+      expect(shouldCaptureViaPromptBar("https://example.com/guide", false)).toBe(true);
+      expect(shouldCaptureViaPromptBar("Find a restaurant near Gion", false)).toBe(false);
+      expect(shouldCaptureViaPromptBar("https://example.com/guide", true)).toBe(false);
+    });
   });
 });

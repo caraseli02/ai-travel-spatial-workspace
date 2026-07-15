@@ -3,6 +3,7 @@ import {
   buildAiPlannerInboxDraftFeedback,
   buildAiCanvasReplyFeedback,
   buildExportFeedback,
+  buildInboxCaptureFeedback,
   buildOrganizedInboxItemFeedback,
   buildShareFeedback,
 } from "./workspaceFeedbackMessages";
@@ -19,6 +20,19 @@ describe("workspaceFeedbackMessages", () => {
       tone: "success",
       title: "Placed on canvas",
       message: 'Reddit r/JapanTravel became "Hidden Temples" on Day 2.',
+    });
+  });
+
+  it("confirms deterministic inbox capture without AI assistance", () => {
+    expect(
+      buildInboxCaptureFeedback({
+        label: "example.com",
+      }),
+    ).toEqual({
+      tone: "success",
+      title: "Saved to Inbox",
+      message:
+        '"example.com" is in your Inbox. Open it anytime to continue your research.',
     });
   });
 

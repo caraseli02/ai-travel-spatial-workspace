@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import PricingSection from "@/components/PricingSection";
 import { DEMO_TRIP_ID } from "@/models/trip";
 import { AiInboxFeature } from "./landing-page/AiInboxFeature";
 import { CtaSection } from "./landing-page/CtaSection";
@@ -25,7 +24,6 @@ export default function LandingPage() {
       <SpatialCanvasFeature onEnterDemo={onEnterDemo} />
       <TripListFeature onEnterDemo={onEnterDemo} />
       <AiInboxFeature onEnterDemo={onEnterDemo} />
-      <PricingSection onCtaClick={onEnterDemo} />
       <TestimonialsSection />
       <CtaSection onEnterDemo={onEnterDemo} />
       <LandingFooter />

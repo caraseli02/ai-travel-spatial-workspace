@@ -59,7 +59,7 @@ describe("TripWorkspacePresenter AI prompting", () => {
     await user.click(screen.getAllByRole("button", { name: "Map view" })[0]!);
 
     expect(screen.getByTestId("map-view")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/Ask AI:/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/paste a link or note to save/i)).toBeInTheDocument();
   });
 
   describe("AI prompt feedback", () => {
@@ -77,7 +77,7 @@ describe("TripWorkspacePresenter AI prompting", () => {
 
       render(<TripWorkspacePresenter {...defaultProps} setInboxOpen={setInboxOpen} />);
 
-      const prompt = screen.getAllByPlaceholderText(/Ask AI:/i)[0]!;
+      const prompt = screen.getAllByPlaceholderText(/paste a link or note to save/i)[0]!;
       fireEvent.focus(prompt);
       fireEvent.click(screen.getByRole("button", { name: "Find a restaurant near Gion" }));
 
@@ -90,5 +90,16 @@ describe("TripWorkspacePresenter AI prompting", () => {
       expect(feedback).toHaveTextContent("Gion Sasaki");
       expect(setInboxOpen).toHaveBeenCalledWith(true);
     });
+  });
+
+  it("resets kanban zoom from the canvas toolbar", async () => {
+    const user = userEvent.setup();
+    render(<TripWorkspacePresenter {...defaultProps} />);
+
+    await user.click(screen.getByTitle("Zoom in"));
+    expect(screen.getByText("110%")).toBeInTheDocument();
+
+    await user.click(screen.getByTitle("Reset view"));
+    expect(screen.getByText("100%")).toBeInTheDocument();
   });
 });

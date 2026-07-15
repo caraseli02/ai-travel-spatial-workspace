@@ -34,14 +34,10 @@ export default function CardDetailPanel({
   onStartLinking,
   isLinkingActive = false,
 }: CardDetailPanelProps) {
-  const {
-    isEditing,
-    setIsEditing,
-    confirmDelete,
-    setConfirmDelete,
-    editState,
-    handlers,
-  } = useCardDetailEditState(card, onUpdateCard);
+  const { isEditing, setIsEditing, editState, handlers } = useCardDetailEditState(
+    card,
+    onUpdateCard,
+  );
 
   if (!card) return null;
 
@@ -49,13 +45,8 @@ export default function CardDetailPanel({
   const displayDetails = filterRedundantCardDetails(card.details, card.price);
 
   const handleDelete = () => {
-    if (!confirmDelete) {
-      setConfirmDelete(true);
-      setTimeout(() => setConfirmDelete(false), 3000);
-    } else {
-      onDeleteCard?.(card.id);
-      onClose();
-    }
+    onDeleteCard?.(card.id);
+    onClose();
   };
 
   const handleStartLinking = () => {
@@ -120,7 +111,6 @@ export default function CardDetailPanel({
         <CardDetailFooter
           sourceMemory={sourceMemory}
           isLinkingActive={isLinkingActive}
-          confirmDelete={confirmDelete}
           onStartLinking={handleStartLinking}
           onDelete={handleDelete}
           showLinkButton={!!onStartLinking}

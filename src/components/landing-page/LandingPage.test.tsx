@@ -21,6 +21,8 @@ describe("LandingPage", () => {
     expect(markup).toContain("From chaos to clarity in three steps");
     expect(markup).toContain("Your trip as a living moodboard");
     expect(markup).toContain("One calm home for every journey");
-    expect(markup).toContain("Start planning");
+    expect(markup).toContain("Open Kyoto Demo");
+    expect(markup).not.toContain("Open demo");
+    expect(markup).not.toContain(">Start planning<");
   });
 });
