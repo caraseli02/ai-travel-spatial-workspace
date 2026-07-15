@@ -34,10 +34,6 @@ export function LandingNav({ onEnterDemo }: { onEnterDemo: () => void }) {
           >
             Sign in
           </Button>
-          <Button onClick={onEnterDemo} size="sm" className="md:h-9 md:px-4 md:py-2 md:text-sm">
-            <span className="md:hidden">Start</span>
-            <span className="hidden md:inline">Start planning</span>
-          </Button>
           <Button
             type="button"
             variant="ghost"
@@ -80,7 +76,7 @@ export function LandingNav({ onEnterDemo }: { onEnterDemo: () => void }) {
                 onEnterDemo();
               }}
             >
-              Start planning
+              Open demo
             </Button>
           </div>
         </SheetContent>

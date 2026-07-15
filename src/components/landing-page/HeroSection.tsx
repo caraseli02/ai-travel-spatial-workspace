@@ -33,7 +33,7 @@ function PromptCta({ onEnterDemo }: { onEnterDemo: () => void }) {
           onClick={onEnterDemo}
           className="h-10 w-full rounded-xl md:h-11 md:w-auto md:shrink-0 md:rounded-full"
         >
-          Start planning
+          Open Kyoto Demo
           <ArrowUp className="size-4" />
         </Button>
       </div>

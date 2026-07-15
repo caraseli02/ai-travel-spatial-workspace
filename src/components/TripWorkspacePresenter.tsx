@@ -427,6 +427,7 @@ export default function TripWorkspacePresenter({
 
           <WorkspaceActionFeedback
             feedback={workspaceFeedback}
+            avoidDetailPanel={selectedCard !== null}
             onDismiss={() => setWorkspaceFeedback(null)}
           />
 

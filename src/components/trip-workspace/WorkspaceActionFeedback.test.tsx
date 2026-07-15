@@ -11,6 +11,7 @@ describe("WorkspaceActionFeedback", () => {
           title: "Placed on canvas",
           message: 'Reddit r/JapanTravel became "Hidden Temples" on Day 2.',
         }}
+        avoidDetailPanel
         onDismiss={() => undefined}
       />,
     );
@@ -19,5 +20,7 @@ describe("WorkspaceActionFeedback", () => {
     expect(markup).toContain("Placed on canvas");
     expect(markup).toContain('Reddit r/JapanTravel became &quot;Hidden Temples&quot; on Day 2.');
     expect(markup).toContain("md:top-3");
+    expect(markup).toContain("md:right-72");
+    expect(markup).toContain("z-[810]");
   });
 });

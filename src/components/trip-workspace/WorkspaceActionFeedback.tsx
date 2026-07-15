@@ -13,10 +13,15 @@ export interface WorkspaceFeedback {
 
 interface WorkspaceActionFeedbackProps {
   feedback: WorkspaceFeedback | null;
+  avoidDetailPanel?: boolean;
   onDismiss: () => void;
 }
 
-export function WorkspaceActionFeedback({ feedback, onDismiss }: WorkspaceActionFeedbackProps) {
+export function WorkspaceActionFeedback({
+  feedback,
+  avoidDetailPanel = false,
+  onDismiss,
+}: WorkspaceActionFeedbackProps) {
   const [copied, setCopied] = useState(false);
 
   if (!feedback) return null;
@@ -48,8 +53,9 @@ export function WorkspaceActionFeedback({ feedback, onDismiss }: WorkspaceAction
   return (
     <div
       className={cn(
-        "pointer-events-none absolute inset-x-3 z-[740] flex justify-center",
-        "bottom-[calc(5.5rem+env(safe-area-inset-bottom))] md:inset-x-auto md:right-3 md:top-3 md:bottom-auto",
+        "pointer-events-none absolute inset-x-3 z-[810] flex justify-center",
+        "bottom-[calc(5.5rem+env(safe-area-inset-bottom))] md:inset-x-auto md:top-3 md:bottom-auto",
+        avoidDetailPanel ? "md:right-72" : "md:right-3",
       )}
     >
       <div

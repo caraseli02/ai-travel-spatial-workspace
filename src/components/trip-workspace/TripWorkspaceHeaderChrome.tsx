@@ -237,7 +237,7 @@ export function TripWorkspaceHeaderChrome({
             )}
           >
             {inboxOpen ? <PanelLeftClose className="size-3.5" /> : <PanelLeftOpen className="size-3.5" />}
-            <span className="hidden sm:block">Inbox</span>
+            <span className="hidden md:block">Inbox</span>
             {unprocessedCount > 0 && (
               <Badge variant="destructive" className="size-4 shrink-0 justify-center p-0 text-[10px]">
                 {unprocessedCount}

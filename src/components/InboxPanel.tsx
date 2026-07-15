@@ -213,8 +213,8 @@ function InboxItemCard({
     >
       <CardContent className="p-3 [--card-spacing:--spacing(3)]">
         <div className="group">
-          <div className="mb-2 flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <div className="flex min-w-0 flex-1 items-center gap-1.5">
               {item.avatar ? (
                 <span className="text-sm">{item.avatar}</span>
               ) : (
@@ -229,12 +229,12 @@ function InboxItemCard({
                   {icon}
                 </div>
               )}
-              <span className="max-w-[120px] truncate text-xs font-medium text-foreground/80">
+              <span className="min-w-0 truncate text-xs font-medium text-foreground/80">
                 {item.source}
               </span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-muted-foreground/60">{captureTime}</span>
+            <div className="flex shrink-0 items-center gap-1.5">
+              <span className="whitespace-nowrap text-xs text-muted-foreground/60">{captureTime}</span>
               {!dimmed ? (
                 <Button
                   variant="ghost"
