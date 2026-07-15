@@ -41,13 +41,10 @@ import {
 } from "./trip-workspace/WorkspaceActionFeedback";
 import {
   buildExportFeedback,
-  buildOrganizedInboxItemFeedback,
   buildShareFeedback,
-  buildAiPlannerInboxDraftFeedback,
-  buildAiCanvasReplyFeedback,
   buildInboxCaptureFeedback,
 } from "./trip-workspace/workspaceFeedbackMessages";
-import { resolveAiPromptOutcome } from "./trip-workspace/resolveAiPromptOutcome";
+import { useTripWorkspaceFeedbackEffects } from "./trip-workspace/useTripWorkspaceFeedbackEffects";
 
 export interface TripWorkspacePresenterProps {
   trip: Trip;
@@ -189,54 +186,19 @@ export default function TripWorkspacePresenter({
     }
   }, [selectedCard, hookSetSelectedCard]);
 
-  useEffect(() => {
-    if (!pendingOrganizedItemId) return;
-
-    const organizedItem = items.find((item) => item.id === pendingOrganizedItemId && item.resultingCardId);
-    const resultingCard = organizedItem
-      ? cards.find((card) => card.id === organizedItem.resultingCardId)
-      : undefined;
-
-    if (!organizedItem || !resultingCard) return;
-
-    setSelectedCard(resultingCard);
-    setWorkspaceFeedback(
-      buildOrganizedInboxItemFeedback({
-        source: organizedItem.source,
-        cardTitle: resultingCard.title,
-        day: resultingCard.day,
-      }),
-    );
-    setPendingOrganizedItemId(null);
-  }, [cards, items, pendingOrganizedItemId, setSelectedCard]);
-
-  useEffect(() => {
-    if (!pendingAiPrompt || isAiThinking || !aiPromptSnapshotRef.current) return;
-
-    const snapshot = aiPromptSnapshotRef.current;
-    const outcome = resolveAiPromptOutcome({
-      previousItemIds: snapshot.itemIds,
-      previousCardIds: snapshot.cardIds,
-      items,
-      cards,
-    });
-
-    if (!outcome) return;
-
-    if (outcome.kind === "inbox-draft") {
-      setWorkspaceFeedback(buildAiPlannerInboxDraftFeedback({ draftLabel: outcome.draftLabel }));
-      setInboxOpen(true);
-    } else {
-      const newCard = cards.find((card) => !snapshot.cardIds.has(card.id));
-      if (newCard) {
-        setSelectedCard(newCard);
-      }
-      setWorkspaceFeedback(buildAiCanvasReplyFeedback({ cardTitle: outcome.cardTitle }));
-    }
-
-    setPendingAiPrompt(false);
-    aiPromptSnapshotRef.current = null;
-  }, [pendingAiPrompt, isAiThinking, items, cards, setInboxOpen, setSelectedCard]);
+  useTripWorkspaceFeedbackEffects({
+    pendingOrganizedItemId,
+    setPendingOrganizedItemId,
+    pendingAiPrompt,
+    setPendingAiPrompt,
+    isAiThinking,
+    items,
+    cards,
+    aiPromptSnapshotRef,
+    setSelectedCard,
+    setWorkspaceFeedback,
+    setInboxOpen,
+  });
 
   const handleZoom = useCallback((direction: "in" | "out") => {
     setKanbanZoom((current) => {
