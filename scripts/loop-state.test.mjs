@@ -15,7 +15,13 @@ afterEach(async () => {
   );
 });
 
-async function runLoopState({ comments = [], openPullRequests, issue }) {
+async function runLoopState({
+  comments = [],
+  inProgressIssues = [],
+  issue,
+  openPullRequests,
+  readyIssues = [],
+}) {
   const fixtureRoot = await mkdtemp(path.join(tmpdir(), "wayfarer-loop-state-"));
   temporaryDirectories.push(fixtureRoot);
   const binDirectory = path.join(fixtureRoot, "bin");
@@ -38,9 +44,9 @@ case "$command_key" in
   "pr view") printf '{"comments":%s}' "$GH_COMMENTS_JSON" ;;
   "issue list")
     if [[ "$all_args" == *"in-progress"* ]]; then
-      printf '[]'
+      printf '%s' "$GH_IN_PROGRESS_ISSUES_JSON"
     else
-      printf '[{"number":143,"title":"Next issue","body":"## Blocked by\\n\\nNone - can start immediately","url":"https://example.test/issues/143"}]'
+      printf '%s' "$GH_READY_ISSUES_JSON"
     fi
     ;;
   "issue view") printf '%s' "$GH_ISSUE_JSON" ;;
@@ -57,8 +63,10 @@ esac
     env: {
       ...process.env,
       GH_COMMENTS_JSON: JSON.stringify(comments),
+      GH_IN_PROGRESS_ISSUES_JSON: JSON.stringify(inProgressIssues),
       GH_ISSUE_JSON: JSON.stringify(issue),
       GH_OPEN_PRS_JSON: JSON.stringify(openPullRequests),
+      GH_READY_ISSUES_JSON: JSON.stringify(readyIssues),
       PATH: `${binDirectory}:${process.env.PATH}`,
     },
   });
@@ -137,6 +145,65 @@ function evaluatorComment({
 }
 
 describe("loop-state public JSON contract", () => {
+  test("an in-progress issue continues before the ready queue is considered", async () => {
+    const state = await runLoopState({
+      inProgressIssues: [
+        {
+          number: 141,
+          title: "Extract shared Trip Material parser",
+          url: "https://example.test/issues/141",
+        },
+      ],
+      openPullRequests: [],
+      readyIssues: [
+        {
+          body: "## Blocked by\n\nNone - can start immediately",
+          number: 143,
+          title: "Next issue",
+          url: "https://example.test/issues/143",
+        },
+      ],
+    });
+
+    expect(state).toMatchObject({
+      action: "continue",
+      issue: 141,
+      title: "Extract shared Trip Material parser",
+    });
+  });
+
+  test("an empty queue is idle when no PR or in-progress issue exists", async () => {
+    const state = await runLoopState({
+      openPullRequests: [],
+    });
+
+    expect(state).toEqual({
+      action: "idle",
+      reason: "no eligible ready-for-agent issues",
+    });
+  });
+
+  test("a draft PR does not occupy WIP, so the next eligible issue is claimed", async () => {
+    const state = await runLoopState({
+      issue: linkedIssue,
+      openPullRequests: [{ ...openPullRequest, isDraft: true }],
+      readyIssues: [
+        {
+          body: "## Blocked by\n\nNone - can start immediately",
+          number: 143,
+          title: "Next issue",
+          url: "https://example.test/issues/143",
+        },
+      ],
+    });
+
+    expect(state).toMatchObject({
+      action: "claim_new",
+      number: 143,
+      title: "Next issue",
+    });
+  });
+
   test("an open PR occupies WIP even when its linked issue label drifted", async () => {
     const state = await runLoopState({
       issue: linkedIssue,
@@ -149,6 +216,21 @@ describe("loop-state public JSON contract", () => {
       issue: 141,
       pr: 172,
       verdict: "pending",
+    });
+  });
+
+  test("an open PR without a linked issue still blocks the queue", async () => {
+    const state = await runLoopState({
+      openPullRequests: [{ ...openPullRequest, closingIssuesReferences: [] }],
+    });
+
+    expect(state).toMatchObject({
+      action: "wait_evaluator",
+      branch: openPullRequest.headRefName,
+      head: openPullRequest.headRefOid,
+      issue: null,
+      pr: openPullRequest.number,
+      reason: "missing linked issue/spec",
     });
   });
 

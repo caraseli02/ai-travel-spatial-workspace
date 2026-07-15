@@ -41,6 +41,15 @@ Wayfarer is a React/Vite prototype for an AI-native travel workspace. It helps a
 - Session handoff lifecycle: `docs/agents/harness.md` (`/handoff` → OS temp; absorb into issue or `PROGRESS.md`)
 - How to work ready issues: `docs/agents/implementation-workflow.md`
 
+## Cursor Cloud specific instructions
+
+Frontend-only React/Vite prototype; no backend, database, or Docker. Standard commands live in `## Quick Start` above and the `Makefile`. Notes for running in this environment:
+
+- Dependencies (`npm ci` plus the Playwright Chromium browser) are refreshed by the startup update script; no manual install step is needed.
+- `make e2e` and `make check` require the Playwright Chromium browser. If E2E fails with a missing-browser error, run `npx playwright install --with-deps chromium`.
+- `make dev` serves on `http://localhost:5173`; Playwright's own preview server (`make e2e`) uses `http://127.0.0.1:4173` and is started automatically by the test runner.
+- State persists in browser localStorage; to reset trips (including the seeded Kyoto Demo Trip), clear site data for the dev origin.
+
 ## Topic Docs
 
 - Issue tracker: GitHub Issues for `caraseli02/ai-travel-spatial-workspace`; see `docs/agents/issue-tracker.md`.

@@ -120,5 +120,28 @@ describe('useTripWorkspaceState', () => {
         }),
       ]);
     });
+
+    it('can complete AI prompts with an injected zero-delay executor', () => {
+      const trip = createEmptyTrip('Barcelona Weekend', 'Barcelona, Spain', '🇪🇸');
+      const zeroDelayExecutor = {
+        execute: (complete: () => void) => complete(),
+      };
+      const { result } = renderHook(() =>
+        useTripWorkspaceState(createBaseState(), trip, zeroDelayExecutor),
+      );
+
+      act(() => {
+        result.current.sendAiQuery('Find a restaurant near Gion');
+      });
+
+      expect(result.current.state.isAiThinking).toBe(false);
+      expect(result.current.state.cards).toEqual([
+        expect.objectContaining({
+          type: 'note',
+          title: 'AI Planner Follow-up',
+        }),
+      ]);
+      expect(vi.getTimerCount()).toBe(0);
+    });
   });
 });

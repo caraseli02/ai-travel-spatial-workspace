@@ -4,7 +4,6 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 STATE_JSON="$(bash "$REPO_ROOT/scripts/loop-state.sh")"
-ACTION="$(echo "$STATE_JSON" | jq -r '.action')"
 
 cat <<'EOF'
 You are the Wayfarer controller loop (planner + generator). This is an autonomous loop — do not ask a human which issue to work on.

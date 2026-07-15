@@ -24,6 +24,8 @@ test("pastes Trip Material into the inbox, processes it, and shows a Canvas Card
 
   await inboxItemCard.getByRole("button", { name: /Place on canvas/i }).click();
 
-  await expect(page.locator("main").getByText(inboxContent)).toBeVisible();
+  await expect(
+    page.locator("main").getByText(inboxContent, { exact: true }).first(),
+  ).toBeVisible();
   await expect(inboxPanel.getByText("Organized")).toBeVisible();
 });
