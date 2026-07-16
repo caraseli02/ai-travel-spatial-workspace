@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { Trip } from '@/models/trip';
+import type { TripRepository } from '@/models/tripRepository';
 import { DEMO_TRIP_ID, createEmptyTrip } from '@/models/trip';
 import { PARIS_FIXTURE_TRIP_ID } from '@/data/tripData';
 import { localTripRepository } from '@/models/tripRepository';
@@ -25,6 +26,11 @@ describe('localTripRepository', () => {
   beforeEach(() => {
     clearStore();
     vi.clearAllMocks();
+  });
+
+  it('exposes localTripRepository through the Trip Repository interface', () => {
+    const repository: TripRepository = localTripRepository;
+    expect(repository).toBe(localTripRepository);
   });
 
   it('seeds design fixture trips on first visit when no trips exist', () => {
