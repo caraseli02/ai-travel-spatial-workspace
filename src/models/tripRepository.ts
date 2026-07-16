@@ -3,6 +3,13 @@ import { createDemoTrip, createParisFixtureTrip } from "@/data/tripData";
 
 const STORAGE_KEY = "wayfarer_trips";
 
+export type TripRepository = {
+  list(): Trip[];
+  load(id: string): Trip | null;
+  save(trip: Trip): void;
+  delete(id: string): void;
+};
+
 /** Safe wrapper to get items from localStorage. */
 function safeGetItem(key: string): string | null {
   try {
@@ -77,7 +84,7 @@ function ensureDemoTrip(trips: Trip[]): Trip[] {
 }
 
 /** localStorage implementation of Trip persistence. */
-export const localTripRepository = {
+export const localTripRepository: TripRepository = {
   list(): Trip[] {
     const trips = readAll();
     return ensureDemoTrip(trips);
