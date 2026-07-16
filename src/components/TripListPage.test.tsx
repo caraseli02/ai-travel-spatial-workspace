@@ -1,8 +1,8 @@
 // @vitest-environment happy-dom
 import "@testing-library/jest-dom/vitest";
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { localTripRepository } from "@/models/tripRepository";
 import TripListPage from "./TripListPage";
 
@@ -13,6 +13,13 @@ vi.mock("react-router-dom", async () => {
   return {
     ...actual,
     useNavigate: () => navigate,
+    useLocation: () => ({
+      pathname: "/trips",
+      search: "",
+      hash: "",
+      state: null,
+      key: "default",
+    }),
   };
 });
 
@@ -26,6 +33,10 @@ vi.mock("@/models/tripRepository", () => ({
 }));
 
 describe("TripListPage", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   beforeEach(() => {
     navigate.mockReset();
     vi.mocked(localTripRepository.list).mockReturnValue([]);
@@ -58,5 +69,6 @@ describe("TripListPage", () => {
       }),
     );
     expect(navigate).toHaveBeenCalledWith(expect.stringMatching(/^\/trips\/trip_/));
+    expect(screen.queryByRole("heading", { name: /new trip/i })).not.toBeInTheDocument();
   });
 });

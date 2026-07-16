@@ -240,15 +240,19 @@ export default function TripWorkspacePresenter({
 
   const handleShareTrip = useCallback(async () => {
     const url = window.location.href;
+    let usedNativeShare = false;
     if (navigator.share) {
       try {
         await navigator.share({ title: trip.name, url });
+        usedNativeShare = true;
         setWorkspaceFeedback(buildShareFeedback("native-shared"));
-        return;
       } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") return;
+        if (!(error instanceof DOMException && error.name === "AbortError")) {
+          // fall through to clipboard when share fails
+        }
       }
     }
+    if (usedNativeShare) return;
     try {
       if (!navigator.clipboard) {
         throw new Error("Clipboard API unavailable");
@@ -435,7 +439,7 @@ export default function TripWorkspacePresenter({
             workspaceView={workspaceView}
           />
 
-          {showOnboardingToast && <OnboardingToast />}
+          {showOnboardingToast && <OnboardingToast forceShow />}
 
           <CardDetailPanel
             card={selectedCard}

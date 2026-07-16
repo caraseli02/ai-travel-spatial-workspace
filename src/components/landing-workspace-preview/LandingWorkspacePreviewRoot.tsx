@@ -13,9 +13,9 @@ export default function LandingWorkspacePreviewRoot() {
   const demoTrip = useMemo(() => createDemoTrip(), []);
 
   return (
-    <div className="mt-2 w-full max-w-[1180px] overflow-hidden rounded-2xl border border-border bg-background shadow-[0_30px_60px_rgba(12,10,9,0.15)]">
+    <div className="mt-2 w-full max-w-[1180px] overflow-visible rounded-2xl border border-border bg-background shadow-[0_30px_60px_rgba(12,10,9,0.15)]">
       <BrowserChrome />
-      <div className="flex h-[420px] md:h-[556px]">
+      <div className="flex h-[420px] overflow-hidden rounded-b-2xl md:h-[556px]">
         <InboxPreview />
         <DesktopWorkspacePreview
           view={workspaceView}

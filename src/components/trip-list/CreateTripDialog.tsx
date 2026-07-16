@@ -5,6 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+  TRIP_DESTINATION_MAX_LENGTH,
+  TRIP_NAME_MAX_LENGTH,
+} from "@/models/trip";
 
 const EMOJI_PRESETS = [
   "🏖️",
@@ -44,12 +48,20 @@ interface CreateTripDialogProps {
   ) => void;
 }
 
+function validateTripDates(start: string, end: string): string | null {
+  if (start && end && end < start) {
+    return "End date must be on or after the start date.";
+  }
+  return null;
+}
+
 export function CreateTripDialog({ open, onOpenChange, onSubmit }: CreateTripDialogProps) {
   const [name, setName] = useState("");
   const [destination, setDestination] = useState("");
   const [emoji, setEmoji] = useState("✈️");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [dateError, setDateError] = useState<string | null>(null);
 
   const resetForm = () => {
     setName("");
@@ -57,12 +69,21 @@ export function CreateTripDialog({ open, onOpenChange, onSubmit }: CreateTripDia
     setEmoji("✈️");
     setStartDate("");
     setEndDate("");
+    setDateError(null);
   };
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     if (!name.trim() || !destination.trim()) return;
+
+    const nextDateError = validateTripDates(startDate, endDate);
+    if (nextDateError) {
+      setDateError(nextDateError);
+      return;
+    }
+
     const dates = startDate && endDate ? { start: startDate, end: endDate } : undefined;
+    onOpenChange(false);
     onSubmit(name.trim(), destination.trim(), emoji, dates);
     resetForm();
   };
@@ -112,6 +133,7 @@ export function CreateTripDialog({ open, onOpenChange, onSubmit }: CreateTripDia
               value={name}
               onChange={(event) => setName(event.target.value)}
               placeholder="e.g., 7 Days in Kyoto"
+              maxLength={TRIP_NAME_MAX_LENGTH}
               autoFocus
             />
           </div>
@@ -126,6 +148,7 @@ export function CreateTripDialog({ open, onOpenChange, onSubmit }: CreateTripDia
               value={destination}
               onChange={(event) => setDestination(event.target.value)}
               placeholder="e.g., Kyoto, Japan"
+              maxLength={TRIP_DESTINATION_MAX_LENGTH}
             />
           </div>
 
@@ -137,10 +160,25 @@ export function CreateTripDialog({ open, onOpenChange, onSubmit }: CreateTripDia
               <Input
                 type="date"
                 value={startDate}
-                onChange={(event) => setStartDate(event.target.value)}
+                onChange={(event) => {
+                  setStartDate(event.target.value);
+                  setDateError(null);
+                }}
               />
-              <Input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
+              <Input
+                type="date"
+                value={endDate}
+                onChange={(event) => {
+                  setEndDate(event.target.value);
+                  setDateError(null);
+                }}
+              />
             </div>
+            {dateError ? (
+              <p className="text-xs text-destructive" role="alert">
+                {dateError}
+              </p>
+            ) : null}
           </div>
 
           <Button type="submit" className="w-full" disabled={!name.trim() || !destination.trim()}>

@@ -26,6 +26,8 @@ export function TripGrid({
   onOpenTrip,
   onDeleteTrip,
 }: TripGridProps) {
+  const showTripCards = filteredTrips.length > 0 || selectedFilter === "all";
+
   return (
     <div className="flex-1 overflow-y-auto bg-background pt-4 sm:pt-8">
       <div className="mx-auto w-full max-w-[1344px] px-4 sm:px-12">
@@ -116,29 +118,31 @@ export function TripGrid({
             </motion.div>
           )}
 
-          <AnimatePresence mode="popLayout">
-            {filteredTrips.map((trip, index) => {
-              const isNew = Date.now() - new Date(trip.createdAt).getTime() < 15000;
-              return (
-                <motion.div
-                  key={trip.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                  className="h-full"
-                >
-                  <TripCard
-                    trip={trip}
-                    index={index}
-                    isNew={isNew}
-                    onOpen={() => onOpenTrip(trip)}
-                    onDelete={() => onDeleteTrip(trip)}
-                  />
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
+          {showTripCards && (
+            <AnimatePresence mode="popLayout">
+              {filteredTrips.map((trip, index) => {
+                const isNew = Date.now() - new Date(trip.createdAt).getTime() < 15000;
+                return (
+                  <motion.div
+                    key={trip.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                    className="h-full"
+                  >
+                    <TripCard
+                      trip={trip}
+                      index={index}
+                      isNew={isNew}
+                      onOpen={() => onOpenTrip(trip)}
+                      onDelete={() => onDeleteTrip(trip)}
+                    />
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          )}
         </div>
       </div>
     </div>

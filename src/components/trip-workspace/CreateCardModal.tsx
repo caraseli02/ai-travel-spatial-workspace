@@ -35,6 +35,7 @@ export function CreateCardModal({ isOpen, onClose, onSubmit, days }: CreateCardM
   const [detailsString, setDetailsString] = useState("");
   const [price, setPrice] = useState("");
   const [rating, setRating] = useState("4.5");
+  const [titleError, setTitleError] = useState("");
 
   useEffect(() => {
     if (isOpen) {
@@ -45,12 +46,16 @@ export function CreateCardModal({ isOpen, onClose, onSubmit, days }: CreateCardM
       setDetailsString("");
       setPrice("");
       setRating("4.5");
+      setTitleError("");
     }
   }, [isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!title.trim()) {
+      setTitleError("Title is required");
+      return;
+    }
 
     const details = detailsString
       ? detailsString
@@ -115,12 +120,25 @@ export function CreateCardModal({ isOpen, onClose, onSubmit, days }: CreateCardM
                 Title
               </Label>
               <Input
-                required
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  setTitle(next);
+                  if (next.length > 0 && !next.trim()) {
+                    setTitleError("Title is required");
+                  } else {
+                    setTitleError("");
+                  }
+                }}
+                aria-invalid={titleError ? true : undefined}
                 className="text-xs"
                 placeholder="e.g. Kyoto Tower visit"
               />
+              {titleError ? (
+                <p className="text-[10px] text-destructive" role="alert">
+                  {titleError}
+                </p>
+              ) : null}
             </div>
 
             <div className="space-y-1">
@@ -203,7 +221,9 @@ export function CreateCardModal({ isOpen, onClose, onSubmit, days }: CreateCardM
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">Create Card</Button>
+            <Button type="submit" disabled={!title.trim()}>
+              Create Card
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

@@ -29,15 +29,38 @@ function safeSetItem(key: string, value: string): void {
   }
 }
 
+/** Safe wrapper to remove items from localStorage. */
+function safeRemoveItem(key: string): void {
+  try {
+    localStorage.removeItem(key);
+  } catch (err) {
+    console.warn(`Failed to remove item "${key}" from localStorage:`, err);
+  }
+}
+
+type ReadAllResult = {
+  trips: Trip[];
+  corrupted: boolean;
+};
+
 /** Read all trips from localStorage. */
-function readAll(): Trip[] {
+function readAll(): ReadAllResult {
   try {
     const raw = safeGetItem(STORAGE_KEY);
-    const trips = raw ? JSON.parse(raw) : [];
-    return Array.isArray(trips) ? trips.map(normalizeTrip) : [];
+    if (!raw) {
+      return { trips: [], corrupted: false };
+    }
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      console.warn("Trips in localStorage are not an array; clearing corrupt data.");
+      safeRemoveItem(STORAGE_KEY);
+      return { trips: [], corrupted: true };
+    }
+    return { trips: parsed.map(normalizeTrip), corrupted: false };
   } catch (err) {
     console.warn("Failed to parse trips from localStorage:", err);
-    return [];
+    safeRemoveItem(STORAGE_KEY);
+    return { trips: [], corrupted: true };
   }
 }
 
@@ -86,7 +109,10 @@ function ensureDemoTrip(trips: Trip[]): Trip[] {
 /** localStorage implementation of Trip persistence. */
 export const localTripRepository: TripRepository = {
   list(): Trip[] {
-    const trips = readAll();
+    const { trips, corrupted } = readAll();
+    if (corrupted && trips.length === 0) {
+      safeRemoveItem(SEEDED_KEY);
+    }
     return ensureDemoTrip(trips);
   },
 
@@ -96,7 +122,7 @@ export const localTripRepository: TripRepository = {
   },
 
   save(trip: Trip): void {
-    const trips = readAll();
+    const { trips } = readAll();
     const idx = trips.findIndex((t) => t.id === trip.id);
     const updated = { ...trip, updatedAt: new Date().toISOString() };
 
@@ -109,7 +135,7 @@ export const localTripRepository: TripRepository = {
   },
 
   delete(id: string): void {
-    const trips = readAll().filter((t) => t.id !== id);
-    writeAll(trips);
+    const { trips } = readAll();
+    writeAll(trips.filter((t) => t.id !== id));
   },
 };

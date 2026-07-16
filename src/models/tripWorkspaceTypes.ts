@@ -40,6 +40,7 @@ export type TripWorkspaceAction =
   | { type: "ADD_CONNECTION"; fromId: string; toId: string }
   | { type: "ADD_CUSTOM_DAY"; dayNum: number; label: string }
   | { type: "AI_PROMPT_START" }
+  | { type: "AI_PROMPT_CANCEL" }
   | { type: "AI_PROMPT_SUCCESS"; query: string; trip?: Trip }
   | { type: "SET_SELECTED_CARD"; card: CanvasCard | null }
   | { type: "OPEN_CREATE_MODAL"; coords: { x: number; y: number } | null }

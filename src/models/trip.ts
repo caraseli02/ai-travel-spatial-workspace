@@ -95,6 +95,9 @@ export function generateTripId(): string {
   return `trip_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
+export const TRIP_NAME_MAX_LENGTH = 80;
+export const TRIP_DESTINATION_MAX_LENGTH = 120;
+
 /** Create a new empty Trip with sensible defaults. */
 export function createEmptyTrip(
   name: string,

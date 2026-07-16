@@ -7,15 +7,18 @@ import { WorkspaceTripStatsPill } from "@/components/trip-workspace/WorkspaceTri
 export function PreviewWorkspaceChrome({
   view,
   onViewChange,
+  stickyBelowNav = false,
 }: {
   view: WorkspaceView;
   onViewChange: (view: WorkspaceView) => void;
+  stickyBelowNav?: boolean;
 }) {
   return (
     <WorkspaceOverlayChrome
       view={view}
       onViewChange={onViewChange}
       keepStatsOnMapView
+      stickyBelowNav={stickyBelowNav}
       toolbar={<WorkspaceCanvasToolbar zoomPercent={100} preview showGridToggle />}
       stats={
         <WorkspaceTripStatsPill
