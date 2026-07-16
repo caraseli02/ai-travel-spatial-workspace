@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { localTripRepository } from "@/models/tripRepository";
 import { createEmptyTrip } from "@/models/trip";
@@ -18,6 +18,7 @@ import type { ChatMessage, TripStatusFilter } from "./trip-list/types";
 
 export default function TripListPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [showNewTripModal, setShowNewTripModal] = useState(false);
   const [promptValue, setPromptValue] = useState("");
@@ -30,6 +31,10 @@ export default function TripListPage() {
   useEffect(() => {
     setTrips(localTripRepository.list());
   }, []);
+
+  useEffect(() => {
+    setShowNewTripModal(false);
+  }, [location.pathname]);
 
   const refreshTrips = () => {
     setTrips(localTripRepository.list());

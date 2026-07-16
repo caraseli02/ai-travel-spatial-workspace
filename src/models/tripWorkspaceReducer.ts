@@ -194,6 +194,11 @@ function reduceTripWorkspaceState(
         ...state,
         isAiThinking: true,
       };
+    case "AI_PROMPT_CANCEL":
+      return {
+        ...state,
+        isAiThinking: false,
+      };
     case "SET_SELECTED_CARD":
       return {
         ...state,

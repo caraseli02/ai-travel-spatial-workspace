@@ -48,7 +48,10 @@ export function TripPromptBar({
         </div>
 
         <form
-          onSubmit={onSubmit}
+          onSubmit={(event) => {
+            event.preventDefault();
+            void onSubmit(event);
+          }}
           className={cn(
             "flex w-full max-w-[672px] items-center gap-2 rounded-2xl border bg-card py-1 pr-1 pl-2 transition-all duration-200",
             promptFocused ? "border-primary/50" : "border-border",
@@ -59,10 +62,18 @@ export function TripPromptBar({
           </Button>
 
           <Input
+            type="text"
+            enterKeyHint="send"
             className="h-8 flex-1 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
             placeholder="Describe your dream trip..."
             value={promptValue}
             onChange={(event) => onPromptValueChange(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey && promptValue.trim()) {
+                event.preventDefault();
+                void onSubmit(event);
+              }
+            }}
             onFocus={() => onPromptFocusedChange(true)}
             onBlur={() => setTimeout(() => onPromptFocusedChange(false), 200)}
           />

@@ -21,9 +21,9 @@ export function DesktopWorkspacePreview({
 }) {
   return (
     <div className="relative hidden min-h-0 flex-1 flex-col bg-[#f5f3ef] md:flex">
-      <PreviewWorkspaceChrome view={view} onViewChange={onViewChange} />
+      <PreviewWorkspaceChrome view={view} onViewChange={onViewChange} stickyBelowNav />
 
-      <div className="flex min-h-0 flex-1 flex-col pt-14">
+      <div className="flex min-h-0 flex-1 flex-col">
         {view === "canvas" ? (
           <>
             <div className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden px-10 pb-28 pt-2">

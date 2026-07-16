@@ -217,7 +217,7 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
             e.stopPropagation();
             setShowConfirm(true);
           }}
-          className="absolute top-3 right-3 z-10 text-white/80 opacity-0 transition-opacity hover:bg-white/10 hover:text-white group-hover:opacity-100 group-focus-within:opacity-100"
+          className="absolute top-3 right-3 z-10 text-white/90 opacity-80 transition-opacity hover:bg-white/15 hover:text-white hover:opacity-100 focus-visible:opacity-100"
           aria-label={`Delete trip ${trip.name}`}
           title="Delete Trip"
         >

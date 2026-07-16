@@ -1,4 +1,4 @@
-import { useReducer, useCallback } from 'react';
+import { useReducer, useCallback, useRef, useEffect } from 'react';
 import {
   reduceTripWorkspaceWithEffects,
   type AiPromptEffect,
@@ -10,6 +10,11 @@ import {
   delayedAiPromptExecutor,
   type AiPromptExecutor,
 } from '@/hooks/aiPromptExecutor';
+import {
+  clearAiPromptPending,
+  consumeAbandonedAiPrompt,
+  markAiPromptPending,
+} from '@/models/aiPromptPending';
 
 interface TripWorkspaceHookState {
   workspace: TripWorkspaceState;
@@ -52,6 +57,26 @@ export function useTripWorkspaceState(
       aiPromptEffect: null,
     },
   );
+  const cancelAiExecutionRef = useRef<(() => void) | null>(null);
+  const aiRequestGenerationRef = useRef(0);
+
+  useEffect(() => {
+    if (!trip?.id) return;
+    if (consumeAbandonedAiPrompt(trip.id)) {
+      dispatch({ type: 'AI_PROMPT_CANCEL' });
+    }
+  }, [trip?.id]);
+
+  useEffect(() => {
+    return () => {
+      cancelAiExecutionRef.current?.();
+      cancelAiExecutionRef.current = null;
+      if (trip?.id) {
+        clearAiPromptPending(trip.id);
+      }
+      aiRequestGenerationRef.current += 1;
+    };
+  }, [trip?.id]);
 
   const addInboxItem = useCallback((content: string) => {
     dispatch({ type: 'ADD_INBOX_ITEM', content });
@@ -79,8 +104,17 @@ export function useTripWorkspaceState(
 
   const sendAiQuery = useCallback((query: string) => {
     if (!query.trim()) return;
+    cancelAiExecutionRef.current?.();
+    const generation = ++aiRequestGenerationRef.current;
+    if (trip?.id) {
+      markAiPromptPending(trip.id, query.trim());
+    }
     dispatch({ type: 'AI_PROMPT_START' });
-    aiPromptExecutor.execute(() => {
+    cancelAiExecutionRef.current = aiPromptExecutor.execute(() => {
+      if (generation !== aiRequestGenerationRef.current) return;
+      if (trip?.id) {
+        clearAiPromptPending(trip.id);
+      }
       dispatch({ type: 'AI_PROMPT_SUCCESS', query, trip });
     });
   }, [aiPromptExecutor, trip]);
@@ -121,7 +155,7 @@ export function useTripWorkspaceState(
     dispatch({ type: 'SET_ACTIVE_DAY', day });
   }, []);
 
-  const createManualCard = useCallback((cardData: Omit<CanvasCard, 'id' | 'x' | 'y' | 'rotation'>) => {
+  const createManualCard = useCallback((cardData: Omit<CanvasCard, 'id' | 'y' | 'x' | 'rotation'>) => {
     dispatch({ type: 'CREATE_MANUAL_CARD', cardData });
   }, []);
 

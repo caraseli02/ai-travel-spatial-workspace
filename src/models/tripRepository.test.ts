@@ -303,4 +303,37 @@ describe('localTripRepository', () => {
       dayLabels: [],
     });
   });
+
+  it('re-seeds demo trips when stored JSON is corrupt and demo was previously seeded', () => {
+    store.wayfarer_trips = '{not valid json';
+    store.wayfarer_demo_seeded = 'true';
+
+    const trips = localTripRepository.list();
+
+    expect(trips).toHaveLength(2);
+    expect(trips[0].id).toBe(DEMO_TRIP_ID);
+    expect(trips.find((t) => t.id === PARIS_FIXTURE_TRIP_ID)).toBeDefined();
+    expect(store.wayfarer_trips).toBeDefined();
+    expect(JSON.parse(store.wayfarer_trips)).toHaveLength(2);
+    expect(store.wayfarer_demo_seeded).toBe('true');
+  });
+
+  it('re-seeds demo trips when stored payload is not a trip array', () => {
+    store.wayfarer_trips = JSON.stringify({ broken: true });
+    store.wayfarer_demo_seeded = 'true';
+
+    const trips = localTripRepository.list();
+
+    expect(trips).toHaveLength(2);
+    expect(trips[0].id).toBe(DEMO_TRIP_ID);
+  });
+
+  it('keeps an intentionally empty trip list when storage is valid', () => {
+    store.wayfarer_trips = JSON.stringify([]);
+    store.wayfarer_demo_seeded = 'true';
+
+    const trips = localTripRepository.list();
+
+    expect(trips).toHaveLength(0);
+  });
 });

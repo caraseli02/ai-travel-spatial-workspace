@@ -4,6 +4,7 @@ import { describe, expect, it, vi, afterEach, beforeEach } from 'vitest';
 import { createEmptyTrip, type CanvasCard } from '@/models/trip';
 import type { TripWorkspaceState } from '@/models/tripWorkspaceModel';
 import { useTripWorkspaceState } from '@/hooks/useTripWorkspaceState';
+import { markAiPromptPending } from '@/models/aiPromptPending';
 
 const createBaseState = (overrides: Partial<TripWorkspaceState> = {}): TripWorkspaceState => ({
   activeDay: null,
@@ -135,7 +136,10 @@ describe('useTripWorkspaceState', () => {
     it('can complete AI prompts with an injected zero-delay executor', () => {
       const trip = createEmptyTrip('Barcelona Weekend', 'Barcelona, Spain', '🇪🇸');
       const zeroDelayExecutor = {
-        execute: (complete: () => void) => complete(),
+        execute: (complete: () => void) => {
+          complete();
+          return () => {};
+        },
       };
       const { result } = renderHook(() =>
         useTripWorkspaceState(createBaseState(), trip, zeroDelayExecutor),
@@ -153,6 +157,34 @@ describe('useTripWorkspaceState', () => {
         }),
       ]);
       expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it('cancels an in-flight AI prompt when the hook unmounts', () => {
+      const trip = createEmptyTrip('Barcelona Weekend', 'Barcelona, Spain', '🇪🇸');
+      const { result, unmount } = renderHook(() => useTripWorkspaceState(createBaseState(), trip));
+
+      act(() => {
+        result.current.sendAiQuery('Plan a museum day');
+      });
+
+      expect(result.current.state.isAiThinking).toBe(true);
+      unmount();
+
+      act(() => {
+        vi.advanceTimersByTime(1200);
+      });
+
+      expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it('cancels thinking when a reload left a pending AI prompt behind', () => {
+      const trip = createEmptyTrip('Barcelona Weekend', 'Barcelona, Spain', '🇪🇸');
+      markAiPromptPending(trip.id, 'Plan day 4');
+
+      const { result } = renderHook(() => useTripWorkspaceState(createBaseState(), trip));
+
+      expect(result.current.state.isAiThinking).toBe(false);
+      expect(sessionStorage.getItem(`wayfarer_ai_pending_${trip.id}`)).toBeNull();
     });
   });
 });

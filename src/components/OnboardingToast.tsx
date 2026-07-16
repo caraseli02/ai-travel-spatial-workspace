@@ -8,7 +8,7 @@ import {
   setOnboardingCompleted,
 } from "@/models/preferences";
 
-export default function OnboardingToast() {
+export default function OnboardingToast({ forceShow = false }: { forceShow?: boolean }) {
   const [visible, setVisible] = useState(false);
   const [step, setStep] = useState(0);
 
@@ -30,11 +30,11 @@ export default function OnboardingToast() {
     },
   ];
   useEffect(() => {
-    if (!getOnboardingCompleted()) {
+    if (forceShow || !getOnboardingCompleted()) {
       const t = setTimeout(() => setVisible(true), 800);
       return () => clearTimeout(t);
     }
-  }, []);
+  }, [forceShow]);
 
   if (!visible) return null;
 

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef } from "react";
-import { Plus } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Plus, X } from "lucide-react";
 import { CanvasCardRenderer } from "@/components/CanvasCards";
 import type { CanvasCard, DayGroup } from "@/models/trip";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,11 @@ export function TripCanvasKanbanView({
   const columns = useMemo(() => getKanbanCanvasColumns(days, cards), [cards, days]);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const columnRefs = useRef(new Map<number, HTMLElement>());
+  const [dayFilterHintDismissed, setDayFilterHintDismissed] = useState(false);
+  const activeDayLabel = useMemo(
+    () => columns.find((column) => column.day === activeDay)?.label ?? (activeDay !== null ? `Day ${activeDay}` : null),
+    [activeDay, columns],
+  );
   const displayColumns = useMemo(() => {
     if (isMobile && activeDay !== null) {
       return columns.filter((column) => column.day === activeDay);
@@ -59,8 +64,47 @@ export function TripCanvasKanbanView({
     resetKanbanScrollerPosition(scrollerRef.current);
   }, [viewResetNonce]);
 
+  useEffect(() => {
+    setDayFilterHintDismissed(false);
+  }, [activeDay]);
+
   return (
     <div className="absolute inset-0 overflow-hidden bg-[#f5f3ef]">
+      {!isMobile && activeDay !== null && !dayFilterHintDismissed && activeDayLabel ? (
+        <div className="pointer-events-none absolute inset-x-0 top-14 z-30 flex justify-center px-3">
+          <div
+            role="status"
+            className="pointer-events-auto flex w-full max-w-xl items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs shadow-md"
+          >
+            <p className="min-w-0 flex-1 text-muted-foreground">
+              Showing{" "}
+              <span className="font-semibold text-foreground">{activeDayLabel}</span>
+              {" — "}
+              click{" "}
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                onClick={() => onActiveDayChange(null)}
+                className="h-auto px-0 py-0 text-xs font-semibold"
+              >
+                All days
+              </Button>{" "}
+              to edit other cards
+            </p>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              onClick={() => setDayFilterHintDismissed(true)}
+              aria-label="Dismiss day filter hint"
+              className="size-6 shrink-0 text-muted-foreground hover:bg-muted"
+            >
+              <X className="size-3" />
+            </Button>
+          </div>
+        </div>
+      ) : null}
       <div
         ref={scrollerRef}
         className={cn(
@@ -102,13 +146,17 @@ export function TripCanvasKanbanView({
                   isMobile && activeDay === null && "h-full w-[calc(100vw-2rem)] snap-center sm:w-[255px]",
                   isMobile && activeDay !== null && "w-full max-w-none",
                   !isMobile && "h-full min-w-[280px] max-w-[360px] flex-1 basis-[280px]",
-                  isDimmed && "opacity-40",
+                  isDimmed && "pointer-events-none opacity-40",
+                  isActive && activeDay !== null && "relative z-10",
                 )}
                 aria-label={column.label}
               >
                 <button
                   type="button"
-                  className="flex flex-col gap-2 text-left"
+                  className={cn(
+                    "flex flex-col gap-2 text-left",
+                    isDimmed && "pointer-events-auto",
+                  )}
                   onClick={() => onActiveDayChange(isActive ? null : column.day)}
                 >
                   <span className="flex items-start gap-1.5">
