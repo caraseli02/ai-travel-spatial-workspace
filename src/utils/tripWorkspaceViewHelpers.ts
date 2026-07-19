@@ -113,6 +113,12 @@ export function getKanbanCanvasColumns(days: DayGroup[], cards: CanvasCard[]): K
   }));
 }
 
+/** Mobile lands on the earliest day's vertical timeline instead of the All days board. */
+export function resolveDefaultActiveDay(days: DayGroup[], isMobile: boolean): number | null {
+  if (!isMobile || days.length === 0) return null;
+  return [...days].sort((a, b) => a.day - b.day)[0].day;
+}
+
 export function getMappedCards(cards: CanvasCard[]) {
   return cards
     .filter((card) => mapPositions[card.id])

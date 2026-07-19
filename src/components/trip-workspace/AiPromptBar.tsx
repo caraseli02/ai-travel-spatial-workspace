@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Send, Sparkles } from "lucide-react";
+import { Send, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,7 @@ export function AiPromptBar({
 }: AiPromptBarProps) {
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
+  const [mobileMapPromptOpen, setMobileMapPromptOpen] = useState(false);
   const nextDay = dayCount + 1;
   const suggestions = [
     `Plan Day ${nextDay}`,
@@ -28,25 +29,48 @@ export function AiPromptBar({
     "Find a restaurant near Gion",
   ];
   const placeholderExample = `Plan Day ${nextDay}`;
+  // On the mobile map companion the prompt starts as a compact FAB so the route sheet and
+  // zoom controls stay the primary map affordances; tapping it reveals the full input.
+  const isMobileMapCompanion = isMobile && workspaceView === "map";
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!value.trim() || isThinking) return;
     onSendQuery(value);
     setValue("");
+    if (isMobileMapCompanion) setMobileMapPromptOpen(false);
   };
 
   const handleSuggestionClick = (suggestion: string) => {
     onSendQuery(suggestion);
+    if (isMobileMapCompanion) setMobileMapPromptOpen(false);
   };
+
+  if (isMobileMapCompanion && !mobileMapPromptOpen) {
+    return (
+      <div className="absolute bottom-[192px] right-4 z-[480]">
+        <Button
+          type="button"
+          size="icon"
+          className="size-11 rounded-full shadow-lg"
+          onClick={() => setMobileMapPromptOpen(true)}
+          aria-label="Ask AI about this trip"
+        >
+          <Sparkles className="size-5" />
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div
       className={cn(
-        "pointer-events-none absolute left-1/2 z-[600] w-full max-w-lg -translate-x-1/2 select-none px-3 md:px-4",
-        workspaceView === "map"
-          ? "bottom-[calc(42vh+1rem)] md:bottom-14"
-          : "bottom-[max(0.75rem,env(safe-area-inset-bottom))] md:bottom-14",
+        "pointer-events-none absolute left-1/2 w-full max-w-lg -translate-x-1/2 select-none px-3 md:px-4",
+        isMobileMapCompanion ? "z-[480] bottom-[192px]" : "z-[600]",
+        !isMobileMapCompanion &&
+          (workspaceView === "map"
+            ? "bottom-[calc(42vh+1rem)] md:bottom-14"
+            : "bottom-[max(0.75rem,env(safe-area-inset-bottom))] md:bottom-14"),
       )}
     >
       <form
@@ -76,6 +100,7 @@ export function AiPromptBar({
             onFocus={() => setFocused(true)}
             onBlur={() => setTimeout(() => setFocused(false), 200)}
             disabled={isThinking}
+            autoFocus={isMobileMapCompanion}
           />
           {isThinking ? (
             <div className="flex items-center gap-1">
@@ -98,6 +123,18 @@ export function AiPromptBar({
                 <Send size={12} />
               </Button>
             )
+          )}
+          {isMobileMapCompanion && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              className="size-6 shrink-0"
+              onClick={() => setMobileMapPromptOpen(false)}
+              aria-label="Close AI prompt"
+            >
+              <X size={12} />
+            </Button>
           )}
         </div>
 

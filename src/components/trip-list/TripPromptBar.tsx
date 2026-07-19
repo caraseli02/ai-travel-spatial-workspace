@@ -26,26 +26,33 @@ export function TripPromptBar({
   onPromptFocusedChange,
   onSubmit,
 }: TripPromptBarProps) {
+  const expanded = promptFocused || promptValue.trim().length > 0;
+
   return (
     <div
       data-testid="trip-prompt-bar"
-      className="shrink-0 border-t border-border/60 bg-background px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-12 sm:pb-6"
+      className="shrink-0 border-t border-border/60 bg-background px-4 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-12 sm:pb-4"
     >
-      <div className="mx-auto flex w-full max-w-[760px] flex-col items-center gap-3">
-        <div className="scrollbar-none flex w-full flex-nowrap items-center justify-start gap-2 overflow-x-auto pb-1">
-          {suggestions.map((suggestion) => (
-            <Button
-              key={suggestion}
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => onSubmit(undefined, suggestion)}
-              className="h-auto rounded-full px-3 py-1.5 text-[10px] font-medium whitespace-nowrap shadow-sm active:scale-[0.98]"
-            >
-              {suggestion}
-            </Button>
-          ))}
-        </div>
+      <div className="mx-auto flex w-full max-w-[760px] flex-col items-center gap-2">
+        {expanded && (
+          <div
+            data-testid="trip-prompt-bar-suggestions"
+            className="scrollbar-none flex w-full flex-nowrap items-center justify-start gap-2 overflow-x-auto pb-1 animate-in fade-in slide-in-from-bottom-1"
+          >
+            {suggestions.map((suggestion) => (
+              <Button
+                key={suggestion}
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => onSubmit(undefined, suggestion)}
+                className="h-auto rounded-full px-3 py-1.5 text-[10px] font-medium whitespace-nowrap shadow-sm active:scale-[0.98]"
+              >
+                {suggestion}
+              </Button>
+            ))}
+          </div>
+        )}
 
         <form
           onSubmit={(event) => {
@@ -89,9 +96,14 @@ export function TripPromptBar({
           </Button>
         </form>
 
-        <p className="text-center text-[10px] text-muted-foreground select-none">
-          AI can make mistakes. Double-check important details.
-        </p>
+        {expanded && (
+          <p
+            data-testid="trip-prompt-bar-disclaimer"
+            className="text-center text-[10px] text-muted-foreground select-none animate-in fade-in"
+          >
+            AI can make mistakes. Double-check important details.
+          </p>
+        )}
       </div>
     </div>
   );

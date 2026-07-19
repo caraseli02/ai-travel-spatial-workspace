@@ -258,7 +258,11 @@ export function ArticleCard({
             <p className="mt-1 text-xs leading-snug text-muted-foreground">{card.subtitle}</p>
           )}
           {card.details && card.details.length > 0 && (
-            <ul className={cn(embedded ? "mt-1.5 space-y-0.5 md:mt-2.5 md:space-y-1" : "mt-2.5 space-y-1")}>
+            <ul
+              className={cn(
+                embedded ? "mt-1.5 hidden space-y-0.5 md:mt-2.5 md:block md:space-y-1" : "mt-2.5 space-y-1",
+              )}
+            >
               {card.details.map((d, i) => (
                 <li key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <span className="size-1 shrink-0 rounded-full bg-muted-foreground/30" />
@@ -345,7 +349,7 @@ export function FlightCard({
             {card.subtitle}
           </p>
           {displayDetails.length > 0 && (
-            <div className={cn(embedded ? "space-y-0.5 md:space-y-1" : "space-y-1")}>
+            <div className={cn(embedded ? "hidden space-y-0.5 md:block md:space-y-1" : "space-y-1")}>
               {displayDetails.map((d, i) => (
                 <div key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <span className="size-1 rounded-full bg-muted-foreground/30" />
@@ -419,7 +423,11 @@ export function HotelCard({
           </div>
           {card.rating && <StarRating rating={card.rating} />}
           {card.details && (
-            <ul className={cn(embedded ? "mt-1.5 space-y-0.5 md:mt-2.5 md:space-y-1" : "mt-2.5 space-y-1")}>
+            <ul
+              className={cn(
+                embedded ? "mt-1.5 hidden space-y-0.5 md:mt-2.5 md:block md:space-y-1" : "mt-2.5 space-y-1",
+              )}
+            >
               {card.details.map((d, i) => (
                 <li key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <span className="size-1 shrink-0 rounded-full bg-muted-foreground/30" />

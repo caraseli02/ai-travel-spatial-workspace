@@ -7,6 +7,7 @@ import {
   getMappedCards,
   getRouteDay,
   groupRouteCardsByTimeOfDay,
+  resolveDefaultActiveDay,
   resolveKanbanCardTag,
   resetKanbanScrollerPosition,
   scrollKanbanToActiveDayColumn,
@@ -193,5 +194,22 @@ describe("tripWorkspaceViewHelpers", () => {
 
   it("ignores reset when the kanban scroller is unavailable", () => {
     expect(() => resetKanbanScrollerPosition(null)).not.toThrow();
+  });
+
+  it("lands mobile on the earliest day instead of the All days board", () => {
+    expect(resolveDefaultActiveDay(dayGroups, true)).toBe(1);
+  });
+
+  it("keeps the All days board as the desktop default", () => {
+    expect(resolveDefaultActiveDay(dayGroups, false)).toBeNull();
+  });
+
+  it("falls back to All days on mobile when the Trip has no Day Groups yet", () => {
+    expect(resolveDefaultActiveDay([], true)).toBeNull();
+  });
+
+  it("picks the lowest day number regardless of Day Group order", () => {
+    const shuffled = [dayGroups[2], dayGroups[0], dayGroups[1]];
+    expect(resolveDefaultActiveDay(shuffled, true)).toBe(1);
   });
 });

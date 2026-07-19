@@ -5,12 +5,14 @@ import type { Trip } from "@/models/trip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import type { TripStatusFilter } from "./types";
 
 interface TripGridProps {
   trips: Trip[];
   filteredTrips: Trip[];
   selectedFilter: TripStatusFilter;
+  isMobile?: boolean;
   onCreateTrip: () => void;
   onShowAllTrips: () => void;
   onOpenTrip: (trip: Trip) => void;
@@ -21,6 +23,7 @@ export function TripGrid({
   trips,
   filteredTrips,
   selectedFilter,
+  isMobile,
   onCreateTrip,
   onShowAllTrips,
   onOpenTrip,
@@ -31,33 +34,39 @@ export function TripGrid({
   return (
     <div className="flex-1 overflow-y-auto bg-background pt-4 sm:pt-8">
       <div className="mx-auto w-full max-w-[1344px] px-4 sm:px-12">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <motion.div layout onClick={onCreateTrip}>
-            <Card
-              className="group h-full min-h-[154px] cursor-pointer rounded-2xl border-2 border-dashed border-border/60 bg-white/[0.01] py-0 shadow-none ring-0 transition-all duration-300 hover:border-primary/40 hover:bg-muted/30 sm:min-h-[420px]"
-              role="button"
-              tabIndex={0}
-              aria-label="Create a new trip"
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  onCreateTrip();
-                }
-              }}
-            >
-              <CardContent className="flex h-full min-h-[154px] flex-col items-center justify-center gap-4 p-6 text-center [--card-spacing:--spacing(4)] sm:min-h-[420px]">
-                <Button variant="outline" size="icon" className="pointer-events-none shrink-0" tabIndex={-1} aria-hidden>
-                  <Plus className="size-4" />
-                </Button>
-                <div className="space-y-1.5">
-                  <span className="block text-sm font-semibold text-foreground">New Trip</span>
-                  <p className="mx-auto max-w-[170px] text-xs leading-relaxed text-muted-foreground">
-                    Start planning your next destination
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+        <div
+          className={cn(
+            isMobile ? "flex flex-col gap-2" : "grid grid-cols-1 gap-6 lg:grid-cols-3",
+          )}
+        >
+          {!isMobile && (
+            <motion.div layout onClick={onCreateTrip}>
+              <Card
+                className="group h-full min-h-[154px] cursor-pointer rounded-2xl border-2 border-dashed border-border/60 bg-white/[0.01] py-0 shadow-none ring-0 transition-all duration-300 hover:border-primary/40 hover:bg-muted/30 sm:min-h-[420px]"
+                role="button"
+                tabIndex={0}
+                aria-label="Create a new trip"
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    onCreateTrip();
+                  }
+                }}
+              >
+                <CardContent className="flex h-full min-h-[154px] flex-col items-center justify-center gap-4 p-6 text-center [--card-spacing:--spacing(4)] sm:min-h-[420px]">
+                  <Button variant="outline" size="icon" className="pointer-events-none shrink-0" tabIndex={-1} aria-hidden>
+                    <Plus className="size-4" />
+                  </Button>
+                  <div className="space-y-1.5">
+                    <span className="block text-sm font-semibold text-foreground">New Trip</span>
+                    <p className="mx-auto max-w-[170px] text-xs leading-relaxed text-muted-foreground">
+                      Start planning your next destination
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
 
           {trips.length === 0 && (
             <motion.div layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
@@ -135,6 +144,7 @@ export function TripGrid({
                       trip={trip}
                       index={index}
                       isNew={isNew}
+                      isMobile={isMobile}
                       onOpen={() => onOpenTrip(trip)}
                       onDelete={() => onDeleteTrip(trip)}
                     />

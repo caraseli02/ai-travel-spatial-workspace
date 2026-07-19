@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, Users, Wallet, MapPin, Sparkles, Trash2 } from "lucide-react";
+import { Calendar, ChevronRight, Users, Wallet, MapPin, Sparkles, Trash2 } from "lucide-react";
 import type { Trip } from "../models/trip";
 import {
   deriveTripStatus,
@@ -20,6 +20,7 @@ interface TripCardProps {
   trip: Trip;
   index: number;
   isNew?: boolean;
+  isMobile?: boolean;
   onOpen: () => void;
   onDelete: () => void;
 }
@@ -38,7 +39,7 @@ const metaClassName = "text-[13px] font-medium text-muted-foreground";
 const activityChipClassName =
   "max-w-[110px] truncate rounded-2xl border border-white/10 bg-transparent px-2 py-0.5 text-[10px] font-medium text-muted-foreground";
 
-export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripCardProps) {
+export default function TripCard({ trip, index, isNew, isMobile, onOpen, onDelete }: TripCardProps) {
   const [showConfirm, setShowConfirm] = useState(false);
   const status = deriveTripStatus(trip);
   const config = statusConfig[status];
@@ -48,6 +49,98 @@ export default function TripCard({ trip, index, isNew, onOpen, onDelete }: TripC
   const travelers = deriveTripTravelers(trip);
   const budget = deriveTripBudget(trip);
   const activities = deriveTripActivities(trip);
+
+  if (isMobile) {
+    return (
+      <motion.div
+        initial={isNew ? { opacity: 0, y: 12 } : { opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: isNew ? 0 : index * 0.04 }}
+        className="relative"
+      >
+        <div
+          data-testid="trip-card-compact"
+          className="relative flex min-h-[76px] items-center gap-3 overflow-hidden rounded-xl border border-border bg-card px-3 py-2.5"
+        >
+          <AnimatePresence>
+            {showConfirm && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-20 flex items-center justify-center gap-2 rounded-xl bg-background/95 px-3 backdrop-blur-md"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span className="flex-1 truncate text-xs font-medium text-foreground">
+                  Delete &ldquo;{trip.name}&rdquo;?
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowConfirm(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete();
+                    setShowConfirm(false);
+                  }}
+                >
+                  Delete
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <button
+            type="button"
+            onClick={onOpen}
+            aria-label={`Open trip workspace for ${trip.name}`}
+            className="flex min-w-0 flex-1 items-center gap-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
+          >
+            <span
+              className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-muted text-xl"
+              role="img"
+              aria-label="trip emoji"
+            >
+              {trip.emoji}
+            </span>
+
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="truncate text-sm font-semibold text-foreground">{trip.name}</span>
+              <span className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-muted-foreground">
+                <span className="truncate">{formatTripDates(trip.dates)}</span>
+                <span aria-hidden>·</span>
+                <span className={cn("shrink-0 font-medium", config.color)}>{config.label}</span>
+              </span>
+            </span>
+          </button>
+
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowConfirm(true);
+            }}
+            className="shrink-0 text-muted-foreground hover:text-foreground"
+            aria-label={`Delete trip ${trip.name}`}
+          >
+            <Trash2 className="size-3.5" />
+          </Button>
+
+          <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div

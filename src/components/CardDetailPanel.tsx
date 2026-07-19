@@ -2,6 +2,7 @@ import { Edit3, Eye, X } from "lucide-react";
 import type { CanvasCard } from "../models/trip";
 import { filterRedundantCardDetails } from "../utils/tripWorkspaceViewHelpers";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Sheet,
   SheetContent,
@@ -23,6 +24,8 @@ interface CardDetailPanelProps {
   onDeleteCard?: (id: string) => void;
   onStartLinking?: (id: string) => void;
   isLinkingActive?: boolean;
+  /** On mobile the detail view opens as a bottom sheet over the dimmed canvas, not a full-width side panel. */
+  isMobile?: boolean;
 }
 
 export default function CardDetailPanel({
@@ -33,6 +36,7 @@ export default function CardDetailPanel({
   onDeleteCard,
   onStartLinking,
   isLinkingActive = false,
+  isMobile = false,
 }: CardDetailPanelProps) {
   const { isEditing, setIsEditing, editState, handlers } = useCardDetailEditState(
     card,
@@ -57,10 +61,18 @@ export default function CardDetailPanel({
   return (
     <Sheet open={!!card} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
-        side="right"
+        side={isMobile ? "bottom" : "right"}
         showCloseButton={false}
-        className="z-[800] gap-0 overflow-y-auto p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-[280px]"
+        className={cn(
+          "z-[800] gap-0 overflow-y-auto p-0",
+          isMobile
+            ? "max-h-[85vh] rounded-t-2xl border-t-0"
+            : "data-[side=right]:w-full data-[side=right]:sm:max-w-[280px]",
+        )}
       >
+        {isMobile && (
+          <div className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-border" aria-hidden />
+        )}
         <SheetHeader className="sticky top-0 z-10 flex-row items-center justify-between border-b border-border bg-card p-0">
           <div className="flex items-center gap-2 px-4 py-3 text-xs font-semibold text-muted-foreground">
             <span className="text-primary">{CANVAS_CARD_TYPE_ICONS[card.type]}</span>

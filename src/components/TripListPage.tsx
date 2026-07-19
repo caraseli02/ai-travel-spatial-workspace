@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { localTripRepository } from "@/models/tripRepository";
 import { createEmptyTrip } from "@/models/trip";
 import type { Trip } from "@/models/trip";
@@ -19,6 +20,7 @@ import type { ChatMessage, TripStatusFilter } from "./trip-list/types";
 export default function TripListPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [showNewTripModal, setShowNewTripModal] = useState(false);
   const [promptValue, setPromptValue] = useState("");
@@ -128,6 +130,7 @@ export default function TripListPage() {
             trips={trips}
             filteredTrips={filteredTrips}
             selectedFilter={selectedFilter}
+            isMobile={isMobile}
             onCreateTrip={() => setShowNewTripModal(true)}
             onShowAllTrips={() => setSelectedFilter("all")}
             onOpenTrip={(trip) => navigate(`/trips/${trip.id}`)}

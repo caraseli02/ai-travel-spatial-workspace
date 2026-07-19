@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { MapContainer, Marker, Polyline, Popup, TileLayer } from "react-leaflet";
 import type { CanvasCard, DayGroup } from "@/models/trip";
 import { cn } from "@/lib/utils";
@@ -29,6 +29,7 @@ export function TripMapView({
   showRoutePanel?: boolean;
   interactive?: boolean;
 }) {
+  const [sheetExpanded, setSheetExpanded] = useState(false);
   const mappedCards = useMemo(() => getMappedCards(cards), [cards]);
   const isOverview = activeDay === null;
   const displayPositions = useMemo(
@@ -76,7 +77,7 @@ export function TripMapView({
         {routeDay !== null && routePositions.length > 1 && (
           <Polyline positions={routePositions} pathOptions={{ color: "#2563eb", weight: 4, opacity: 0.72 }} />
         )}
-        {interactive && <MapControlButtons />}
+        {interactive && <MapControlButtons sheetExpanded={sheetExpanded} />}
         {mappedCards.map(({ card, position }) => {
           const isSelected = interactive && selectedCard?.id === card.id;
           const isDimmed = activeDay !== null && card.day !== activeDay && card.day !== 0;
@@ -111,6 +112,7 @@ export function TripMapView({
           cards={routeCards}
           onSelectCard={onSelectCard}
           selectedCard={selectedCard}
+          onExpandedChange={setSheetExpanded}
         />
       )}
     </div>

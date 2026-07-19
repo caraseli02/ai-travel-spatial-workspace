@@ -28,6 +28,7 @@ import {
   formatTripDates,
   formatTripDurationNights,
 } from "../utils/tripCardHelpers";
+import { resolveDefaultActiveDay } from "../utils/tripWorkspaceViewHelpers";
 import { AiPromptBar } from "./trip-workspace/AiPromptBar";
 import { CreateCardModal } from "./trip-workspace/CreateCardModal";
 import { AddDayModal } from "./trip-workspace/AddDayModal";
@@ -71,7 +72,7 @@ export default function TripWorkspacePresenter({
 
   const initialState = useMemo<TripWorkspaceState>(() => {
     return {
-      activeDay: null,
+      activeDay: resolveDefaultActiveDay(trip.days, isMobile),
       days: trip.days,
       dayLabels: trip.dayLabels,
       cards: trip.cards,
@@ -84,6 +85,7 @@ export default function TripWorkspacePresenter({
       showAddDayModal: false,
       showOverflow: false,
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only the initial mobile state seeds activeDay; later resizes should not reset a user's day selection.
   }, [trip]);
 
   const {
@@ -316,6 +318,7 @@ export default function TripWorkspacePresenter({
         onExportTrip={handleExportTrip}
         workspaceView={workspaceView}
         onWorkspaceViewChange={handleWorkspaceViewChange}
+        hasSelectedCard={selectedCard !== null}
       />
 
       <div className="relative flex flex-1 overflow-hidden">
@@ -449,6 +452,7 @@ export default function TripWorkspacePresenter({
             onDeleteCard={handleDeleteCard}
             onStartLinking={handleStartLinking}
             isLinkingActive={linkingSession.isActive && linkingSession.originId === selectedCard?.id}
+            isMobile={isMobile}
           />
         </main>
       </div>

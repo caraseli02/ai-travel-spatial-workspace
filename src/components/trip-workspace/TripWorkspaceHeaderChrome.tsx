@@ -39,6 +39,8 @@ export interface TripWorkspaceHeaderChromeProps {
   onExportTrip: () => void;
   workspaceView: WorkspaceView;
   onWorkspaceViewChange: (view: WorkspaceView) => void;
+  /** Card detail is open, taking over the mobile screen — day chrome underneath does not apply. */
+  hasSelectedCard?: boolean;
 }
 
 export function TripWorkspaceHeaderChrome({
@@ -57,11 +59,15 @@ export function TripWorkspaceHeaderChrome({
   onExportTrip,
   workspaceView,
   onWorkspaceViewChange,
+  hasSelectedCard = false,
 }: TripWorkspaceHeaderChromeProps) {
   const unprocessedCount = inboxItems.filter((item) => !item.processed).length;
   const tripStatus = deriveTripStatus(trip);
   const statusCfg = workspaceStatusConfig[tripStatus];
   const travelerCount = deriveTripTravelers(trip);
+  // On mobile, the Inbox sheet and Card Detail sheet each take over the screen —
+  // the day pill strip and view switcher underneath don't apply to either mode.
+  const hideMobileDayChrome = inboxOpen || hasSelectedCard;
 
   return (
     <header className="z-40 shrink-0 border-b border-border bg-card">
@@ -238,7 +244,7 @@ export function TripWorkspaceHeaderChrome({
           >
             {inboxOpen ? <PanelLeftClose className="size-3.5" /> : <PanelLeftOpen className="size-3.5" />}
             <span className="hidden md:block">Inbox</span>
-            {unprocessedCount > 0 && (
+            {!inboxOpen && unprocessedCount > 0 && (
               <Badge variant="destructive" className="size-4 shrink-0 justify-center p-0 text-[10px]">
                 {unprocessedCount}
               </Badge>
@@ -247,51 +253,53 @@ export function TripWorkspaceHeaderChrome({
         </div>
       </div>
 
-      <div className="relative md:hidden">
-        <div className="scrollbar-none flex flex-nowrap items-center gap-1.5 overflow-x-auto px-4 pb-2.5 snap-x snap-mandatory">
-          <Button
-            variant={activeDay === null ? "default" : "secondary"}
-            size="sm"
-            onClick={() => onActiveDayChange(null)}
-            className="h-8 shrink-0 snap-start rounded-full px-3 text-xs"
-          >
-            All
-          </Button>
-          {days.map((d) => (
+      {!hideMobileDayChrome && (
+        <div className="relative md:hidden">
+          <div className="scrollbar-none flex flex-nowrap items-center gap-1.5 overflow-x-auto px-4 pb-2.5 snap-x snap-mandatory">
             <Button
-              key={d.day}
-              variant={activeDay === d.day ? "default" : "secondary"}
+              variant={activeDay === null ? "default" : "secondary"}
               size="sm"
-              onClick={() => onActiveDayChange(activeDay === d.day ? null : d.day)}
-              className="h-8 shrink-0 snap-start gap-1 rounded-full px-3 text-xs"
-              style={activeDay === d.day ? { backgroundColor: d.color, borderColor: d.color } : undefined}
+              onClick={() => onActiveDayChange(null)}
+              className="h-8 shrink-0 snap-start rounded-full px-3 text-xs"
             >
-              <span
-                className="size-1.5 shrink-0 rounded-full"
-                style={{
-                  backgroundColor: activeDay === d.day ? "rgba(255,255,255,0.7)" : d.color,
-                }}
-              />
-              Day&nbsp;{d.day}
+              All
             </Button>
-          ))}
-          <Button
-            variant="outline"
-            size="icon-sm"
-            onClick={onOpenAddDayModal}
-            className="size-7 shrink-0 rounded-full"
-            title="Add Day"
-          >
-            <Plus className="size-3" />
-          </Button>
+            {days.map((d) => (
+              <Button
+                key={d.day}
+                variant={activeDay === d.day ? "default" : "secondary"}
+                size="sm"
+                onClick={() => onActiveDayChange(activeDay === d.day ? null : d.day)}
+                className="h-8 shrink-0 snap-start gap-1 rounded-full px-3 text-xs"
+                style={activeDay === d.day ? { backgroundColor: d.color, borderColor: d.color } : undefined}
+              >
+                <span
+                  className="size-1.5 shrink-0 rounded-full"
+                  style={{
+                    backgroundColor: activeDay === d.day ? "rgba(255,255,255,0.7)" : d.color,
+                  }}
+                />
+                Day&nbsp;{d.day}
+              </Button>
+            ))}
+            <Button
+              variant="outline"
+              size="icon-sm"
+              onClick={onOpenAddDayModal}
+              className="size-7 shrink-0 rounded-full"
+              title="Add Day"
+            >
+              <Plus className="size-3" />
+            </Button>
+          </div>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-card to-transparent"
+          />
         </div>
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-card to-transparent"
-        />
-      </div>
+      )}
 
-      {trip.dates && (
+      {!hideMobileDayChrome && trip.dates && (
         <div className="flex items-center justify-between gap-3 border-t border-border/60 px-4 py-2 md:hidden">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
             <Calendar className="size-3 shrink-0" />
@@ -304,7 +312,7 @@ export function TripWorkspaceHeaderChrome({
           <WorkspaceViewSwitcher value={workspaceView} onValueChange={onWorkspaceViewChange} />
         </div>
       )}
-      {!trip.dates && (
+      {!hideMobileDayChrome && !trip.dates && (
         <div className="flex justify-end border-t border-border/60 px-4 py-2 md:hidden">
           <WorkspaceViewSwitcher value={workspaceView} onValueChange={onWorkspaceViewChange} />
         </div>

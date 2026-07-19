@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import "@testing-library/jest-dom/vitest";
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Trip } from "@/models/trip";
 import { TripGrid } from "./TripGrid";
 
@@ -21,6 +21,10 @@ const upcomingTrip = {
 } as Trip;
 
 describe("TripGrid", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   it("does not render trip cards when a status filter has zero matches", () => {
     render(
       <TripGrid
@@ -39,5 +43,39 @@ describe("TripGrid", () => {
     expect(
       screen.queryByRole("button", { name: "Open trip workspace for Summer Escape" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("renders the dashed New Trip card on desktop", () => {
+    render(
+      <TripGrid
+        trips={[upcomingTrip]}
+        filteredTrips={[upcomingTrip]}
+        selectedFilter="all"
+        onCreateTrip={vi.fn()}
+        onShowAllTrips={vi.fn()}
+        onOpenTrip={vi.fn()}
+        onDeleteTrip={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Create a new trip" })).toBeInTheDocument();
+  });
+
+  it("omits the duplicate New Trip card on mobile and renders compact rows", () => {
+    render(
+      <TripGrid
+        trips={[upcomingTrip]}
+        filteredTrips={[upcomingTrip]}
+        selectedFilter="all"
+        isMobile
+        onCreateTrip={vi.fn()}
+        onShowAllTrips={vi.fn()}
+        onOpenTrip={vi.fn()}
+        onDeleteTrip={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: "Create a new trip" })).not.toBeInTheDocument();
+    expect(screen.getByTestId("trip-card-compact")).toBeInTheDocument();
   });
 });
