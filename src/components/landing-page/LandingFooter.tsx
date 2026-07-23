@@ -7,7 +7,7 @@ export function LandingFooter() {
       <div className="mx-auto flex max-w-7xl flex-col gap-9">
         <div className="flex flex-col gap-10 lg:flex-row lg:justify-between lg:gap-12">
           <div className="shrink-0 space-y-3.5 lg:max-w-sm">
-            <WayfarerLogo className="[&_span]:text-stone-50" />
+            <WayfarerLogo className="text-stone-50" />
             <p className="text-sm leading-relaxed">
               The AI-native workspace for trips you can see. Capture anything, organize
               automatically, plan spatially.

@@ -1,4 +1,4 @@
-import { ArrowUp, Inbox, Sparkles } from "lucide-react";
+import { ArrowUp, Inbox } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -16,10 +16,7 @@ export function InboxMock({ className }: { className?: string }) {
           3 new
         </Badge>
       </div>
-      <div className="flex items-center gap-2.5 border-b border-border px-4 py-3.5">
-        <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary">
-          <Sparkles className="size-3.5 text-primary-foreground" />
-        </div>
+      <div className="flex items-center gap-2 border-b border-border px-4 py-3.5">
         <p className="flex-1 text-sm text-muted-foreground">Paste a link, screenshot, or note…</p>
         <ArrowUp className="size-[18px] text-muted-foreground" />
       </div>

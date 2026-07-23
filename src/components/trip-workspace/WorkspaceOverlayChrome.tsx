@@ -9,7 +9,11 @@ export interface WorkspaceOverlayChromeProps {
   stats?: React.ReactNode;
   /** Landing preview keeps trip metadata visible on map view. */
   keepStatsOnMapView?: boolean;
-  /** Sticky below the landing nav so view toggles stay clickable while scrolling. */
+  /**
+   * Landing preview: keep chrome in normal flow so it reserves space above the board.
+   * Do not use sticky here — preview ancestors use overflow clipping, which would make
+   * `top-[76px]` stick inside the preview panel and cover day column headers.
+   */
   stickyBelowNav?: boolean;
   className?: string;
 }
@@ -31,7 +35,7 @@ export function WorkspaceOverlayChrome({
       className={cn(
         "pointer-events-none z-10 w-full px-3",
         stickyBelowNav
-          ? "sticky top-[76px] z-[45] py-3"
+          ? "relative shrink-0 py-3"
           : "absolute inset-x-3 top-3 md:inset-x-0 md:px-3",
         className,
       )}

@@ -6,8 +6,6 @@ import { HeroSection } from "./landing-page/HeroSection";
 import { HowItWorksSection } from "./landing-page/HowItWorksSection";
 import { LandingFooter } from "./landing-page/LandingFooter";
 import { LandingNav } from "./landing-page/LandingNav";
-import { SpatialCanvasFeature } from "./landing-page/SpatialCanvasFeature";
-import { TestimonialsSection } from "./landing-page/TestimonialsSection";
 import { TripListFeature } from "./landing-page/TripListFeature";
 import { TrustStrip } from "./landing-page/TrustStrip";
 
@@ -21,10 +19,8 @@ export default function LandingPage() {
       <HeroSection onEnterDemo={onEnterDemo} />
       <TrustStrip />
       <HowItWorksSection />
-      <SpatialCanvasFeature onEnterDemo={onEnterDemo} />
       <TripListFeature onEnterDemo={onEnterDemo} />
       <AiInboxFeature onEnterDemo={onEnterDemo} />
-      <TestimonialsSection />
       <CtaSection onEnterDemo={onEnterDemo} />
       <LandingFooter />
     </div>

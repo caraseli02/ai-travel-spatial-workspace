@@ -3,7 +3,6 @@ import { createDemoTrip } from "@/data/tripData";
 import type { CanvasCard } from "@/models/trip";
 import { kanbanColumns } from "./landingPreviewData";
 import { KanbanColumn } from "./KanbanColumn";
-import { PreviewAiPromptBar } from "./PreviewAiPromptBar";
 import { PreviewWorkspaceChrome } from "./PreviewWorkspaceChrome";
 
 export function DesktopWorkspacePreview({
@@ -25,21 +24,18 @@ export function DesktopWorkspacePreview({
 
       <div className="flex min-h-0 flex-1 flex-col">
         {view === "canvas" ? (
-          <>
-            <div className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden px-10 pb-28 pt-2">
-              <div className="flex h-full min-w-max gap-3">
-                {kanbanColumns.map((column, index) => (
-                  <KanbanColumn
-                    key={column.label}
-                    {...column}
-                    showAddCard={index === kanbanColumns.length - 1}
-                  />
-                ))}
-              </div>
+          <div className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden px-10 pb-3 pt-2">
+            <div className="flex h-full min-w-max items-stretch gap-3">
+              {kanbanColumns.map((column, index) => (
+                <KanbanColumn
+                  key={column.label}
+                  {...column}
+                  showAddCard={index === kanbanColumns.length - 1}
+                  className="h-full min-h-0"
+                />
+              ))}
             </div>
-
-            <PreviewAiPromptBar className="absolute bottom-4 left-1/2 z-10 w-[min(512px,calc(100%-2rem))] -translate-x-1/2" />
-          </>
+          </div>
         ) : (
           <div className="relative min-h-0 flex-1 overflow-hidden">
             <TripMapView

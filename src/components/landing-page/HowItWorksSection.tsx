@@ -1,11 +1,10 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { howItWorksSteps } from "./landingData";
 
 export function HowItWorksSection() {
   return (
     <section id="how-it-works" className="scroll-mt-[68px] bg-muted px-4 py-16 md:px-12 md:py-24">
       <div className="mx-auto max-w-7xl">
-        <div className="mx-auto mb-12 max-w-3xl text-center md:mb-14">
+        <div className="mx-auto mb-12 max-w-3xl text-center md:mb-16">
           <p className="mb-3 text-xs font-semibold tracking-widest text-primary uppercase">
             How it works
           </p>
@@ -17,22 +16,20 @@ export function HowItWorksSection() {
             back a plan you can see.
           </p>
         </div>
-        <div className="grid gap-7 md:grid-cols-3">
+        <div className="grid gap-10 md:grid-cols-3 md:gap-14">
           {howItWorksSteps.map((step) => (
-            <Card key={step.num} className="rounded-2xl py-7 shadow-sm">
-              <CardContent className="flex flex-col gap-4 px-7">
-                <div className="flex items-start justify-between">
-                  <div className="flex size-[52px] items-center justify-center rounded-[14px] border border-primary/15 bg-primary/5 text-primary">
-                    <step.icon size={22} />
-                  </div>
-                  <span className="font-serif text-3xl font-semibold text-muted-foreground/30">
-                    {step.num}
-                  </span>
-                </div>
-                <h3 className="text-xl font-semibold">{step.title}</h3>
-                <p className="text-sm leading-relaxed text-muted-foreground">{step.desc}</p>
-              </CardContent>
-            </Card>
+            <article
+              key={step.num}
+              className="flex flex-col gap-3 border-t border-foreground/10 pt-6"
+            >
+              <span className="font-serif text-5xl leading-none font-semibold tracking-tight text-primary/40 md:text-6xl">
+                {step.num}
+              </span>
+              <h3 className="mt-2 text-xl font-semibold tracking-tight">{step.title}</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground md:text-[15px]">
+                {step.desc}
+              </p>
+            </article>
           ))}
         </div>
       </div>
