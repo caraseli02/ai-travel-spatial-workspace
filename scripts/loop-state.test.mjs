@@ -165,10 +165,44 @@ describe("loop-state public JSON contract", () => {
       ],
     });
 
-    expect(state).toMatchObject({
+    expect(state).toEqual({
       action: "continue",
       issue: 141,
       title: "Extract shared Trip Material parser",
+      url: "https://example.test/issues/141",
+    });
+  });
+
+  test("continues the oldest in-progress issue when several are claimed", async () => {
+    const state = await runLoopState({
+      inProgressIssues: [
+        {
+          number: 144,
+          title: "Later issue",
+          url: "https://example.test/issues/144",
+        },
+        {
+          number: 142,
+          title: "Current issue",
+          url: "https://example.test/issues/142",
+        },
+      ],
+      openPullRequests: [],
+      readyIssues: [
+        {
+          body: "## Blocked by\n\nNone - can start immediately",
+          number: 143,
+          title: "Next issue",
+          url: "https://example.test/issues/143",
+        },
+      ],
+    });
+
+    expect(state).toEqual({
+      action: "continue",
+      issue: 142,
+      title: "Current issue",
+      url: "https://example.test/issues/142",
     });
   });
 
@@ -197,10 +231,12 @@ describe("loop-state public JSON contract", () => {
       ],
     });
 
-    expect(state).toMatchObject({
+    expect(state).toEqual({
       action: "claim_new",
+      body: "## Blocked by\n\nNone - can start immediately",
       number: 143,
       title: "Next issue",
+      url: "https://example.test/issues/143",
     });
   });
 
