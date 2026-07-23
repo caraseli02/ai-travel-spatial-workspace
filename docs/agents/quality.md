@@ -6,7 +6,7 @@ This document tracks codebase health signals that should survive session boundar
 
 | Area | Rating | Evidence | Next action |
 | --- | --- | --- | --- |
-| Harness | Strong | Split routing docs, `make check`, CI, E2E smoke, startup checks, file-size ratchet. | Keep entry files short and maintain `PROGRESS.md`. |
+| Harness | Strong | Split routing docs, `make check`, CI, E2E smoke, startup checks, file-size ratchet, SHA-bound evaluator loop (`loop-state.sh`, automation queue). | Keep entry files short, maintain `PROGRESS.md`, and prefer command/test updates over duplicated loop prose. |
 | Domain model | Strong | 99 unit tests cover Trip Repository, Trip Workspace Model, Trip Material memory, Linking Session, agent context, and the planner (wired via #49). | Add focused tests alongside the tech-debt module splits (#59, #60). |
 | UI runtime flows | Improving | Playwright smoke covers Landing Page, Trip List, Trip Workspace routing, and localStorage persistence. | Add focused E2E flows for new UI behavior beyond smoke coverage. |
 | Environment | Improving | `.nvmrc`, `package.json` engines, `npm ci`, and CI are in place. | Use Node 22 LTS locally before release verification. |

@@ -19,7 +19,7 @@ At the start of every run:
 
 Action routing:
 - wait_evaluator → stop immediately. Do not pick new work. The evaluator owns the open PR.
-- repair → read the trusted FAIL comment whose evaluator marker matches the `head` returned by loop-state, fix the same branch/PR, re-run verification, push. End with "PR ready for evaluator".
+- repair → use `evaluatorComment` from loop-state when present (else re-read the trusted FAIL marker for `head`), fix the same branch/PR, re-run verification, push. End with "PR ready for evaluator". If `openPrCount` > 1, repair the returned PR only and leave a blocker note about the extra open PRs.
 - continue → keep implementing the in-progress issue on its branch until a PR exists.
 - claim_new → claim the issue (bash scripts/claim-issue.sh <number> codex/issue-<number>-<short-slug>), implement on that branch, verify, open PR with Closes #<issue>.
 - idle → stop and report no eligible work.
