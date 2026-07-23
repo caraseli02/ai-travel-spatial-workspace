@@ -1,0 +1,398 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-23T10:42:45Z",
+  "title": "Design System: Wayfarer",
+  "extensions": {
+    "colorMeta": {
+      "warm-ember": {
+        "role": "primary",
+        "displayName": "Warm Ember",
+        "canonical": "oklch(0.553 0.145 55.5)",
+        "tonalRamp": [
+          "#3d1f0a",
+          "#5c2e0c",
+          "#7a3f12",
+          "#92400e",
+          "#c2410c",
+          "#ea580c",
+          "#fb923c",
+          "#ffedd5"
+        ]
+      },
+      "warm-ember-foreground": {
+        "role": "primary",
+        "displayName": "Warm Ember Foreground",
+        "canonical": "oklch(0.985 0 0)",
+        "tonalRamp": [
+          "#fafaf9",
+          "#fafaf9",
+          "#fafaf9",
+          "#fafaf9",
+          "#fafaf9",
+          "#fafaf9",
+          "#fafaf9",
+          "#fafaf9"
+        ]
+      },
+      "sketchbook-cream": {
+        "role": "neutral",
+        "displayName": "Sketchbook Cream",
+        "canonical": "oklch(0.988 0.002 95)",
+        "tonalRamp": [
+          "#44403c",
+          "#78716c",
+          "#a8a29e",
+          "#d6d3d1",
+          "#e7e5e4",
+          "#f5f5f4",
+          "#fafaf9",
+          "#faf9f7"
+        ]
+      },
+      "card-paper": {
+        "role": "neutral",
+        "displayName": "Card Paper",
+        "canonical": "oklch(0.991 0.003 95)",
+        "tonalRamp": [
+          "#44403c",
+          "#78716c",
+          "#a8a29e",
+          "#d6d3d1",
+          "#e7e5e4",
+          "#f5f5f4",
+          "#fafaf9",
+          "#faf9f7"
+        ]
+      },
+      "ink-stone": {
+        "role": "neutral",
+        "displayName": "Ink Stone",
+        "canonical": "oklch(0.216 0.006 56)",
+        "tonalRamp": [
+          "#0c0a09",
+          "#1c1917",
+          "#292524",
+          "#44403c",
+          "#57534e",
+          "#78716c",
+          "#a8a29e",
+          "#e7e5e4"
+        ]
+      },
+      "muted-stone": {
+        "role": "neutral",
+        "displayName": "Muted Stone",
+        "canonical": "oklch(0.553 0.013 58)",
+        "tonalRamp": [
+          "#0c0a09",
+          "#1c1917",
+          "#292524",
+          "#44403c",
+          "#57534e",
+          "#78716c",
+          "#a8a29e",
+          "#e7e5e4"
+        ]
+      },
+      "quiet-wash": {
+        "role": "neutral",
+        "displayName": "Quiet Wash",
+        "canonical": "oklch(0.966 0.005 90)",
+        "tonalRamp": [
+          "#44403c",
+          "#78716c",
+          "#a8a29e",
+          "#d6d3d1",
+          "#e7e5e4",
+          "#f5f5f4",
+          "#fafaf9",
+          "#faf9f7"
+        ]
+      },
+      "hairline-border": {
+        "role": "neutral",
+        "displayName": "Hairline Border",
+        "canonical": "oklch(0.914 0.008 85)",
+        "tonalRamp": [
+          "#44403c",
+          "#78716c",
+          "#a8a29e",
+          "#d6d3d1",
+          "#e7e5e4",
+          "#f5f5f4",
+          "#fafaf9",
+          "#faf9f7"
+        ]
+      },
+      "destructive": {
+        "role": "secondary",
+        "displayName": "Destructive",
+        "canonical": "oklch(0.577 0.245 27.325)",
+        "tonalRamp": [
+          "#7f1d1d",
+          "#991b1b",
+          "#b91c1c",
+          "#dc2626",
+          "#ef4444",
+          "#f87171",
+          "#fecaca",
+          "#fef2f2"
+        ]
+      },
+      "canvas-dot-base": {
+        "role": "neutral",
+        "displayName": "Canvas Dot Base",
+        "canonical": "#f5f3ef",
+        "tonalRamp": [
+          "#44403c",
+          "#78716c",
+          "#a8a29e",
+          "#d6d3d1",
+          "#e7e5e4",
+          "#f5f5f4",
+          "#fafaf9",
+          "#faf9f7"
+        ]
+      },
+      "canvas-dot": {
+        "role": "neutral",
+        "displayName": "Canvas Dot",
+        "canonical": "#d6cfc3",
+        "tonalRamp": [
+          "#44403c",
+          "#78716c",
+          "#a8a29e",
+          "#d6d3d1",
+          "#e7e5e4",
+          "#f5f5f4",
+          "#fafaf9",
+          "#faf9f7"
+        ]
+      },
+      "workspace-paper": {
+        "role": "neutral",
+        "displayName": "Workspace Paper",
+        "canonical": "#fefcf8",
+        "tonalRamp": [
+          "#44403c",
+          "#78716c",
+          "#a8a29e",
+          "#d6d3d1",
+          "#e7e5e4",
+          "#f5f5f4",
+          "#fafaf9",
+          "#faf9f7"
+        ]
+      },
+      "brand-dark": {
+        "role": "primary",
+        "displayName": "Brand Dark",
+        "canonical": "#92400e",
+        "tonalRamp": [
+          "#3d1f0a",
+          "#5c2e0c",
+          "#7a3f12",
+          "#92400e",
+          "#c2410c",
+          "#ea580c",
+          "#fb923c",
+          "#ffedd5"
+        ]
+      },
+      "trip-list-bg": {
+        "role": "neutral",
+        "displayName": "Trip List Night",
+        "canonical": "#0c0a09",
+        "tonalRamp": [
+          "#0c0a09",
+          "#1c1917",
+          "#292524",
+          "#44403c",
+          "#57534e",
+          "#78716c",
+          "#a8a29e",
+          "#e7e5e4"
+        ]
+      },
+      "trip-list-surface": {
+        "role": "neutral",
+        "displayName": "Trip List Surface",
+        "canonical": "#1c1917",
+        "tonalRamp": [
+          "#0c0a09",
+          "#1c1917",
+          "#292524",
+          "#44403c",
+          "#57534e",
+          "#78716c",
+          "#a8a29e",
+          "#e7e5e4"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Landing and major marketing headlines in Lora only."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section titles on marketing surfaces."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card titles and panel headers in Inter."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Supporting UI and marketing body copy."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Chips, meta, filters, tags."
+      }
+    },
+    "shadows": [
+      {
+        "name": "card-lift",
+        "value": "0 2px 4px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.08)",
+        "purpose": "Default elevation for trip cards and signature content cards only."
+      },
+      {
+        "name": "card-lift-hover",
+        "value": "0 4px 8px rgba(0,0,0,0.08), 0 16px 40px rgba(0,0,0,0.14)",
+        "purpose": "Hover response on interactive content cards."
+      },
+      {
+        "name": "sticky",
+        "value": "2px 3px 8px rgba(0,0,0,0.1)",
+        "purpose": "Canvas sticky-note affordances."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Default state transitions."
+      },
+      {
+        "name": "card-drop-in",
+        "value": "0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "purpose": "Canvas card entrance drop-in."
+      },
+      {
+        "name": "float",
+        "value": "6s ease-in-out infinite",
+        "purpose": "Landing decorative float only \u2014 not chrome."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "md",
+        "value": "768px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Warm Ember solid CTA \u2014 flat, no drop shadow.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Open Kyoto Demo</button>",
+      "css": ".ds-btn-primary{background:oklch(0.553 0.145 55.5);color:oklch(0.985 0 0);border:0;border-radius:0.75rem;padding:8px 14px;height:36px;font:500 14px/1 Inter,system-ui,sans-serif;box-shadow:none;cursor:pointer;transition:background .15s ease}.ds-btn-primary:hover{background:color-mix(in oklch,oklch(0.553 0.145 55.5) 80%,transparent)}.ds-btn-primary:focus-visible{outline:3px solid color-mix(in oklch,oklch(0.553 0.145 55.5) 50%,transparent);outline-offset:2px}"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Ghost/outline secondary CTA \u2014 understated, no elevation.",
+      "html": "<button class=\"ds-btn-outline\" type=\"button\">+ New Trip</button>",
+      "css": ".ds-btn-outline{background:transparent;color:oklch(0.553 0.145 55.5);border:1px solid oklch(0.553 0.145 55.5);border-radius:0.75rem;padding:8px 14px;height:36px;font:500 14px/1 Inter,system-ui,sans-serif;box-shadow:none;cursor:pointer;transition:background .15s ease}.ds-btn-outline:hover{background:oklch(0.966 0.005 90)}.ds-btn-outline:focus-visible{outline:3px solid color-mix(in oklch,oklch(0.553 0.145 55.5) 50%,transparent);outline-offset:2px}"
+    },
+    {
+      "name": "Ghost Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip-ghost",
+      "description": "Flat filter pill \u2014 no fill shadow; active uses Warm Ember stroke.",
+      "html": "<div class=\"ds-filters\"><button class=\"ds-chip ds-chip-active\" type=\"button\">All Trips</button><button class=\"ds-chip\" type=\"button\">Upcoming</button><button class=\"ds-chip\" type=\"button\">Past</button></div>",
+      "css": ".ds-filters{display:flex;gap:8px;flex-wrap:wrap}.ds-chip{background:transparent;color:oklch(0.216 0.006 56);border:1px solid oklch(0.914 0.008 85);border-radius:999px;padding:6px 12px;font:500 12px/1.2 Inter,system-ui,sans-serif;box-shadow:none;cursor:pointer}.ds-chip-active{color:oklch(0.553 0.145 55.5);border-color:oklch(0.553 0.145 55.5)}.ds-chip:hover{background:oklch(0.966 0.005 90)}.ds-chip:focus-visible{outline:3px solid color-mix(in oklch,oklch(0.553 0.145 55.5) 50%,transparent);outline-offset:2px}"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input-default",
+      "description": "Compact hairline field with Warm Ember focus ring.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Describe your dream trip\u2026\" />",
+      "css": ".ds-input{width:100%;max-width:320px;height:32px;padding:4px 10px;border:1px solid oklch(0.914 0.008 85);border-radius:0.75rem;background:transparent;color:oklch(0.216 0.006 56);font:400 14px/1.4 Inter,system-ui,sans-serif;box-shadow:none}.ds-input:focus{border-color:oklch(0.553 0.145 55.5);outline:3px solid color-mix(in oklch,oklch(0.553 0.145 55.5) 50%,transparent)}.ds-input::placeholder{color:oklch(0.553 0.013 58)}"
+    },
+    {
+      "name": "Content Card",
+      "kind": "card",
+      "refersTo": "card-default",
+      "description": "Signature elevated content surface \u2014 owns soft polaroid lift.",
+      "html": "<article class=\"ds-card\"><div class=\"ds-card-thumb\"></div><div class=\"ds-card-body\"><h3 class=\"ds-card-title\">Kyoto, Japan</h3><p class=\"ds-card-meta\">Dec 14\u201321 \u00b7 7 days</p></div></article>",
+      "css": ".ds-card{display:flex;gap:12px;align-items:center;padding:12px;background:oklch(0.991 0.003 95);color:oklch(0.216 0.006 56);border-radius:calc(0.75rem * 1.4);border:1px solid oklch(0.914 0.008 85);box-shadow:0 2px 4px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08);max-width:360px;transition:box-shadow .2s ease}.ds-card:hover{box-shadow:0 4px 8px rgba(0,0,0,.08),0 16px 40px rgba(0,0,0,.14)}.ds-card-thumb{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,#fb923c,#92400e);flex:0 0 auto}.ds-card-title{margin:0;font:600 16px/1.3 Lora,Georgia,serif}.ds-card-meta{margin:4px 0 0;font:400 12px/1.3 Inter,system-ui,sans-serif;color:oklch(0.553 0.013 58)}"
+    },
+    {
+      "name": "Landing Nav",
+      "kind": "nav",
+      "refersTo": "button-ghost",
+      "description": "Translucent sketchbook nav with ghost actions.",
+      "html": "<nav class=\"ds-nav\"><span class=\"ds-brand\">Wayfarer</span><div class=\"ds-nav-actions\"><button class=\"ds-nav-ghost\" type=\"button\">Sign in</button><button class=\"ds-btn-primary\" type=\"button\">Open demo</button></div></nav>",
+      "css": ".ds-nav{display:flex;align-items:center;justify-content:space-between;height:68px;padding:0 24px;background:color-mix(in oklch,oklch(0.988 0.002 95) 92%,transparent);border-bottom:1px solid oklch(0.914 0.008 85);backdrop-filter:blur(8px)}.ds-brand{font:600 18px/1 Lora,Georgia,serif;color:oklch(0.216 0.006 56)}.ds-nav-actions{display:flex;gap:8px;align-items:center}.ds-nav-ghost{background:transparent;border:0;color:oklch(0.553 0.013 58);font:500 14px Inter,system-ui,sans-serif;padding:8px 12px;border-radius:0.75rem;box-shadow:none;cursor:pointer}.ds-nav-ghost:hover{color:oklch(0.216 0.006 56);background:oklch(0.966 0.005 90)}.ds-btn-primary{background:oklch(0.553 0.145 55.5);color:oklch(0.985 0 0);border:0;border-radius:0.75rem;padding:8px 14px;height:36px;font:500 14px/1 Inter,system-ui,sans-serif;box-shadow:none}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Travel Sketchbook",
+    "overview": "Wayfarer\u2019s interface should feel like opening a well-made sketchbook: warm paper, clear ink, and trip cards you can rearrange \u2014 not a dense SaaS dashboard. The product promise is easy and simple; every screen should save time by making the next action obvious and the trip structure visible at a glance.\n\nPersonality is calm and tactile. Marketing headlines use Lora; tools and chrome stay in Inter. Warm Ember marks decisive actions and active filters, then gets out of the way. Depth is reserved for content that matters (trip cards, canvas objects); page chrome stays ghost-flat so nothing competes for attention.\n\nConfirmed visual rejections: purple-gradient SaaS themes, heavy multi-layer shadows on filters/CTAs/toolbars, and cool \u201cgallery stone\u201d pages that mute the sketchbook metaphor.",
+    "keyCharacteristics": [
+      "Warm paper surfaces with Stone neutrals and a single Warm Ember accent",
+      "Lora for marketing display; Inter for UI and body",
+      "Soft lift on content cards only; ghost chrome for filters and secondary actions",
+      "Light Landing + Trip Workspace; intentional dark Trip List hub",
+      "Domain day accents (amber / orange / emerald / rose) only on canvas semantics \u2014 never on generic chrome"
+    ],
+    "rules": [
+      {
+        "name": "The Warm Ember Rarity Rule",
+        "body": "Warm Ember appears on primary actions and active states only \u2014 roughly \u226410% of any screen. If the page feels orange, remove accent until the content is quiet again.",
+        "section": "colors"
+      },
+      {
+        "name": "The Domain Accent Fence",
+        "body": "Amber / orange / emerald / rose day-cluster colors belong on Spatial Canvas semantics (days, tips, sticky notes). Never use them for nav, generic buttons, or standard cards.",
+        "section": "colors"
+      },
+      {
+        "name": "The Serif Spotlight Rule",
+        "body": "Lora is for persuasion and section titles. Do not set dense Operate UI (inbox lists, forms, toolbars) in serif.",
+        "section": "typography"
+      },
+      {
+        "name": "The Cards Own the Lift Rule",
+        "body": "Soft shadows are reserved for content cards (and canvas stickies). If a filter, tab, toolbar, or button casts a shadow, remove it \u2014 chrome must not compete with cards for attention.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Ghost Chrome Rule",
+        "body": "Filters and secondary actions default to ghost/outline: transparent fill, hairline or Warm Ember stroke when active, zero elevation.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use Sketchbook Cream pages with Warm Ember for the single clearest action.",
+      "Do elevate trip cards (and canvas stickies) with polaroid-shadow; keep filters and buttons flat.",
+      "Do prefer ghost/outline chrome for filters and secondary CTAs.",
+      "Do set marketing headlines in Lora and Operate UI in Inter.",
+      "Do preserve light workspace + dark Trip List as the current dual-surface baseline."
+    ],
+    "donts": [
+      "Don't put drop shadows on filter bars, pills, toolbars, or buttons \u2014 chrome must not compete with cards.",
+      "Don't flood screens with Warm Ember or treat day-cluster colors as generic brand chrome.",
+      "Don't restyle the system toward purple gradients, cool gallery stone as the default paper, or heavy Material elevation on every surface.",
+      "Don't invent testimonials, pricing proof, or live-AI capability in visuals that PRODUCT.md does not support.",
+      "Don't set dense tool UI in Lora."
+    ]
+  }
+}
