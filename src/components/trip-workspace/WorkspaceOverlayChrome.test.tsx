@@ -41,4 +41,19 @@ describe("WorkspaceOverlayChrome", () => {
     expect(markup).not.toContain("toolbar");
     expect(markup).not.toContain("stats");
   });
+
+  it("keeps landing preview chrome in normal flow instead of sticky", () => {
+    const markup = renderToStaticMarkup(
+      <WorkspaceOverlayChrome
+        view="canvas"
+        onViewChange={() => undefined}
+        stickyBelowNav
+        toolbar={<div>toolbar</div>}
+      />,
+    );
+
+    expect(markup).toContain("relative shrink-0 py-3");
+    expect(markup).not.toContain("sticky");
+    expect(markup).not.toContain("absolute inset-x-3");
+  });
 });

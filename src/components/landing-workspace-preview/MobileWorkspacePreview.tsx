@@ -3,7 +3,6 @@ import { createDemoTrip } from "@/data/tripData";
 import type { CanvasCard } from "@/models/trip";
 import { kanbanColumns } from "./landingPreviewData";
 import { KanbanColumn } from "./KanbanColumn";
-import { PreviewAiPromptBar } from "./PreviewAiPromptBar";
 
 export function MobileWorkspacePreview({
   view,
@@ -32,22 +31,20 @@ export function MobileWorkspacePreview({
           </div>
 
           <div className="relative min-h-0 flex-1">
-            <div className="h-full overflow-x-auto overflow-y-hidden pb-2">
+            <div className="h-full overflow-x-auto overflow-y-hidden">
               <div className="flex h-full min-w-max gap-2.5">
                 {kanbanColumns.map((column, index) => (
                   <KanbanColumn
                     key={column.label}
                     {...column}
                     showAddCard={index === kanbanColumns.length - 1}
-                    className="w-[300px]"
+                    className="h-full min-h-0 w-[300px]"
                   />
                 ))}
               </div>
             </div>
             <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-[#f5f3ef] to-transparent" />
           </div>
-
-          <PreviewAiPromptBar className="mt-2" />
         </>
       ) : (
         <div className="relative min-h-0 flex-1 overflow-hidden rounded-xl border border-[#e7e3dc]">

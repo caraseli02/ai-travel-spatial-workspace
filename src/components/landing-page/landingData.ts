@@ -6,17 +6,11 @@ import {
   GitBranch,
   Globe,
   Hotel,
-  Layers,
   Plane,
-  Sparkles,
   X,
 } from "lucide-react";
 
-export const navLinks = [
-  { label: "Features", href: "#features" },
-  { label: "How it works", href: "#how-it-works" },
-  { label: "Stories", href: "#stories" },
-] as const;
+export const navLinks = [{ label: "How it works", href: "#how-it-works" }] as const;
 
 export const trustDestinations = [
   { flag: "🇯🇵", name: "Kyoto" },
@@ -30,28 +24,19 @@ export const trustDestinations = [
 export const howItWorksSteps = [
   {
     num: "01",
-    icon: Layers,
     title: "Capture everything",
     desc: "Paste links, screenshots, and half-formed ideas. Your inbox holds every loose thread in one calm place.",
   },
   {
     num: "02",
-    icon: Sparkles,
     title: "Let AI organize",
     desc: "Wayfarer reads each item, tags it, and sorts it into days and categories — flights, stays, food, and must-sees.",
   },
   {
     num: "03",
-    icon: Globe,
     title: "See it spatially",
     desc: "Your trip becomes a living canvas you can rearrange, connect, and actually feel before you go.",
   },
-] as const;
-
-export const canvasBullets = [
-  "Drag-and-drop cards grouped by day",
-  "Connect related places with ink lines",
-  "Polaroids, stays, flights, notes — all in one space",
 ] as const;
 
 export const inboxBullets = [
@@ -139,39 +124,14 @@ export const inboxItems = [
   },
 ] as const;
 
-export const testimonials = [
-  {
-    quote:
-      "I planned a two-week Japan trip in one evening. Seeing it all on the canvas finally made the journey feel real.",
-    name: "Mara L.",
-    role: "Solo traveler",
-    avatarClass: "bg-amber-500",
-  },
-  {
-    quote:
-      "We stopped losing screenshots in the group chat. Everything just… landed on the right day by itself.",
-    name: "Daniel & Priya",
-    role: "Honeymooners",
-    avatarClass: "bg-primary",
-  },
-  {
-    quote:
-      "The first planner that thinks the way I travel — by place and feeling, not by spreadsheet.",
-    name: "Tomás R.",
-    role: "Digital nomad",
-    avatarClass: "bg-emerald-500",
-  },
-] as const;
-
 export const footerLinks = {
-  Product: ["Features", "Spatial canvas", "Changelog"],
+  Product: ["How it works", "Changelog"],
   Company: ["About", "Blog", "Careers"],
   Legal: ["Privacy", "Terms"],
 } as const;
 
 export const footerLinkHrefs: Partial<Record<string, string>> = {
-  Features: "#features",
-  "Spatial canvas": "#features",
+  "How it works": "#how-it-works",
 };
 
 export const socialLinks = [
