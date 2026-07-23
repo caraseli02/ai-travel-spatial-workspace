@@ -8,16 +8,15 @@ This file is the durable handoff point for current project state. Update it when
 
 Update this section at clock-out for multi-session or non-issue work. For a single `ready-for-agent` issue, the GitHub issue and PR are enough.
 
-- Latest commit: `1517327` (fix remaining adversarial UAT edge-case findings, #181) on `main`
+- Latest commit: `c2e30c5` (cover oldest in-progress continue routing, #189) on `main`
 - Test status: tracked by CI `check` on `main`; loop-state contract tests cover WIP routing and SHA-bound evaluator markers
 - E2E status: Playwright smoke is part of `make check`
 - Full check: use `make check` before merge/release verification
-- Active WIP: review-fix follow-up for open harness PRs (#188, #189) — loop-state repair payload, multi-PR visibility, PROGRESS refresh
-- In progress: harness loop-state hardening on `codex/evaluator-watchdog-harness`
+- Active WIP: none
+- In progress: none
 - Known issues: local shell may run Node `>=25`, while the repo baseline is Node 22 LTS; `npm ci` passes but reports an engine warning until the local runtime is switched. npm audit reports dependency findings from Playwright; deferred to a scoped dependency-maintenance issue.
 - Next steps:
-  1. Land #188 (loop-state repair / multi-PR / PROGRESS) then #189 or close #189 if superseded.
-  2. Pick the next `ready-for-agent` product or tech-debt slice from the open backlog.
+  1. Pick the next `ready-for-agent` product or tech-debt slice from the open backlog.
 
 ## Current State
 
