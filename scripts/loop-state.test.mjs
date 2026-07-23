@@ -229,24 +229,85 @@ describe("loop-state public JSON contract", () => {
       branch: openPullRequest.headRefName,
       head: openPullRequest.headRefOid,
       issue: null,
+      openPrCount: 1,
       pr: openPullRequest.number,
       reason: "missing linked issue/spec",
     });
   });
 
-  test("a trusted FAIL verdict for the current head routes the same PR to repair", async () => {
+  test("a trusted FAIL without a linked issue still routes the same PR to repair", async () => {
+    const failComment = evaluatorComment({ verdict: "FAIL" });
     const state = await runLoopState({
-      comments: [evaluatorComment({ verdict: "FAIL" })],
+      comments: [failComment],
+      openPullRequests: [{ ...openPullRequest, closingIssuesReferences: [] }],
+    });
+
+    expect(state).toMatchObject({
+      action: "repair",
+      evaluatorComment: failComment.body,
+      head: openPullRequest.headRefOid,
+      issue: null,
+      openPrCount: 1,
+      pr: openPullRequest.number,
+      verdict: "fail",
+    });
+  });
+
+  test("multiple open non-draft PRs keep the oldest WIP and report the count", async () => {
+    const newerPullRequest = {
+      ...openPullRequest,
+      closingIssuesReferences: [{ number: 143, url: "https://example.test/issues/143" }],
+      headRefName: "codex/issue-143-later",
+      headRefOid: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      number: 190,
+      title: "Later PR",
+    };
+    const state = await runLoopState({
+      issue: linkedIssue,
+      openPullRequests: [newerPullRequest, openPullRequest],
+    });
+
+    expect(state).toMatchObject({
+      action: "wait_evaluator",
+      issue: 141,
+      openPrCount: 2,
+      pr: 172,
+      verdict: "pending",
+    });
+  });
+
+  test("a trusted FAIL verdict for the current head routes the same PR to repair", async () => {
+    const failComment = evaluatorComment({ verdict: "FAIL" });
+    const state = await runLoopState({
+      comments: [failComment],
       issue: linkedIssue,
       openPullRequests: [openPullRequest],
     });
 
     expect(state).toMatchObject({
       action: "repair",
+      evaluatorComment: failComment.body,
       head: openPullRequest.headRefOid,
       issue: 141,
+      openPrCount: 1,
       pr: 172,
       verdict: "fail",
+    });
+  });
+
+  test("the latest trusted current-head marker wins when verdicts conflict", async () => {
+    const state = await runLoopState({
+      comments: [
+        evaluatorComment({ verdict: "FAIL" }),
+        evaluatorComment({ verdict: "PASS" }),
+      ],
+      issue: linkedIssue,
+      openPullRequests: [openPullRequest],
+    });
+
+    expect(state).toMatchObject({
+      action: "wait_evaluator",
+      verdict: "pass",
     });
   });
 

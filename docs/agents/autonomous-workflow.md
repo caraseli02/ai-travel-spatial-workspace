@@ -137,10 +137,12 @@ A PR is review-ready only when every hard gate passes and neither review axis ha
 Run `bash scripts/loop-state.sh` at the start of every controller tick. It discovers exact issue links through `closingIssuesReferences`, accepts only trusted markers matching the current head, and prints JSON with the required action:
 
 - `wait_evaluator` — open PR exists; evaluator owns next step
-- `repair` — evaluator FAIL; fix same branch/PR
+- `repair` — evaluator FAIL; fix same branch/PR (includes `evaluatorComment` when a trusted marker exists)
 - `continue` — `in-progress` issue with no open PR yet; keep implementing
 - `claim_new` — no active WIP; pick next `ready-for-agent` issue
 - `idle` — no eligible work
+
+Open non-draft PRs occupy WIP even without a linked issue. A trusted current-head `FAIL` still routes to `repair` on that PR. When more than one open non-draft PR exists, `loop-state.sh` keeps the oldest (`openPrCount` reports the total) so WIP stays visible.
 
 Do not ask a human which issue to pick. Follow the state machine.
 

@@ -20,9 +20,11 @@ OPEN_PRS_JSON="$(gh pr list \
   --json number,title,isDraft,headRefName,headRefOid,closingIssuesReferences \
   --limit 100)"
 
-OPEN_WIP_PR="$(echo "$OPEN_PRS_JSON" | jq -c '
-  [.[] | select(.isDraft == false)] | sort_by(.number) | first // empty
+OPEN_NON_DRAFT_PRS="$(echo "$OPEN_PRS_JSON" | jq -c '
+  [.[] | select(.isDraft == false)] | sort_by(.number)
 ')"
+OPEN_PR_COUNT="$(echo "$OPEN_NON_DRAFT_PRS" | jq 'length')"
+OPEN_WIP_PR="$(echo "$OPEN_NON_DRAFT_PRS" | jq -c 'first // empty')"
 
 if [[ -n "$OPEN_WIP_PR" ]]; then
   pr_num="$(echo "$OPEN_WIP_PR" | jq -r '.number')"
@@ -31,7 +33,7 @@ if [[ -n "$OPEN_WIP_PR" ]]; then
   issue_num="$(echo "$OPEN_WIP_PR" | jq -r '.closingIssuesReferences[0].number // empty')"
   evaluator_bots="${WAYFARER_EVALUATOR_BOTS:-cursoragent,cursoragent[bot]}"
   pr_details="$(gh pr view "$pr_num" --json comments)"
-  verdict="$(echo "$pr_details" | jq -r \
+  marker_json="$(echo "$pr_details" | jq -c \
     --argjson pr "$pr_num" \
     --arg head "$head_sha" \
     --arg bots "$evaluator_bots" '
@@ -43,39 +45,85 @@ if [[ -n "$OPEN_WIP_PR" ]]; then
       [
         .comments[]
         | select(trusted($bots))
-        | .body
-        | try capture("<!-- wayfarer-evaluator:v1 pr=\($pr) head=\($head) verdict=(?<verdict>PASS|FAIL|BLOCKED) -->")
+        | . as $comment
+        | ($comment.body | capture("<!-- wayfarer-evaluator:v1 pr=\($pr) head=\($head) verdict=(?<verdict>PASS|FAIL|BLOCKED) -->")?) as $marker
+        | select($marker != null)
+        | {verdict: ($marker.verdict | ascii_downcase), body: $comment.body}
       ]
-      | last.verdict // "pending"
-      | ascii_downcase
+      | last // {verdict: "pending", body: ""}
     ')"
+  verdict="$(echo "$marker_json" | jq -r '.verdict')"
+  evaluator_comment="$(echo "$marker_json" | jq -r '.body')"
+
+  if [[ "$verdict" == "fail" ]]; then
+    action="repair"
+  else
+    action="wait_evaluator"
+  fi
 
   if [[ -n "$issue_num" ]]; then
     issue_json="$(gh issue view "$issue_num" --json number,title,url,state,labels)"
     issue_title="$(echo "$issue_json" | jq -r '.title')"
     issue_url="$(echo "$issue_json" | jq -r '.url')"
-    if [[ "$verdict" == "fail" ]]; then
-      action="repair"
-    else
-      action="wait_evaluator"
-    fi
     jq -n \
       --arg action "$action" \
       --argjson issue "$issue_num" \
       --arg title "$issue_title" \
       --arg url "$issue_url" \
       --argjson pr "$pr_num" \
+      --argjson openPrCount "$OPEN_PR_COUNT" \
       --arg branch "$branch" \
       --arg head "$head_sha" \
       --arg verdict "$verdict" \
-      '{action:$action, issue:$issue, title:$title, url:$url, pr:$pr, branch:$branch, head:$head, verdict:$verdict}'
+      --arg evaluatorComment "$evaluator_comment" \
+      '{
+        action: $action,
+        issue: $issue,
+        title: $title,
+        url: $url,
+        pr: $pr,
+        openPrCount: $openPrCount,
+        branch: $branch,
+        head: $head,
+        verdict: $verdict
+      }
+      + (if $evaluatorComment == "" then {} else {evaluatorComment: $evaluatorComment} end)'
+  elif [[ "$action" == "repair" ]]; then
+    jq -n \
+      --argjson pr "$pr_num" \
+      --argjson openPrCount "$OPEN_PR_COUNT" \
+      --arg branch "$branch" \
+      --arg head "$head_sha" \
+      --arg verdict "$verdict" \
+      --arg evaluatorComment "$evaluator_comment" \
+      '{
+        action: "repair",
+        issue: null,
+        pr: $pr,
+        openPrCount: $openPrCount,
+        branch: $branch,
+        head: $head,
+        verdict: $verdict,
+        evaluatorComment: $evaluatorComment,
+        reason: "missing linked issue/spec"
+      }'
   else
     jq -n \
       --argjson pr "$pr_num" \
+      --argjson openPrCount "$OPEN_PR_COUNT" \
       --arg branch "$branch" \
       --arg head "$head_sha" \
       --arg verdict "$verdict" \
-      '{action:"wait_evaluator", issue:null, pr:$pr, branch:$branch, head:$head, verdict:$verdict, reason:"missing linked issue/spec"}'
+      '{
+        action: "wait_evaluator",
+        issue: null,
+        pr: $pr,
+        openPrCount: $openPrCount,
+        branch: $branch,
+        head: $head,
+        verdict: $verdict,
+        reason: "missing linked issue/spec"
+      }'
   fi
   exit 0
 fi
